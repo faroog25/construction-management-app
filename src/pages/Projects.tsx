@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,122 +11,46 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Search, Filter, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2 } from 'lucide-react';
+import { getProjects, ProjectWithClient, getStatusFromCode } from '@/services/projectService';
+import { useQuery } from '@tanstack/react-query';
 
-const PROJECTS = [
-  {
-    id: 1,
-    title: 'West Heights Tower',
-    client: 'Skyline Properties',
-    dueDate: 'Sep 30, 2023',
-    teamSize: 12,
-    progress: 75,
-    status: 'active' as const,
-  },
-  {
-    id: 2,
-    title: 'Riverside Office Complex',
-    client: 'Metro Developments',
-    dueDate: 'Nov 15, 2023',
-    teamSize: 8,
-    progress: 45,
-    status: 'active' as const,
-  },
-  {
-    id: 3,
-    title: 'Heritage Park Renovation',
-    client: 'City Council',
-    dueDate: 'Aug 10, 2023',
-    teamSize: 6,
-    progress: 90,
-    status: 'completed' as const,
-  },
-  {
-    id: 4,
-    title: 'Parkview Residential Complex',
-    client: 'Horizon Homes',
-    dueDate: 'Dec 5, 2023',
-    teamSize: 15,
-    progress: 30,
-    status: 'pending' as const,
-  },
-  {
-    id: 5,
-    title: 'Central Station Remodel',
-    client: 'Transit Authority',
-    dueDate: 'Jan 22, 2024',
-    teamSize: 20,
-    progress: 15,
-    status: 'active' as const,
-  },
-  {
-    id: 6,
-    title: 'Oakwood Community Center',
-    client: 'Community Foundation',
-    dueDate: 'Oct 18, 2023',
-    teamSize: 10,
-    progress: 55,
-    status: 'active' as const,
-  },
-  {
-    id: 7,
-    title: 'Harbor View Hotel',
-    client: 'Seaside Resorts',
-    dueDate: 'Mar 5, 2024',
-    teamSize: 24,
-    progress: 10,
-    status: 'pending' as const,
-  },
-  {
-    id: 8,
-    title: 'Greenfield Shopping Mall',
-    client: 'Retail Partners Inc.',
-    dueDate: 'Feb 12, 2024',
-    teamSize: 18,
-    progress: 25,
-    status: 'active' as const,
-  },
-  {
-    id: 9,
-    title: 'Sunnydale School Expansion',
-    client: 'Education Department',
-    dueDate: 'Jul 30, 2023',
-    teamSize: 14,
-    progress: 100,
-    status: 'completed' as const,
-  },
-  {
-    id: 10,
-    title: 'Mountain View Apartments',
-    client: 'Highland Properties',
-    dueDate: 'Sep 15, 2023',
-    teamSize: 10,
-    progress: 85,
-    status: 'delayed' as const,
-  },
-  {
-    id: 11,
-    title: 'Tech Hub Campus',
-    client: 'Innovation Partners',
-    dueDate: 'Apr 20, 2024',
-    teamSize: 22,
-    progress: 5,
-    status: 'pending' as const,
-  },
-  {
-    id: 12,
-    title: 'Riverside Park Bridge',
-    client: 'City Infrastructure',
-    dueDate: 'Dec 28, 2023',
-    teamSize: 9,
-    progress: 60,
-    status: 'active' as const,
-  },
-];
+// Status types mapping
+const STATUS_MAP = {
+  'all': 0,
+  'active': 1,
+  'completed': 2,
+  'pending': 3,
+  'delayed': 4
+};
 
 const Projects = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('newest');
+  const [activeTab, setActiveTab] = useState('all');
+  
+  // Fetch projects using React Query
+  const { data: projects = [], isLoading, isError } = useQuery({
+    queryKey: ['projects'],
+    queryFn: getProjects,
+  });
+
+  // Filter projects based on search query and current tab
+  const filteredProjects = projects
+    .filter(project => 
+      activeTab === 'all' || getStatusFromCode(project.status) === activeTab
+    )
+    .filter(project => 
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (project.client_name && project.client_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+    .sort((a, b) => {
+      if (sortOption === 'newest') return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+      if (sortOption === 'progress') return b.progress - a.progress;
+      if (sortOption === 'dueDate') return new Date(a.expected_end_date).getTime() - new Date(b.expected_end_date).getTime();
+      return 0;
+    });
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -173,8 +97,8 @@ const Projects = () => {
                     <DropdownMenuItem onClick={() => setSortOption('progress')}>
                       By Progress
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSortOption('teamSize')}>
-                      Team Size
+                    <DropdownMenuItem onClick={() => setSortOption('dueDate')}>
+                      By Due Date
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -188,7 +112,7 @@ const Projects = () => {
           </CardContent>
         </Card>
         
-        <Tabs defaultValue="all" className="space-y-4">
+        <Tabs defaultValue="all" className="space-y-4" onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="active">Active</TabsTrigger>
@@ -197,37 +121,44 @@ const Projects = () => {
             <TabsTrigger value="delayed">Delayed</TabsTrigger>
           </TabsList>
           
-          {['all', 'active', 'completed', 'pending', 'delayed'].map((tabValue) => (
-            <TabsContent key={tabValue} value={tabValue} className="space-y-4">
+          {isLoading && (
+            <div className="flex justify-center items-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-lg">Loading projects...</span>
+            </div>
+          )}
+          
+          {isError && (
+            <div className="text-center py-12">
+              <p className="text-destructive">Error loading projects. Please try again.</p>
+            </div>
+          )}
+          
+          {!isLoading && !isError && (
+            <TabsContent value={activeTab} className="space-y-4">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {PROJECTS
-                  .filter(project => tabValue === 'all' || project.status === tabValue)
-                  .filter(project => 
-                    project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    project.client.toLowerCase().includes(searchQuery.toLowerCase())
-                  )
-                  .sort((a, b) => {
-                    if (sortOption === 'newest') return a.id - b.id;
-                    if (sortOption === 'progress') return b.progress - a.progress;
-                    if (sortOption === 'teamSize') return b.teamSize - a.teamSize;
-                    return 0;
-                  })
-                  .map((project, index) => (
-                    <ProjectCard
-                      key={project.id}
-                      {...project}
-                      className="animate-in"
-                      style={{ animationDelay: `${index * 0.05}s` }}
-                    />
-                  ))}
+                {filteredProjects.map((project, index) => (
+                  <ProjectCard
+                    key={project.id}
+                    id={project.id}
+                    name={project.name}
+                    client_name={project.client_name}
+                    expected_end_date={project.expected_end_date}
+                    start_date={project.start_date}
+                    progress={project.progress}
+                    status={project.status}
+                    className="animate-in"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  />
+                ))}
               </div>
-              {PROJECTS.filter(project => tabValue === 'all' || project.status === tabValue).length === 0 && (
+              {filteredProjects.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">No projects found</p>
                 </div>
               )}
             </TabsContent>
-          ))}
+          )}
         </Tabs>
       </main>
     </div>

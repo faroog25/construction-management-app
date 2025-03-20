@@ -11,17 +11,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { getStatusFromCode } from '@/services/projectService';
 
 type ProjectStatus = 'active' | 'completed' | 'pending' | 'delayed';
 
 interface ProjectCardProps {
-  title: string;
-  client: string;
-  dueDate: string;
-  teamSize: number;
+  id: number;
+  name: string;
+  client_name?: string;
+  expected_end_date: string;
+  start_date: string;
   progress: number;
-  status: ProjectStatus;
+  status: number;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const statusConfig = {
@@ -32,15 +35,24 @@ const statusConfig = {
 };
 
 const ProjectCard = ({
-  title,
-  client,
-  dueDate,
-  teamSize,
+  id,
+  name,
+  client_name = 'Unknown Client',
+  expected_end_date,
   progress,
   status,
   className,
+  style,
 }: ProjectCardProps) => {
-  const statusInfo = statusConfig[status];
+  // Convert database status code to status string
+  const statusType: ProjectStatus = getStatusFromCode(status);
+  const statusInfo = statusConfig[statusType];
+
+  // Format the date to be more readable
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
   
   return (
     <div 
@@ -48,12 +60,13 @@ const ProjectCard = ({
         "bg-card rounded-xl overflow-hidden shadow-sm border card-hover animate-in transition-all",
         className
       )}
+      style={style}
     >
       <div className="p-5">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <h3 className="font-semibold text-lg mb-1 text-balance">{title}</h3>
-            <p className="text-muted-foreground text-sm">{client}</p>
+            <h3 className="font-semibold text-lg mb-1 text-balance">{name}</h3>
+            <p className="text-muted-foreground text-sm">{client_name}</p>
           </div>
           <div className="flex items-center space-x-2">
             <Badge variant="outline" className={cn(statusInfo.className, "font-medium")}>
@@ -78,11 +91,11 @@ const ProjectCard = ({
           <div className="flex justify-between items-center">
             <div className="text-sm text-muted-foreground flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
-              <span>Due {dueDate}</span>
+              <span>Due {formatDate(expected_end_date)}</span>
             </div>
             <div className="text-sm text-muted-foreground flex items-center gap-1.5">
               <Users className="h-4 w-4" />
-              <span>{teamSize} members</span>
+              <span>ID: {id}</span>
             </div>
           </div>
           
