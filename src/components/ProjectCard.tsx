@@ -22,7 +22,6 @@ interface ProjectCardProps {
   progress: number;
   status: ProjectStatus;
   className?: string;
-  style?: React.CSSProperties; // Added style prop to the interface
 }
 
 const statusConfig = {
@@ -40,7 +39,6 @@ const ProjectCard = ({
   progress,
   status,
   className,
-  style, // Added style to the destructured props
 }: ProjectCardProps) => {
   const statusInfo = statusConfig[status];
   
@@ -50,7 +48,6 @@ const ProjectCard = ({
         "bg-card rounded-xl overflow-hidden shadow-sm border card-hover animate-in transition-all",
         className
       )}
-      style={style} // Added style prop to the div
     >
       <div className="p-5">
         <div className="flex justify-between items-start mb-3">
