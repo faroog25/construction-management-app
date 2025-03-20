@@ -1,4 +1,3 @@
-
 // This file contains functions to interact with the projects database
 
 export interface Project {
@@ -26,6 +25,10 @@ export interface ProjectWithClient {
   client_name?: string;
   stage_name?: string;
   progress: number; // Calculated based on tasks or stages
+  site_engineer_id?: number | null;
+  order_id?: number | null;
+  client_id?: number | null;
+  stage_id?: number | null;
 }
 
 // Mock data based on the database schema
@@ -41,6 +44,7 @@ const PROJECTS_DATA: ProjectWithClient[] = [
     client_name: 'Skyline Properties',
     stage_name: 'Construction',
     progress: 75,
+    site_engineer_id: 3,
   },
   {
     id: 2,
@@ -53,6 +57,7 @@ const PROJECTS_DATA: ProjectWithClient[] = [
     client_name: 'Metro Developments',
     stage_name: 'Foundation',
     progress: 45,
+    site_engineer_id: 2,
   },
   {
     id: 3,
@@ -65,6 +70,7 @@ const PROJECTS_DATA: ProjectWithClient[] = [
     client_name: 'City Council',
     stage_name: 'Completed',
     progress: 100,
+    site_engineer_id: 1,
   },
   {
     id: 4,

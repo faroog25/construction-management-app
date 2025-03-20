@@ -39,6 +39,7 @@ const ProjectCard = ({
   name,
   client_name = 'Unknown Client',
   expected_end_date,
+  start_date,
   progress,
   status,
   className,
