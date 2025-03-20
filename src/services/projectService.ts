@@ -1,4 +1,3 @@
-
 // This file contains functions to interact with the projects database
 
 export interface Project {
@@ -26,6 +25,7 @@ export interface ProjectWithClient {
   client_name?: string;
   stage_name?: string;
   progress: number; // Calculated based on tasks or stages
+  site_engineer_id?: number | null;
 }
 
 // Mock data based on the database schema
