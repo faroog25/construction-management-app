@@ -34,12 +34,14 @@ const Projects = () => {
   const { data: projects = [], isLoading, isError, error } = useQuery({
     queryKey: ['projects'],
     queryFn: getProjects,
-    onError: (err) => {
-      console.error('Error fetching projects:', err);
-      toast.error('Failed to load projects. Please try again later.');
-    },
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,
+    onSettled: (data, error) => {
+      if (error) {
+        console.error('Error fetching projects:', error);
+        toast.error('Failed to load projects. Please try again later.');
+      }
+    }
   });
 
   // Filter projects based on search query and current tab
