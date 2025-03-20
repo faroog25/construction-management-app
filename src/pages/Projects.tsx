@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,13 +35,15 @@ const Projects = () => {
     queryFn: getProjects,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,
-    onSettled: (data, error) => {
-      if (error) {
-        console.error('Error fetching projects:', error);
-        toast.error('Failed to load projects. Please try again later.');
-      }
-    }
   });
+
+  // Handle API errors with a side effect - this avoids the TypeScript error
+  useEffect(() => {
+    if (error) {
+      console.error('Error fetching projects:', error);
+      toast.error('Failed to load projects. Please try again later.');
+    }
+  }, [error]);
 
   // Filter projects based on search query and current tab
   const filteredProjects = projects

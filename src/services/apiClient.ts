@@ -1,14 +1,16 @@
 
 import { ProjectWithClient } from './projectService';
 
-const API_BASE_URL = 'http://constructionmanagementassistant.runasp.net/api';
+// Updated API base URL (removed /api suffix which was causing issues)
+const API_BASE_URL = 'http://constructionmanagementassistant.runasp.net';
 
 /**
  * Fetches data from the construction management API
  */
 export async function fetchFromApi<T>(endpoint: string): Promise<T> {
   try {
-    const response = await fetch(`${API_BASE_URL}/${endpoint}`);
+    // Add /api prefix to endpoint for correct path construction
+    const response = await fetch(`${API_BASE_URL}/api/${endpoint}`);
     
     if (!response.ok) {
       throw new Error(`API error: ${response.status} ${response.statusText}`);
