@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ProjectWithClient } from '@/services/projectService';
+import { ProjectWithClient, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -21,24 +21,15 @@ interface ProjectDetailsProps {
 
 const ProjectDetails = ({ project }: ProjectDetailsProps) => {
   // Helper function to format dates
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Not set';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  // Map numeric status to string status
-  const getStatusType = (statusCode: number) => {
-    switch (statusCode) {
-      case 1: return 'active';
-      case 2: return 'completed';
-      case 3: return 'pending';
-      case 4: return 'delayed';
-      default: return 'active';
-    }
-  };
-
-  const statusType = getStatusType(project.status);
-  const statusInfo = statusConfig[statusType as keyof typeof statusConfig];
+  // Using the shared utility function to get status type
+  const statusType = getStatusFromCode(project.status);
+  const statusInfo = statusConfig[statusType];
 
   return (
     <div className="space-y-6">
@@ -114,14 +105,15 @@ const ProjectDetails = ({ project }: ProjectDetailsProps) => {
                 </div>
               </div>
               
-              {/* In a real app, more details would be displayed here */}
-              <div className="flex items-start gap-3">
-                <UserCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Site Engineer</p>
-                  <p className="font-medium">{project.site_engineer_id ? `Engineer ID: ${project.site_engineer_id}` : 'Not assigned'}</p>
+              {project.site_engineer_id && (
+                <div className="flex items-start gap-3">
+                  <UserCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Site Engineer</p>
+                    <p className="font-medium">Engineer ID: {project.site_engineer_id}</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>

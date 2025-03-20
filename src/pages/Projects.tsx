@@ -11,9 +11,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2, AlertCircle } from 'lucide-react';
 import { getProjects, ProjectWithClient, getStatusFromCode } from '@/services/projectService';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 // Status types mapping
 const STATUS_MAP = {
@@ -30,9 +31,15 @@ const Projects = () => {
   const [activeTab, setActiveTab] = useState('all');
   
   // Fetch projects using React Query
-  const { data: projects = [], isLoading, isError } = useQuery({
+  const { data: projects = [], isLoading, isError, error } = useQuery({
     queryKey: ['projects'],
     queryFn: getProjects,
+    onError: (err) => {
+      console.error('Error fetching projects:', err);
+      toast.error('Failed to load projects. Please try again later.');
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 2,
   });
 
   // Filter projects based on search query and current tab
@@ -129,8 +136,18 @@ const Projects = () => {
           )}
           
           {isError && (
-            <div className="text-center py-12">
-              <p className="text-destructive">Error loading projects. Please try again.</p>
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <div className="flex items-center text-destructive">
+                <AlertCircle className="h-6 w-6 mr-2" />
+                <p className="text-lg font-medium">Failed to load projects</p>
+              </div>
+              <p className="text-muted-foreground">There was an error connecting to the API.</p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline"
+              >
+                Try Again
+              </Button>
             </div>
           )}
           
