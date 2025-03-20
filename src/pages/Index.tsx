@@ -8,43 +8,42 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, ChevronRight, Building, Clock, FileText, Briefcase } from 'lucide-react';
 
-// Updated projects array to match ProjectCard props
 const projects = [
   {
     id: 1,
-    name: 'West Heights Tower',
-    client_name: 'Skyline Properties',
-    expected_end_date: '2023-09-30',
-    start_date: '2023-05-15',
+    title: 'West Heights Tower',
+    client: 'Skyline Properties',
+    dueDate: 'Sep 30, 2023',
+    teamSize: 12,
     progress: 75,
-    status: 1, // 1 = active
+    status: 'active' as const,
   },
   {
     id: 2,
-    name: 'Riverside Office Complex',
-    client_name: 'Metro Developments',
-    expected_end_date: '2023-11-15',
-    start_date: '2023-06-20',
+    title: 'Riverside Office Complex',
+    client: 'Metro Developments',
+    dueDate: 'Nov 15, 2023',
+    teamSize: 8,
     progress: 45,
-    status: 1, // 1 = active
+    status: 'active' as const,
   },
   {
     id: 3,
-    name: 'Heritage Park Renovation',
-    client_name: 'City Council',
-    expected_end_date: '2023-08-10',
-    start_date: '2023-04-05',
+    title: 'Heritage Park Renovation',
+    client: 'City Council',
+    dueDate: 'Aug 10, 2023',
+    teamSize: 6,
     progress: 90,
-    status: 2, // 2 = completed
+    status: 'completed' as const,
   },
   {
     id: 4,
-    name: 'Parkview Residential Complex',
-    client_name: 'Horizon Homes',
-    expected_end_date: '2023-12-05',
-    start_date: '2023-07-10',
+    title: 'Parkview Residential Complex',
+    client: 'Horizon Homes',
+    dueDate: 'Dec 5, 2023',
+    teamSize: 15,
     progress: 30,
-    status: 3, // 3 = pending
+    status: 'pending' as const,
   },
 ];
 
@@ -169,7 +168,7 @@ const Index = () => {
               <TabsContent value="active" className="space-y-4">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {projects
-                    .filter(p => p.status === 1)
+                    .filter(p => p.status === 'active')
                     .map((project, index) => (
                       <ProjectCard
                         key={project.id}
@@ -184,7 +183,7 @@ const Index = () => {
               <TabsContent value="completed" className="space-y-4">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {projects
-                    .filter(p => p.status === 2)
+                    .filter(p => p.status === 'completed')
                     .map((project, index) => (
                       <ProjectCard
                         key={project.id}
