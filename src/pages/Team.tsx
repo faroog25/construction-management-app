@@ -21,13 +21,17 @@ import {
   Building,
   Briefcase,
   Users,
-  MessagesSquare
+  MessagesSquare,
+  UserCircle
 } from 'lucide-react';
 import { SiteEngineer, getSiteEngineers, deleteSiteEngineer } from '@/services/siteEngineerService';
 import { toast } from 'sonner';
 import { NewSiteEngineerModal } from '@/components/NewSiteEngineerModal';
 import { TeamMembers } from '@/components/TeamMembers';
+import { ClientMembers } from '@/components/ClientMembers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { NewWorkerModal } from '@/components/NewWorkerModal';
+import { NewClientModal } from '@/components/NewClientModal';
 
 const Team = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,6 +39,8 @@ const Team = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddWorkerModalOpen, setIsAddWorkerModalOpen] = useState(false);
+  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
 
   const fetchSiteEngineers = async () => {
     try {
@@ -44,7 +50,7 @@ const Team = () => {
       
       if (!response || !response.data || !response.data.items) {
         console.error('Invalid data structure:', response);
-        throw new Error('Invalid data structure received from API');
+        throw new Error('تم استلام هيكل بيانات غير صالح من الخادم');
       }
       
       if (response.data.items.length === 0) {
@@ -54,7 +60,7 @@ const Team = () => {
       setSiteEngineers(response.data.items);
     } catch (err) {
       console.error('Error fetching site engineers:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch site engineers';
+      const errorMessage = err instanceof Error ? err.message : 'فشل في جلب مهندسي الموقع';
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -70,29 +76,30 @@ const Team = () => {
     try {
       await deleteSiteEngineer(id);
       setSiteEngineers(siteEngineers.filter(engineer => engineer.id !== id));
-      toast.success('Site engineer deleted successfully');
-    } catch (err) {
-      toast.error('Failed to delete site engineer');
+      toast.success('تم الحذف بنجاح');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'فشل في حذف المهندس';
+      toast.error(errorMessage);
     }
   };
 
   const getInitials = (engineer: SiteEngineer) => {
     try {
       const nameParts = engineer.fullName.split(' ');
-      if (nameParts.length < 2) return 'N/A';
+      if (nameParts.length < 2) return 'غير متوفر';
       return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`;
     } catch (error) {
       console.error('Error getting initials:', error);
-      return 'N/A';
+      return 'غير متوفر';
     }
   };
 
   const getFullName = (engineer: SiteEngineer) => {
     try {
-      return engineer.fullName || 'Unknown Name';
+      return engineer.fullName || 'اسم غير معروف';
     } catch (error) {
       console.error('Error getting full name:', error);
-      return 'Unknown Name';
+      return 'اسم غير معروف';
     }
   };
 
@@ -120,13 +127,13 @@ const Team = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Team</h2>
+          <h2 className="text-xl font-semibold text-red-600 mb-2">خطأ في تحميل الفريق</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <Button 
             onClick={() => fetchSiteEngineers()}
             className="w-full"
           >
-            Try Again
+            حاول مرة أخرى
           </Button>
         </div>
       </div>
@@ -140,13 +147,21 @@ const Team = () => {
         <main className="flex-1 container mx-auto px-4 py-8 animate-in">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Team Management</h1>
-              <p className="text-muted-foreground mt-1">Manage your construction team members</p>
+              <h1 className="text-3xl font-bold tracking-tight">إدارة الفريق</h1>
+              <p className="text-muted-foreground mt-1">إدارة أعضاء فريق البناء</p>
             </div>
-            <div className="mt-4 lg:mt-0">
+            <div className="mt-4 lg:mt-0 flex flex-wrap gap-2">
               <Button className="rounded-lg" onClick={() => setIsAddModalOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Site Engineer
+                إضافة مهندس موقع
+              </Button>
+              <Button className="rounded-lg" variant="outline" onClick={() => setIsAddWorkerModalOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                إضافة عامل
+              </Button>
+              <Button className="rounded-lg" variant="outline" onClick={() => setIsAddClientModalOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                إضافة عميل
               </Button>
             </div>
           </div>
@@ -155,11 +170,15 @@ const Team = () => {
             <TabsList>
               <TabsTrigger value="engineers" className="flex items-center gap-2">
                 <Building className="h-4 w-4" />
-                Site Engineers
+                مهندسو الموقع
               </TabsTrigger>
               <TabsTrigger value="workers" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Workers
+                العمال
+              </TabsTrigger>
+              <TabsTrigger value="clients" className="flex items-center gap-2">
+                <UserCircle className="h-4 w-4" />
+                العملاء
               </TabsTrigger>
             </TabsList>
 
@@ -169,7 +188,7 @@ const Team = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search site engineers..."
+                      placeholder="البحث عن مهندسي الموقع..."
                       className="pl-10"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -198,7 +217,7 @@ const Team = () => {
                                 {getFullName(engineer)}
                               </h3>
                               <p className="text-sm text-muted-foreground">
-                                {engineer.id ? `ID: ${engineer.id}` : 'No ID'}
+                                {engineer.id ? `الرقم التعريفي: ${engineer.id}` : 'لا يوجد رقم تعريفي'}
                               </p>
                             </div>
                           </div>
@@ -211,17 +230,17 @@ const Team = () => {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem className="flex items-center">
                                 <Mail className="mr-2 h-4 w-4" />
-                                <span>Email</span>
+                                <span>البريد الإلكتروني</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem className="flex items-center">
                                 <Phone className="mr-2 h-4 w-4" />
-                                <span>Call</span>
+                                <span>اتصال</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="flex items-center text-red-600"
                                 onClick={() => handleDelete(engineer.id)}
                               >
-                                <span>Delete</span>
+                                <span>حذف</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -231,25 +250,25 @@ const Team = () => {
                           <div className="flex items-center gap-2">
                             <Mail className="h-4 w-4 text-muted-foreground" />
                             <span className="text-muted-foreground">
-                              {engineer.email || 'No email'}
+                              {engineer.email || 'لا يوجد بريد إلكتروني'}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Phone className="h-4 w-4 text-muted-foreground" />
                             <span className="text-muted-foreground">
-                              {engineer.phoneNumber || 'No phone'}
+                              {engineer.phoneNumber || 'لا يوجد رقم هاتف'}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4 text-muted-foreground" />
                             <span className="text-muted-foreground">
-                              {engineer.address || 'No address'}
+                              {engineer.address || 'لا يوجد عنوان'}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Building className="h-4 w-4 text-muted-foreground" />
                             <span className="text-muted-foreground">
-                              {engineer.isAvailable ? 'Available' : 'Not Available'}
+                              {engineer.isAvailable ? 'متاح' : 'غير متاح'}
                             </span>
                           </div>
                         </div>
@@ -261,7 +280,7 @@ const Team = () => {
 
               {filteredEngineers.length === 0 && (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">No site engineers found</p>
+                  <p className="text-muted-foreground">لم يتم العثور على مهندسي موقع</p>
                 </div>
               )}
             </TabsContent>
@@ -269,12 +288,32 @@ const Team = () => {
             <TabsContent value="workers">
               <TeamMembers />
             </TabsContent>
+
+            <TabsContent value="clients">
+              <ClientMembers />
+            </TabsContent>
           </Tabs>
 
           <NewSiteEngineerModal 
             isOpen={isAddModalOpen}
             onOpenChange={setIsAddModalOpen}
             onEngineerCreated={fetchSiteEngineers}
+          />
+          <NewWorkerModal 
+            isOpen={isAddWorkerModalOpen}
+            onOpenChange={setIsAddWorkerModalOpen}
+            onWorkerCreated={() => {
+              // Refresh workers list
+              // TODO: Implement worker list refresh
+            }}
+          />
+          <NewClientModal 
+            isOpen={isAddClientModalOpen}
+            onOpenChange={setIsAddClientModalOpen}
+            onClientCreated={() => {
+              // Refresh clients list
+              // TODO: Implement client list refresh
+            }}
           />
         </main>
       </div>
