@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +17,6 @@ import {
   File, 
   FileText, 
   FileImage, 
-  FilePdf, 
   FileArchive,
   MoreVertical,
   Download,
@@ -125,7 +123,7 @@ const DOCUMENTS: Document[] = [
 
 const getDocumentIcon = (type: string) => {
   switch (type) {
-    case 'pdf': return <FilePdf className="h-10 w-10 text-red-500" />;
+    case 'pdf': return <FileText className="h-10 w-10 text-red-500" />;
     case 'doc': return <FileText className="h-10 w-10 text-blue-500" />;
     case 'image': return <FileImage className="h-10 w-10 text-green-500" />;
     case 'archive': return <FileArchive className="h-10 w-10 text-amber-500" />;
