@@ -10,10 +10,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2, X, Check } from 'lucide-react';
+import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle } from 'lucide-react';
 import { getProjects, Project, getStatusFromCode, createProject } from '@/services/projectService';
 import { getClients, Client } from '@/services/clientService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { 
   Select, 
   SelectContent, 
@@ -66,12 +67,8 @@ const Projects = () => {
   const { data: projectsData = [], isLoading, isError, error } = useQuery({
     queryKey: ['projects'],
     queryFn: () => getProjects(),
-    onSuccess: (data) => {
-      console.log('Projects data received:', data);
-    },
-    onError: (error) => {
-      console.error('Error fetching projects:', error);
-    }
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 2
   });
 
   // Fetch clients using React Query
@@ -231,11 +228,14 @@ const Projects = () => {
           )}
           
           {isError && (
-            <div className="text-center py-12">
-              <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
-                <p className="font-medium">Error loading projects</p>
-                <p className="text-sm mt-1">{error instanceof Error ? error.message : 'Please try again.'}</p>
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <div className="flex items-center text-destructive">
+                <AlertCircle className="w-5 h-5 mr-2" />
+                <p>Failed to load projects</p>
               </div>
+              <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}>
+                Try Again
+              </Button>
             </div>
           )}
           

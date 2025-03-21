@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardStats from '@/components/DashboardStats';
 import ProjectCard from '@/components/ProjectCard';
 import ProjectTimeline from '@/components/ProjectTimeline';
@@ -6,49 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, ChevronRight, Building, Clock, FileText, Briefcase } from 'lucide-react';
-
-const projects = [
-  {
-    id: 1,
-    name: 'West Heights Tower',
-    client_name: 'Skyline Properties',
-    expected_end_date: 'Sep 30, 2023',
-    start_date: 'Apr 15, 2023',
-    teamSize: 12,
-    progress: 75,
-    status: 1, // 1 = active
-  },
-  {
-    id: 2,
-    name: 'Riverside Office Complex',
-    client_name: 'Metro Developments',
-    expected_end_date: 'Nov 15, 2023',
-    start_date: 'Jun 10, 2023',
-    teamSize: 8,
-    progress: 45,
-    status: 1, // 1 = active
-  },
-  {
-    id: 3,
-    name: 'Heritage Park Renovation',
-    client_name: 'City Council',
-    expected_end_date: 'Aug 10, 2023',
-    start_date: 'Jan 20, 2023',
-    teamSize: 6,
-    progress: 90,
-    status: 2, // 2 = completed
-  },
-  {
-    id: 4,
-    name: 'Parkview Residential Complex',
-    client_name: 'Horizon Homes',
-    expected_end_date: 'Dec 5, 2023',
-    start_date: 'Jul 8, 2023',
-    teamSize: 15,
-    progress: 30,
-    status: 3, // 3 = pending
-  },
-];
+import { getProjects, ProjectWithClient } from '@/services/projectService';
+import { useQuery } from '@tanstack/react-query';
 
 const tasks = [
   { id: 1, title: 'Review foundation plans', type: 'document', dueDate: 'Today', status: 'urgent' },
@@ -68,6 +27,14 @@ const getTaskIcon = (type: string) => {
 };
 
 const Index = () => {
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: getProjects,
+  });
+
+  // Take the first 4 projects for the dashboard display
+  const recentProjects = projects.slice(0, 4);
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="h-16"></div> {/* Navbar spacer */}
@@ -157,10 +124,16 @@ const Index = () => {
               
               <TabsContent value="all" className="space-y-4">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {projects.map((project, index) => (
+                  {recentProjects.map((project, index) => (
                     <ProjectCard
                       key={project.id}
-                      {...project}
+                      id={project.id}
+                      name={project.name}
+                      client_name={project.client_name}
+                      expected_end_date={project.expected_end_date}
+                      start_date={project.start_date}
+                      progress={project.progress}
+                      status={project.status}
                       className="animate-in"
                       style={{ animationDelay: `${index * 0.05}s` }}
                     />
@@ -170,12 +143,18 @@ const Index = () => {
               
               <TabsContent value="active" className="space-y-4">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {projects
+                  {recentProjects
                     .filter(p => p.status === 1)
                     .map((project, index) => (
                       <ProjectCard
                         key={project.id}
-                        {...project}
+                        id={project.id}
+                        name={project.name}
+                        client_name={project.client_name}
+                        expected_end_date={project.expected_end_date}
+                        start_date={project.start_date}
+                        progress={project.progress}
+                        status={project.status}
                         className="animate-in"
                         style={{ animationDelay: `${index * 0.05}s` }}
                       />
@@ -185,12 +164,18 @@ const Index = () => {
               
               <TabsContent value="completed" className="space-y-4">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {projects
+                  {recentProjects
                     .filter(p => p.status === 2)
                     .map((project, index) => (
                       <ProjectCard
                         key={project.id}
-                        {...project}
+                        id={project.id}
+                        name={project.name}
+                        client_name={project.client_name}
+                        expected_end_date={project.expected_end_date}
+                        start_date={project.start_date}
+                        progress={project.progress}
+                        status={project.status}
                         className="animate-in"
                         style={{ animationDelay: `${index * 0.05}s` }}
                       />
