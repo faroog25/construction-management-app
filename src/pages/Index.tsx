@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, ChevronRight, Building, Clock, FileText, Briefcase } from 'lucide-react';
-import { getProjects, ProjectWithClient } from '@/services/projectService';
+import { getProjects, Project } from '@/services/projectService';
 import { useQuery } from '@tanstack/react-query';
 
 const tasks = [
@@ -29,7 +29,7 @@ const getTaskIcon = (type: string) => {
 const Index = () => {
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['projects'],
-    queryFn: getProjects,
+    queryFn: () => getProjects(),
   });
 
   // Take the first 4 projects for the dashboard display
@@ -128,11 +128,11 @@ const Index = () => {
                     <ProjectCard
                       key={project.id}
                       id={project.id}
-                      name={project.name}
-                      client_name={project.client_name}
-                      expected_end_date={project.expected_end_date}
-                      start_date={project.start_date}
-                      progress={project.progress}
+                      name={project.projectName}
+                      client_name={project.clientName}
+                      expected_end_date={project.expectedEndDate}
+                      start_date={project.startDate}
+                      progress={36}
                       status={project.status}
                       className="animate-in"
                       style={{ animationDelay: `${index * 0.05}s` }}
@@ -149,11 +149,11 @@ const Index = () => {
                       <ProjectCard
                         key={project.id}
                         id={project.id}
-                        name={project.name}
-                        client_name={project.client_name}
-                        expected_end_date={project.expected_end_date}
-                        start_date={project.start_date}
-                        progress={project.progress}
+                        name={project.projectName}
+                        client_name={project.clientName}
+                        expected_end_date={project.expectedEndDate}
+                        start_date={project.startDate}
+                        progress={12}
                         status={project.status}
                         className="animate-in"
                         style={{ animationDelay: `${index * 0.05}s` }}
@@ -170,11 +170,11 @@ const Index = () => {
                       <ProjectCard
                         key={project.id}
                         id={project.id}
-                        name={project.name}
-                        client_name={project.client_name}
-                        expected_end_date={project.expected_end_date}
-                        start_date={project.start_date}
-                        progress={project.progress}
+                        name={project.projectName}
+                        client_name={project.clientName}
+                        expected_end_date={project.expectedEndDate}
+                        start_date={project.startDate}
+                        progress={32}
                         status={project.status}
                         className="animate-in"
                         style={{ animationDelay: `${index * 0.05}s` }}
