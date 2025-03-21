@@ -3,12 +3,17 @@
 // API endpoint
 const API_BASE_URL = 'http://constructionmanagementassistant.runasp.net/api/v1';
 
+export enum ClientType {
+  Individual = "فرد",
+  Corporate = "شركة"
+}
+
 export interface Client {
   id: number;
   fullName: string;
   email: string;
   phoneNumber: string;
-  clientType: string;
+  clientType: ClientType;
 }
 
 export interface ClientResponse {
@@ -49,27 +54,33 @@ export async function getClientById(id: number): Promise<Client | undefined> {
   }
 }
 
-export async function createClient(client: {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  notes?: string;
-}): Promise<Client> {
+export async function createClient(client: Omit<Client, 'id'>): Promise<Client> {
   try {
+    const payload = {
+      fullName: client.fullName,
+      email: client.email,
+      phoneNumber: client.phoneNumber,
+      clientType: client.clientType
+    };
+    
+    console.log('Sending payload:', payload);
+
     const response = await fetch(`${API_BASE_URL}/Clients`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(client),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => null);
+      console.error('Error response:', errorData);
+      throw new Error(errorData?.message || `Failed to create client: ${response.status}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error creating client:', error);
     throw error;
