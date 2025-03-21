@@ -1,69 +1,95 @@
-# Welcome to your Lovable project
+# Builder Buddy Assistant
 
-## Project info
+A modern web application built with React, TypeScript, and Vite, featuring a beautiful UI powered by shadcn/ui components.
 
-**URL**: https://lovable.dev/projects/3c6a301f-0718-4cea-a1dc-f8e762a455da
+## 🚀 Features
 
-## How can I edit this code?
+- Modern React with TypeScript
+- Vite for fast development and building
+- Beautiful UI components using shadcn/ui
+- Tailwind CSS for styling
+- React Router for navigation
+- React Query for data fetching
+- Form handling with React Hook Form and Zod validation
+- Dark mode support with next-themes
+- Responsive design
+- Type-safe development
 
-There are several ways of editing your application.
+## 🛠️ Tech Stack
 
-**Use Lovable**
+- **Framework:** React 18
+- **Language:** TypeScript
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS
+- **UI Components:** shadcn/ui (based on Radix UI)
+- **Routing:** React Router
+- **State Management:** React Query
+- **Form Handling:** React Hook Form + Zod
+- **Charts:** Recharts
+- **Date Handling:** date-fns
+- **Icons:** Lucide React
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3c6a301f-0718-4cea-a1dc-f8e762a455da) and start prompting.
+## 📦 Installation
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/builder-buddy-assistant.git
+cd builder-buddy-assistant
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+# or
+bun install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+# or
+bun dev
+```
 
-**Use GitHub Codespaces**
+## 🏗️ Project Structure
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+src/
+├── components/     # Reusable UI components
+├── pages/         # Page components
+├── services/      # API and service functions
+├── hooks/         # Custom React hooks
+├── lib/           # Utility functions and configurations
+├── utils/         # Helper functions
+└── App.tsx        # Main application component
+```
 
-## What technologies are used for this project?
+## 📝 Available Scripts
 
-This project is built with .
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run build:dev` - Build for development
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🔧 Configuration
 
-## How can I deploy this project?
+The project uses several configuration files:
 
-Simply open [Lovable](https://lovable.dev/projects/3c6a301f-0718-4cea-a1dc-f8e762a455da) and click on Share -> Publish.
+- `vite.config.ts` - Vite configuration
+- `tailwind.config.ts` - Tailwind CSS configuration
+- `tsconfig.json` - TypeScript configuration
+- `eslint.config.js` - ESLint configuration
+- `postcss.config.js` - PostCSS configuration
 
-## I want to use a custom domain - is that possible?
+## 🤝 Contributing
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
