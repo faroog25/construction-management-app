@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Calendar, Users, Clock, MoreVertical } from 'lucide-react';
@@ -27,7 +26,7 @@ interface ProjectCardProps {
   style?: React.CSSProperties;
 }
 
-const statusConfig = {
+const statusConfig: Record<ProjectStatus, { label: string; className: string }> = {
   active: { label: 'Active', className: 'bg-green-100 text-green-800' },
   completed: { label: 'Completed', className: 'bg-blue-100 text-blue-800' },
   pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800' },
@@ -87,22 +86,19 @@ const ProjectCard = ({
           </div>
         </div>
         
-        <div className="mt-4 space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-muted-foreground flex items-center gap-1.5">
-              <Clock className="h-4 w-4" />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-2 text-muted-foreground">
+              <Calendar className="h-4 w-4" />
               <span>Due {formatDate(expected_end_date)}</span>
             </div>
-            <div className="text-sm text-muted-foreground flex items-center gap-1.5">
-              <Users className="h-4 w-4" />
-              <span>ID: {id}</span>
-            </div>
+            <span className="text-muted-foreground">ID: {id}</span>
           </div>
           
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="font-medium">Progress</span>
-              <span>{progress}%</span>
+              <span className="text-muted-foreground">{progress}%</span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
