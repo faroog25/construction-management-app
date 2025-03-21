@@ -5,60 +5,65 @@ const API_BASE_URL = 'http://constructionmanagementassistant.runasp.net/api/v1';
 
 export interface SiteEngineer {
   id: number;
-  firstName: string;
-  secondName: string;
-  thirdName: string;
-  lastName: string;
-  email: string;
+  fullName: string;
   phoneNumber: string;
-  nationalNumber: string;
+  email: string | null;
   address: string;
-  hireDate: string;
-  status: number;
-  projects: number;
+  isAvailable: boolean;
 }
 
 export interface SiteEngineerResponse {
   success: boolean;
   message: string;
+  errors?: string[];
   data: {
     items: SiteEngineer[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+    hasNextPage: boolean;
+    hasPreveiosPage: boolean;
   };
 }
 
-export async function getSiteEngineers(page: number = 1, pageSize: number = 10): Promise<SiteEngineer[]> {
+/**
+ * Fetches site engineers from the API with proper handling for Arabic text
+ */
+export async function getSiteEngineers(page: number = 1, pageSize: number = 10): Promise<SiteEngineerResponse> {
   try {
-    console.log('Fetching site engineers from:', `${API_BASE_URL}/SiteEngineers?pageNumber=${page}&pageSize=${pageSize}`);
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers?pageNumber=${page}&pageSize=${pageSize}`);
+    const response = await fetch(`${API_BASE_URL}/SiteEngineers?pageNumber=${page}&pageSize=${pageSize}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
+      }
+    });
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText
-      });
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Failed to fetch site engineers: ${response.status}`);
     }
     
     const result = await response.json();
-    console.log('API Response:', result);
-    
-    if (!result.data || !result.data.items) {
-      console.error('Invalid API response structure:', result);
-      throw new Error('Invalid API response structure');
-    }
-    
-    return result.data.items;
+    return result;
   } catch (error) {
     console.error('Error fetching site engineers:', error);
     throw error;
   }
 }
 
+/**
+ * Fetches a site engineer by ID with proper handling for Arabic text
+ */
 export async function getSiteEngineerById(id: number): Promise<SiteEngineer | undefined> {
   try {
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`);
+    const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8' // Support Arabic content
+      }
+    });
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -70,6 +75,9 @@ export async function getSiteEngineerById(id: number): Promise<SiteEngineer | un
   }
 }
 
+/**
+ * Creates a new site engineer with proper handling for Arabic text
+ */
 export async function createSiteEngineer(engineer: {
   firstName: string;
   secondName: string;
@@ -80,12 +88,14 @@ export async function createSiteEngineer(engineer: {
   nationalNumber: string;
   address: string;
   hireDate: string;
-}): Promise<SiteEngineer> {
+}): Promise<SiteEngineerResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8' // Support Arabic content
       },
       body: JSON.stringify(engineer),
     });
@@ -96,19 +106,24 @@ export async function createSiteEngineer(engineer: {
     }
 
     const result = await response.json();
-    return result.data;
+    return result;
   } catch (error) {
     console.error('Error creating site engineer:', error);
     throw error;
   }
 }
 
+/**
+ * Updates a site engineer with proper handling for Arabic text
+ */
 export async function updateSiteEngineer(id: number, engineer: Partial<SiteEngineer>): Promise<SiteEngineer> {
   try {
     const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8' // Support Arabic content
       },
       body: JSON.stringify(engineer),
     });
@@ -126,10 +141,17 @@ export async function updateSiteEngineer(id: number, engineer: Partial<SiteEngin
   }
 }
 
+/**
+ * Deletes a site engineer
+ */
 export async function deleteSiteEngineer(id: number): Promise<void> {
   try {
     const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8' // Support Arabic content
+      }
     });
 
     if (!response.ok) {
