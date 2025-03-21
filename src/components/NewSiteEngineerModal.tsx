@@ -35,7 +35,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
     e.preventDefault();
     
     if (!firstName || !lastName || !email || !phoneNumber || !nationalNumber || !address || !hireDate) {
-      toast.error('Please fill in all required fields');
+      toast.error('جميع الحقول مطلوبة');
       return;
     }
 
@@ -54,12 +54,13 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
       };
 
       await createSiteEngineer(engineer);
-      toast.success('Site engineer added successfully');
+      toast.success('تمت الإضافة بنجاح');
       onOpenChange(false);
       onEngineerCreated?.();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error creating site engineer:', error);
-      toast.error('Failed to add site engineer. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'فشلت الإضافة';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -69,90 +70,90 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Site Engineer</DialogTitle>
+          <DialogTitle>إضافة مهندس موقع جديد</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">First Name *</Label>
+            <Label htmlFor="firstName">الاسم الأول *</Label>
             <Input
               id="firstName"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Enter first name"
+              placeholder="أدخل الاسم الأول"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="secondName">Second Name</Label>
+            <Label htmlFor="secondName">الاسم الثاني</Label>
             <Input
               id="secondName"
               value={secondName}
               onChange={(e) => setSecondName(e.target.value)}
-              placeholder="Enter second name"
+              placeholder="أدخل الاسم الثاني"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="thirdName">Third Name</Label>
+            <Label htmlFor="thirdName">الاسم الثالث</Label>
             <Input
               id="thirdName"
               value={thirdName}
               onChange={(e) => setThirdName(e.target.value)}
-              placeholder="Enter third name"
+              placeholder="أدخل الاسم الثالث"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name *</Label>
+            <Label htmlFor="lastName">الاسم الأخير *</Label>
             <Input
               id="lastName"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              placeholder="Enter last name"
+              placeholder="أدخل الاسم الأخير"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">البريد الإلكتروني *</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter email address"
+              placeholder="أدخل البريد الإلكتروني"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number *</Label>
+            <Label htmlFor="phoneNumber">رقم الهاتف *</Label>
             <Input
               id="phoneNumber"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Enter phone number"
+              placeholder="أدخل رقم الهاتف"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="nationalNumber">National Number *</Label>
+            <Label htmlFor="nationalNumber">الرقم الوطني *</Label>
             <Input
               id="nationalNumber"
               value={nationalNumber}
               onChange={(e) => setNationalNumber(e.target.value)}
-              placeholder="Enter national number"
+              placeholder="أدخل الرقم الوطني"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="address">Address *</Label>
+            <Label htmlFor="address">العنوان *</Label>
             <Input
               id="address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter address"
+              placeholder="أدخل العنوان"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="hireDate">Hire Date *</Label>
+            <Label htmlFor="hireDate">تاريخ التعيين *</Label>
             <Input
               id="hireDate"
               type="date"
@@ -163,10 +164,10 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              إلغاء
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Adding...' : 'Add Engineer'}
+              {isSubmitting ? 'جاري الإضافة...' : 'إضافة المهندس'}
             </Button>
           </DialogFooter>
         </form>
