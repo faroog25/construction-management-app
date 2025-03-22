@@ -22,11 +22,14 @@ import {
   Briefcase,
   Users,
   MessagesSquare,
-  UserCircle
+  UserCircle,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { SiteEngineer, getSiteEngineers, deleteSiteEngineer } from '@/services/siteEngineerService';
 import { toast } from 'sonner';
 import { NewSiteEngineerModal } from '@/components/NewSiteEngineerModal';
+import { EditSiteEngineerModal } from '@/components/EditSiteEngineerModal';
 import { TeamMembers } from '@/components/TeamMembers';
 import { ClientMembers } from '@/components/ClientMembers';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -39,6 +42,8 @@ const Team = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEngineer, setSelectedEngineer] = useState<SiteEngineer | null>(null);
   const [isAddWorkerModalOpen, setIsAddWorkerModalOpen] = useState(false);
   const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
 
@@ -72,7 +77,16 @@ const Team = () => {
     fetchSiteEngineers();
   }, []);
 
+  const handleEdit = (engineer: SiteEngineer) => {
+    setSelectedEngineer(engineer);
+    setIsEditModalOpen(true);
+  };
+
   const handleDelete = async (id: number) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا المهندس؟')) {
+      return;
+    }
+    
     try {
       await deleteSiteEngineer(id);
       setSiteEngineers(siteEngineers.filter(engineer => engineer.id !== id));
@@ -228,19 +242,16 @@ const Team = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem className="flex items-center">
-                                <Mail className="mr-2 h-4 w-4" />
-                                <span>البريد الإلكتروني</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="flex items-center">
-                                <Phone className="mr-2 h-4 w-4" />
-                                <span>اتصال</span>
+                              <DropdownMenuItem onClick={() => handleEdit(engineer)}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                تعديل
                               </DropdownMenuItem>
                               <DropdownMenuItem 
-                                className="flex items-center text-red-600"
                                 onClick={() => handleDelete(engineer.id)}
+                                className="text-red-600"
                               >
-                                <span>حذف</span>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                حذف
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -298,6 +309,12 @@ const Team = () => {
             isOpen={isAddModalOpen}
             onOpenChange={setIsAddModalOpen}
             onEngineerCreated={fetchSiteEngineers}
+          />
+          <EditSiteEngineerModal
+            isOpen={isEditModalOpen}
+            onOpenChange={setIsEditModalOpen}
+            onEngineerUpdated={fetchSiteEngineers}
+            engineer={selectedEngineer}
           />
           <NewWorkerModal 
             isOpen={isAddWorkerModalOpen}
