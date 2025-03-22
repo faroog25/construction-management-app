@@ -22,6 +22,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import ProjectDetailsModal from '@/components/ProjectDetailsModal';
 
 // Adapter interface to bridge between Project model and ProjectCard component
 interface ProjectAdapter {
@@ -60,6 +61,8 @@ const Projects = () => {
     status: 1,
     clientId: 0
   });
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -136,7 +139,7 @@ const Projects = () => {
       client_name: project.clientName || 'Unknown Client',
       expected_end_date: project.expectedEndDate || '',
       start_date: project.startDate || '',
-      progress: project.orderId || 0, // Using orderId as progress since it's available in the API
+      progress: project.orderId || 0,
       status: project.status || 1
     }))
     .sort((a, b) => {
@@ -148,6 +151,14 @@ const Projects = () => {
   
   console.log('Filtered projects:', filteredProjects);
   
+  const handleViewDetails = (projectId: number) => {
+    const project = projectsData.find(p => p.id === projectId);
+    if (project) {
+      setSelectedProject(project);
+      setIsDetailsModalOpen(true);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="h-16"></div> {/* Navbar spacer */}
@@ -252,6 +263,7 @@ const Projects = () => {
                     start_date={project.start_date}
                     progress={project.progress}
                     status={project.status}
+                    onViewDetails={() => handleViewDetails(project.id)}
                     className="animate-in"
                     style={{ animationDelay: `${index * 0.05}s` }}
                   />
@@ -387,6 +399,14 @@ const Projects = () => {
               </form>
             </div>
           </div>
+        )}
+
+        {selectedProject && (
+          <ProjectDetailsModal
+            project={selectedProject}
+            isOpen={isDetailsModalOpen}
+            onOpenChange={setIsDetailsModalOpen}
+          />
         )}
       </main>
     </div>

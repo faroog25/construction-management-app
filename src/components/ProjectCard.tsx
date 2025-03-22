@@ -24,6 +24,7 @@ interface ProjectCardProps {
   status: number;
   className?: string;
   style?: React.CSSProperties;
+  onViewDetails?: () => void;
 }
 
 const statusConfig: Record<ProjectStatus, { label: string; className: string }> = {
@@ -43,6 +44,7 @@ const ProjectCard = ({
   status,
   className,
   style,
+  onViewDetails,
 }: ProjectCardProps) => {
   // Convert database status code to status string
   const statusType: ProjectStatus = getStatusFromCode(status);
@@ -79,7 +81,7 @@ const ProjectCard = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>View Details</DropdownMenuItem>
+                <DropdownMenuItem onClick={onViewDetails}>View Details</DropdownMenuItem>
                 <DropdownMenuItem>Edit Project</DropdownMenuItem>
                 <DropdownMenuItem>Generate Report</DropdownMenuItem>
               </DropdownMenuContent>
