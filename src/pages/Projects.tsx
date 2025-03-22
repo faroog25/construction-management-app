@@ -151,11 +151,16 @@ const Projects = () => {
   
   console.log('Filtered projects:', filteredProjects);
   
-  const handleViewDetails = (projectId: number) => {
-    const project = projectsData.find(p => p.id === projectId);
-    if (project) {
-      setSelectedProject(project);
-      setIsDetailsModalOpen(true);
+  const handleViewDetails = async (projectId: number) => {
+    try {
+      const project = projectsData.find(p => p.id === projectId);
+      if (project) {
+        setSelectedProject(project);
+        setIsDetailsModalOpen(true);
+      }
+    } catch (error) {
+      console.error('Error viewing project details:', error);
+      toast.error('Failed to load project details');
     }
   };
 

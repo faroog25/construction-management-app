@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { ProjectWithClient, getStatusFromCode } from '@/services/projectService';
+import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -16,7 +15,7 @@ const statusConfig = {
 };
 
 interface ProjectDetailsProps {
-  project: ProjectWithClient;
+  project: Project;
 }
 
 const ProjectDetails = ({ project }: ProjectDetailsProps) => {
@@ -28,14 +27,14 @@ const ProjectDetails = ({ project }: ProjectDetailsProps) => {
   };
 
   // Using the shared utility function to get status type
-  const statusType = getStatusFromCode(project.status);
+  const statusType = getStatusFromCode(project.status || 1);
   const statusInfo = statusConfig[statusType];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{project.projectName}</h1>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="outline" className={cn(statusInfo.className, "font-medium")}>
               {statusInfo.label}
@@ -67,24 +66,23 @@ const ProjectDetails = ({ project }: ProjectDetailsProps) => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="font-medium">{project.progress}% Complete</span>
-              {project.stage_name && <span className="text-sm">{project.stage_name}</span>}
+              <span className="font-medium">{project.orderId || 0}% Complete</span>
             </div>
-            <Progress value={project.progress} className="h-2" />
+            <Progress value={project.orderId || 0} className="h-2" />
             
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Started</p>
-                <p className="font-medium">{formatDate(project.start_date)}</p>
+                <p className="font-medium">{formatDate(project.startDate || null)}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Expected Completion</p>
-                <p className="font-medium">{formatDate(project.expected_end_date)}</p>
+                <p className="font-medium">{formatDate(project.expectedEndDate || null)}</p>
               </div>
-              {project.actual_end_date && (
+              {project.actualEndDate && (
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Actual Completion</p>
-                  <p className="font-medium">{formatDate(project.actual_end_date)}</p>
+                  <p className="font-medium">{formatDate(project.actualEndDate)}</p>
                 </div>
               )}
             </div>
@@ -101,19 +99,27 @@ const ProjectDetails = ({ project }: ProjectDetailsProps) => {
                 <Building className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm text-muted-foreground">Client</p>
-                  <p className="font-medium">{project.client_name || 'Not assigned'}</p>
+                  <p className="font-medium">{project.clientName || 'Not assigned'}</p>
                 </div>
               </div>
               
-              {project.site_engineer_id && (
+              {project.siteEngineerId && (
                 <div className="flex items-start gap-3">
                   <UserCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <p className="text-sm text-muted-foreground">Site Engineer</p>
-                    <p className="font-medium">Engineer ID: {project.site_engineer_id}</p>
+                    <p className="font-medium">Engineer ID: {project.siteEngineerId}</p>
                   </div>
                 </div>
               )}
+
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Site Address</p>
+                  <p className="font-medium">{project.siteAddress || 'Not set'}</p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
