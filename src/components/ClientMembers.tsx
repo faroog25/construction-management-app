@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Client, getClients, ClientType } from '../services/clientService';
+import { getClients } from '../services/clientService';
+import { Client, ClientType } from '@/types/client';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Skeleton } from './ui/skeleton';
@@ -14,7 +15,7 @@ const getClientTypeLabel = (type: ClientType): string => {
   switch (type) {
     case ClientType.Individual:
       return 'فرد';
-    case ClientType.Corporate:
+    case ClientType.Company:
       return 'شركة';
     default:
       return 'غير معروف';

@@ -1,23 +1,29 @@
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { createClient } from '@/services/clientService';
+import { ClientType } from '@/types/client';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { clientSchema, type ClientFormValues } from '@/lib/validations/client';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { toast } from 'sonner';
-import { Client, createClient, ClientType } from '@/services/clientService';
+} from "@/components/ui/select"
 
 interface NewClientModalProps {
   isOpen: boolean;
@@ -26,41 +32,29 @@ interface NewClientModalProps {
 }
 
 export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewClientModalProps) {
-  const [newClient, setNewClient] = useState({
-    fullName: '',
-    email: '',
-    phoneNumber: '',
-    clientType: ClientType.Individual,
+  const form = useForm<ClientFormValues>({
+    resolver: zodResolver(clientSchema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      phoneNumber: '',
+      clientType: ClientType.Individual,
+    },
+    mode: "all",
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate the form data
-    if (!newClient.fullName.trim()) {
-      toast.error('الاسم مطلوب');
-      return;
-    }
-    if (!newClient.email.trim()) {
-      toast.error('البريد الإلكتروني مطلوب');
-      return;
-    }
-    if (!newClient.phoneNumber.trim()) {
-      toast.error('رقم الهاتف مطلوب');
-      return;
-    }
-
+  const onSubmit = async (values: ClientFormValues) => {
     try {
-      await createClient(newClient);
+      await createClient({
+        fullName: values.fullName,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        clientType: values.clientType,
+      });
       toast.success('تمت الإضافة بنجاح');
       onClientCreated();
       onOpenChange(false);
-      setNewClient({
-        fullName: '',
-        email: '',
-        phoneNumber: '',
-        clientType: ClientType.Individual,
-      });
+      form.reset();
     } catch (error: unknown) {
       console.error('Error creating client:', error);
       const errorMessage = error instanceof Error ? error.message : 'فشلت الإضافة';
@@ -74,56 +68,98 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
         <DialogHeader>
           <DialogTitle>إضافة عميل جديد</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="fullName">الاسم الكامل</Label>
-              <Input
-                id="fullName"
-                value={newClient.fullName}
-                onChange={(e) => setNewClient({ ...newClient, fullName: e.target.value.trim() })}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newClient.email}
-                onChange={(e) => setNewClient({ ...newClient, email: e.target.value.trim() })}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
-              <Input
-                id="phoneNumber"
-                value={newClient.phoneNumber}
-                onChange={(e) => setNewClient({ ...newClient, phoneNumber: e.target.value.trim() })}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="clientType">نوع العميل</Label>
-              <Select
-                value={newClient.clientType}
-                onValueChange={(value) => setNewClient({ ...newClient, clientType: value as ClientType })}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="fullName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الاسم الكامل</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="أدخل الاسم الكامل" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>البريد الإلكتروني</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      placeholder="أدخل البريد الإلكتروني" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>رقم الهاتف</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="أدخل رقم الهاتف" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="clientType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>نوع العميل</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر نوع العميل" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={ClientType.Individual}>فرد</SelectItem>
+                      <SelectItem value={ClientType.Company}>شركة</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                إلغاء
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={form.formState.isSubmitting || !form.formState.isValid}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر نوع العميل" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ClientType.Individual}>فرد</SelectItem>
-                  <SelectItem value={ClientType.Corporate}>شركة</SelectItem>
-                </SelectContent>
-              </Select>
+                {form.formState.isSubmitting ? 'جاري الإضافة...' : 'إضافة'}
+              </Button>
             </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit">إضافة العميل</Button>
-          </DialogFooter>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
