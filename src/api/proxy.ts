@@ -22,10 +22,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'URL parameter is required' });
     }
 
+    // Filter and transform headers to be compatible with fetch
+    const headers: Record<string, string> = {};
+    Object.entries(req.headers).forEach(([key, value]) => {
+      if (value && typeof value === 'string') {
+        headers[key] = value;
+      }
+    });
+
     const response = await fetch(targetUrl, {
       method: req.method,
       headers: {
-        ...req.headers,
+        ...headers,
         host: new URL(targetUrl).host,
       },
       body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
