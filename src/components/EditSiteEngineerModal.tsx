@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,7 +11,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { siteEngineerSchema, type SiteEngineerFormValues } from '@/lib/validations/siteEngineer';
-import { createSiteEngineer } from '@/services/siteEngineerService';
+import { SiteEngineer, updateSiteEngineer } from '@/services/siteEngineerService';
 import { toast } from 'sonner';
 import {
   Form,
@@ -22,13 +22,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-interface NewSiteEngineerModalProps {
+interface EditSiteEngineerModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onEngineerCreated?: () => void;
+  onEngineerUpdated?: () => void;
+  engineer: SiteEngineer | null;
 }
 
-export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }: NewSiteEngineerModalProps) {
+export function EditSiteEngineerModal({ 
+  isOpen, 
+  onOpenChange, 
+  onEngineerUpdated,
+  engineer 
+}: EditSiteEngineerModalProps) {
   const form = useForm<SiteEngineerFormValues>({
     resolver: zodResolver(siteEngineerSchema),
     defaultValues: {
@@ -42,12 +48,36 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
       address: '',
       hireDate: '',
     },
-    mode: "onTouched"
+    mode: "onChange"
   });
 
+  useEffect(() => {
+    if (engineer) {
+      // Split the fullName into parts
+      const nameParts = engineer.fullName.split(' ').filter(part => part.trim());
+      form.reset({
+        firstName: nameParts[0] || '',
+        lastName: nameParts[nameParts.length - 1] || '',
+        secondName: nameParts.length > 2 ? nameParts[1] : '',
+        thirdName: nameParts.length > 3 ? nameParts[2] : '',
+        email: engineer.email || '',
+        phoneNumber: engineer.phoneNumber || '',
+        address: engineer.address || '',
+        nationalNumber: '',
+        hireDate: '',
+      });
+    }
+  }, [engineer, form]);
+
   const onSubmit = async (data: SiteEngineerFormValues) => {
+    if (!engineer?.id) {
+      toast.error('معرف المهندس غير متوفر');
+      return;
+    }
+
     try {
-      const engineer = {
+      const updatedEngineer = {
+        id: engineer.id,
         firstName: data.firstName.trim(),
         secondName: data.secondName?.trim(),
         thirdName: data.thirdName?.trim(),
@@ -59,28 +89,31 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
         hireDate: data.hireDate || null,
       };
 
-      await createSiteEngineer(engineer);
-      toast.success('تمت الإضافة بنجاح');
+      await updateSiteEngineer(engineer.id, updatedEngineer);
+      toast.success('تم التحديث بنجاح');
       onOpenChange(false);
-      onEngineerCreated?.();
-      form.reset();
+      onEngineerUpdated?.();
     } catch (error: unknown) {
-      console.error('Error creating site engineer:', error);
+      console.error('Error updating site engineer:', error);
       if (error instanceof Error) {
         toast.error(error.message);
       } else if (typeof error === 'string') {
         toast.error(error);
       } else {
-        toast.error('فشلت الإضافة. الرجاء المحاولة مرة أخرى');
+        toast.error('فشل التحديث. الرجاء المحاولة مرة أخرى');
       }
     }
   };
+
+  if (!engineer) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>إضافة مهندس موقع جديد</DialogTitle>
+          <DialogTitle>تعديل بيانات مهندس الموقع</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -89,14 +122,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    الاسم الأول
-                    <span className="text-destructive">*</span>
-                  </FormLabel>
+                  <FormLabel>الاسم الأول</FormLabel>
                   <FormControl>
                     <Input placeholder="أدخل الاسم الأول" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -110,7 +140,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
                   <FormControl>
                     <Input placeholder="أدخل الاسم الثاني" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -124,7 +154,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
                   <FormControl>
                     <Input placeholder="أدخل الاسم الثالث" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -134,14 +164,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    الاسم الأخير
-                    <span className="text-destructive">*</span>
-                  </FormLabel>
+                  <FormLabel>الاسم الأخير</FormLabel>
                   <FormControl>
                     <Input placeholder="أدخل الاسم الأخير" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -155,7 +182,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
                   <FormControl>
                     <Input type="email" placeholder="أدخل البريد الإلكتروني" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -165,14 +192,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               name="phoneNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    رقم الهاتف
-                    <span className="text-destructive">*</span>
-                  </FormLabel>
+                  <FormLabel>رقم الهاتف</FormLabel>
                   <FormControl>
                     <Input placeholder="أدخل رقم الهاتف" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -186,7 +210,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
                   <FormControl>
                     <Input placeholder="أدخل الرقم الوطني" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -200,7 +224,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
                   <FormControl>
                     <Input placeholder="أدخل العنوان" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -214,23 +238,23 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                إلغاء
-              </Button>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              إلغاء
+            </Button>
               <Button 
                 type="submit" 
-                disabled={form.formState.isSubmitting}
+                disabled={!form.formState.isValid || form.formState.isSubmitting}
               >
-                {form.formState.isSubmitting ? 'جاري الإضافة...' : 'إضافة المهندس'}
-              </Button>
-            </DialogFooter>
-          </form>
+                {form.formState.isSubmitting ? 'جاري التحديث...' : 'تحديث البيانات'}
+            </Button>
+          </DialogFooter>
+        </form>
         </Form>
       </DialogContent>
     </Dialog>
