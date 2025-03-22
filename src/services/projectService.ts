@@ -1,6 +1,4 @@
-
-// API endpoint
-const API_BASE_URL = 'http://constructionmanagementassistant.runasp.net/api/v1';
+import { API_BASE_URL } from '@/config/api';
 
 export interface Project {
   id: number;

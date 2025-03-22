@@ -1,7 +1,6 @@
-// This file contains functions to interact with the clients database
+import { API_BASE_URL } from '@/config/api';
 
-// API endpoint
-const API_BASE_URL = 'http://constructionmanagementassistant.runasp.net/api/v1';
+// This file contains functions to interact with the clients database
 
 export enum ClientType {
   Individual = "فرد",
