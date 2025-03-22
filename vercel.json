@@ -9,7 +9,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "dest": "/src/api/$1"
+      "destination": "/src/api/$1"
     }
   ],
   "headers": [
