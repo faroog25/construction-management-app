@@ -115,16 +115,52 @@ export async function createSiteEngineer(engineer: {
 /**
  * Updates a site engineer with proper handling for Arabic text
  */
-export async function updateSiteEngineer(id: number, engineer: Partial<SiteEngineer>): Promise<SiteEngineer> {
+export async function updateSiteEngineer(id: number, engineer: {
+  id: number;
+  firstName: string;
+  secondName?: string;
+  thirdName?: string;
+  lastName: string;
+  email?: string;
+  phoneNumber: string;
+  nationalNumber?: string;
+  address?: string;
+  hireDate?: string;
+}): Promise<SiteEngineer> {
   try {
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
+    // Validate required fields
+    if (!engineer.firstName?.trim()) {
+      throw new Error('الاسم الأول مطلوب');
+    }
+    if (!engineer.lastName?.trim()) {
+      throw new Error('الاسم الأخير مطلوب');
+    }
+    if (!engineer.phoneNumber?.trim()) {
+      throw new Error('رقم الهاتف مطلوب');
+    }
+
+    // Clean up empty optional fields
+    const cleanEngineer = {
+      id: engineer.id,
+      firstName: engineer.firstName.trim(),
+      lastName: engineer.lastName.trim(),
+      phoneNumber: engineer.phoneNumber.trim(),
+      ...(engineer.secondName?.trim() ? { secondName: engineer.secondName.trim() } : {}),
+      ...(engineer.thirdName?.trim() ? { thirdName: engineer.thirdName.trim() } : {}),
+      ...(engineer.email?.trim() ? { email: engineer.email.trim() } : {}),
+      ...(engineer.nationalNumber?.trim() ? { nationalNumber: engineer.nationalNumber.trim() } : {}),
+      ...(engineer.address?.trim() ? { address: engineer.address.trim() } : {}),
+      ...(engineer.hireDate ? { hireDate: engineer.hireDate } : {})
+    };
+
+    const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8' // Support Arabic content
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       },
-      body: JSON.stringify(engineer),
+      body: JSON.stringify(cleanEngineer),
     });
 
     if (!response.ok) {
