@@ -15,12 +15,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { 
   CalendarDays, 
   ChartGantt, 
   Clock, 
   Calendar, 
-  AlertCircle 
+  AlertCircle,
+  CircleHalf,
+  CircleDot,
+  CirclePercent 
 } from 'lucide-react';
 import {
   ResizablePanelGroup,
@@ -53,6 +57,14 @@ const statusColors = {
   'in-progress': 'bg-blue-100 text-blue-800',
   'delayed': 'bg-red-100 text-red-800',
   'completed': 'bg-green-100 text-green-800',
+};
+
+// Icons for progress indicators
+const getProgressIcon = (progress: number) => {
+  if (progress === 0) return <CircleDot className="h-4 w-4 text-gray-400" />;
+  if (progress < 50) return <CircleHalf className="h-4 w-4 text-blue-500" />;
+  if (progress < 100) return <CirclePercent className="h-4 w-4 text-amber-500" />;
+  return <CircleDot className="h-4 w-4 text-green-500" />;
 };
 
 const GanttChart = ({ project }: GanttChartProps) => {
@@ -296,10 +308,13 @@ const GanttChart = ({ project }: GanttChartProps) => {
               <Calendar className="h-3.5 w-3.5" />
               <span className="font-medium">End:</span> {new Date(task.end).toLocaleDateString()}
             </p>
-            <p className="flex items-center gap-2 mb-1">
-              <Clock className="h-3.5 w-3.5" />
-              <span className="font-medium">Progress:</span> {task.progress}%
-            </p>
+            <div className="flex flex-col gap-1 mt-2">
+              <p className="flex items-center gap-2">
+                <Clock className="h-3.5 w-3.5" />
+                <span className="font-medium">Progress:</span> {task.progress}%
+              </p>
+              <Progress value={task.progress} className="h-2" />
+            </div>
           </div>
           <Badge className={statusColors[task.status]}>
             {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ')}
@@ -409,9 +424,12 @@ const GanttChart = ({ project }: GanttChartProps) => {
                         {task.name}
                       </span>
                     </div>
-                    <Badge className={statusColors[task.status]} variant="outline">
-                      {task.progress}%
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      {getProgressIcon(task.progress)}
+                      <Badge className={statusColors[task.status]} variant="outline">
+                        {task.progress}%
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -540,7 +558,19 @@ const GanttChart = ({ project }: GanttChartProps) => {
                                   rx={3} 
                                 />
                                 
-                                {/* Dependency lines would go here in a production implementation */}
+                                {/* Add progress percentage label */}
+                                <text
+                                  x={startPos + (barWidth * (taskData.progress / 100)) - 20}
+                                  y={barY + (barHeight / 2) + 5}
+                                  fill="white"
+                                  fontSize={10}
+                                  fontWeight="bold"
+                                  textAnchor="end"
+                                  dominantBaseline="middle"
+                                  style={{ pointerEvents: 'none' }}
+                                >
+                                  {taskData.progress > 15 ? `${taskData.progress}%` : ''}
+                                </text>
                                 
                                 {/* Add text for subgroups */}
                                 {taskData.type === 'subgroup' && (

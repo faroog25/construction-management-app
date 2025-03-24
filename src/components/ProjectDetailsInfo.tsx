@@ -4,7 +4,7 @@ import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Calendar, Clock, Users, UserCircle, Building, MapPin } from 'lucide-react';
+import { Calendar, Clock, Users, UserCircle, Building, MapPin, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Status configuration same as in ProjectCard for consistency
@@ -31,14 +31,19 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
   const statusType = getStatusFromCode(project.status || 1);
   const statusInfo = statusConfig[statusType];
 
+  // Define progress thresholds and colors
+  const getProgressColor = (progress: number) => {
+    if (progress < 25) return 'bg-red-500';
+    if (progress < 50) return 'bg-orange-500';
+    if (progress < 75) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  const progressValue = project.orderId || 0;
+  const progressColor = getProgressColor(progressValue);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className={cn(statusInfo.className, "font-medium")}>
-          {statusInfo.label}
-        </Badge>
-      </div>
-
       {project.description && (
         <Card>
           <CardHeader className="pb-2">
@@ -56,10 +61,27 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
             <CardTitle className="text-md font-medium">Progress</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">{project.orderId || 0}% Complete</span>
+            <div className="flex flex-col space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="font-medium">{progressValue}% Complete</span>
+                <Badge variant="outline" className={cn(statusInfo.className, "font-medium")}>
+                  {statusInfo.label}
+                </Badge>
+              </div>
+              <Progress value={progressValue} className="h-2" />
+              
+              {/* Visual progress indicator */}
+              <div className="w-full bg-muted rounded-md h-6 mt-2 relative overflow-hidden">
+                <div 
+                  className={`h-full ${progressColor} transition-all duration-500 ease-in-out`} 
+                  style={{ width: `${progressValue}%` }}
+                >
+                  <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
+                    {progressValue}% Complete
+                  </span>
+                </div>
+              </div>
             </div>
-            <Progress value={project.orderId || 0} className="h-2" />
             
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="space-y-1">
@@ -115,6 +137,8 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Project Timeline component - removed from here since it's now in a separate tab */}
     </div>
   );
 };
