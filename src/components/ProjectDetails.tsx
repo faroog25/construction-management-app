@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Clock, Users, UserCircle, Building, MapPin, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import GanttChart from '@/components/GanttChart';
 
 // Status configuration same as in ProjectCard for consistency
 const statusConfig = {
@@ -124,6 +126,9 @@ const ProjectDetails = ({ project }: ProjectDetailsProps) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Gantt Chart Component */}
+      <GanttChart project={project} />
     </div>
   );
 };
