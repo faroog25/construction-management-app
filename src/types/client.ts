@@ -1,6 +1,6 @@
 export enum ClientType {
-  Individual = "Individual",
-  Company = "Company"
+  Individual = "فرد",
+  Company = "شركة"
 }
 
 export interface Client {
