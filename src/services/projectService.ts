@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface Project {
@@ -67,6 +68,8 @@ export async function getProjectsByStatus(statusCode: number): Promise<Project[]
 
 export async function getProjectById(id: number): Promise<Project | undefined> {
   try {
+    // For now, we'll just use the getProjects and filter by ID
+    // In a real application, you'd have a dedicated API endpoint
     const projects = await getProjects();
     return projects.find(project => project.id === id);
   } catch (error) {

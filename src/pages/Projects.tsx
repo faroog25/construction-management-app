@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle } from 'lucide-react';
 import { getProjects, Project, getStatusFromCode, createProject } from '@/services/projectService';
-import { getClients, Client } from '@/services/clientService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { 
@@ -23,8 +22,8 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import ProjectDetailsModal from '@/components/ProjectDetailsModal';
+import { useNavigate } from 'react-router-dom';
 
-// Adapter interface to bridge between Project model and ProjectCard component
 interface ProjectAdapter {
   id: number;
   name: string;
@@ -35,7 +34,6 @@ interface ProjectAdapter {
   status: number;
 }
 
-// Status types mapping
 const STATUS_MAP = {
   'all': 0,
   'active': 1,
@@ -63,24 +61,22 @@ const Projects = () => {
   });
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const navigate = useNavigate();
 
   const queryClient = useQueryClient();
 
-  // Fetch projects using React Query
   const { data: projectsData = [], isLoading, isError, error } = useQuery({
     queryKey: ['projects'],
     queryFn: () => getProjects(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
     retry: 2
   });
 
-  // Fetch clients using React Query
   const { data: clients = [], isLoading: isLoadingClients } = useQuery({
     queryKey: ['clients'],
     queryFn: () => getClients(),
   });
 
-  // Create project mutation
   const createProjectMutation = useMutation({
     mutationFn: createProject,
     onSuccess: () => {
@@ -101,7 +97,6 @@ const Projects = () => {
     },
   });
 
-  // Update project with selected client
   useEffect(() => {
     if (selectedClientId) {
       const selectedClient = clients.find(client => client.id === selectedClientId);
@@ -123,7 +118,6 @@ const Projects = () => {
     }
   };
 
-  // Filter and adapt projects for presentation
   const filteredProjects: ProjectAdapter[] = projectsData
     .filter(project => 
       activeTab === 'all' || getStatusFromCode(project.status || 1) === activeTab
@@ -148,25 +142,19 @@ const Projects = () => {
       if (sortOption === 'dueDate') return new Date(a.expected_end_date).getTime() - new Date(b.expected_end_date).getTime();
       return 0;
     });
-  
-  console.log('Filtered projects:', filteredProjects);
-  
+
   const handleViewDetails = async (projectId: number) => {
     try {
-      const project = projectsData.find(p => p.id === projectId);
-      if (project) {
-        setSelectedProject(project);
-        setIsDetailsModalOpen(true);
-      }
+      navigate(`/projects/${projectId}`);
     } catch (error) {
-      console.error('Error viewing project details:', error);
-      toast.error('Failed to load project details');
+      console.error('Error navigating to project details:', error);
+      toast.error('Failed to navigate to project details');
     }
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="h-16"></div> {/* Navbar spacer */}
+      <div className="h-16"></div>
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>
@@ -283,7 +271,6 @@ const Projects = () => {
           )}
         </Tabs>
         
-        {/* New Project Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md">

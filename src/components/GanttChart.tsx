@@ -19,6 +19,17 @@ interface GanttChartProps {
   project: Project;
 }
 
+interface GanttTask {
+  id: number;
+  name: string;
+  nameAr: string; // Arabic name
+  start: number; // timestamp
+  end: number; // timestamp
+  progress: number;
+  dependencies?: number[];
+  color?: string;
+}
+
 const GanttChart = ({ project }: GanttChartProps) => {
   // Parse dates from project
   const startDate = project.startDate ? new Date(project.startDate) : new Date();
@@ -27,52 +38,58 @@ const GanttChart = ({ project }: GanttChartProps) => {
   // Set today's date for reference
   const today = new Date();
   
-  // Calculate total project duration in days
-  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  
-  // Generate months for the timeline
-  const generateMonths = () => {
-    const months = [];
-    const currentDate = new Date(startDate);
-    
-    while (currentDate <= endDate) {
-      months.push({
-        name: currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-        start: new Date(currentDate).getTime(),
-        actualStart: currentDate <= today ? new Date(currentDate).getTime() : null,
-        today: currentDate.getMonth() === today.getMonth() && 
-               currentDate.getFullYear() === today.getFullYear() ? 
-               today.getTime() : null
-      });
-      
-      // Move to next month
-      currentDate.setMonth(currentDate.getMonth() + 1);
+  // Dummy data for tasks with Arabic content
+  const tasks: GanttTask[] = [
+    {
+      id: 1,
+      name: "Project Planning",
+      nameAr: "تخطيط المشروع",
+      start: new Date('2023-09-01').getTime(),
+      end: new Date('2023-10-15').getTime(),
+      progress: 100,
+      color: "#4CAF50"
+    },
+    {
+      id: 2,
+      name: "Foundation Work",
+      nameAr: "أعمال الأساسات",
+      start: new Date('2023-10-16').getTime(),
+      end: new Date('2023-11-30').getTime(),
+      progress: 100,
+      dependencies: [1],
+      color: "#2196F3"
+    },
+    {
+      id: 3,
+      name: "Main Structure",
+      nameAr: "الهيكل الرئيسي",
+      start: new Date('2023-12-01').getTime(),
+      end: new Date('2024-02-28').getTime(),
+      progress: 65,
+      dependencies: [2],
+      color: "#FFC107"
+    },
+    {
+      id: 4,
+      name: "Interior Finishing",
+      nameAr: "التشطيبات الداخلية",
+      start: new Date('2024-03-01').getTime(),
+      end: new Date('2024-05-15').getTime(),
+      progress: 0,
+      dependencies: [3],
+      color: "#9C27B0"
+    },
+    {
+      id: 5,
+      name: "Exterior Finishing",
+      nameAr: "التشطيبات الخارجية",
+      start: new Date('2024-05-16').getTime(),
+      end: new Date('2024-06-30').getTime(),
+      progress: 0,
+      dependencies: [4],
+      color: "#E91E63"
     }
-    
-    return months;
-  };
-  
-  // Generate tasks data
-  const generateTasks = () => {
-    // Base task (the entire project)
-    const tasks = [
-      {
-        task: project.projectName,
-        start: startDate.getTime(),
-        end: endDate.getTime(),
-        completed: Math.min((today.getTime() - startDate.getTime()) / (endDate.getTime() - startDate.getTime()) * 100, 100),
-        progress: project.orderId || 0
-      }
-    ];
-    
-    // For a more detailed Gantt chart, we would add more tasks from the project here
-    // This is a simplified version showing just the overall project timeline
-    
-    return tasks;
-  };
-  
-  const months = generateMonths();
-  const tasks = generateTasks();
+  ];
   
   // CustomTooltip component for the Gantt chart
   const CustomTooltip = ({ active, payload }: any) => {
@@ -81,10 +98,10 @@ const GanttChart = ({ project }: GanttChartProps) => {
       
       return (
         <div className="bg-background border rounded-md p-2 shadow-md text-sm">
-          <p className="font-medium">{task.task}</p>
-          <p>Start: {new Date(task.start).toLocaleDateString()}</p>
-          <p>End: {new Date(task.end).toLocaleDateString()}</p>
-          <p>Progress: {task.progress}%</p>
+          <p className="font-medium">{task.nameAr}</p>
+          <p>البداية: {new Date(task.start).toLocaleDateString('ar-SA')}</p>
+          <p>النهاية: {new Date(task.end).toLocaleDateString('ar-SA')}</p>
+          <p>التقدم: {task.progress}%</p>
         </div>
       );
     }
@@ -93,105 +110,110 @@ const GanttChart = ({ project }: GanttChartProps) => {
   };
   
   return (
-    <Card className="mt-6">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-md font-medium">Project Timeline (Gantt Chart)</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[300px] w-full">
-          <div className="min-w-[600px] pr-4">
-            <ChartContainer 
-              config={{
-                progress: { label: 'Progress', color: 'hsl(var(--primary))' },
-                planned: { label: 'Planned', color: 'hsl(var(--muted-foreground)/0.3)' }
-              }}
-              className="h-[250px] w-full"
-            >
-              <BarChart
-                data={tasks}
-                layout="vertical"
-                margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
-                barSize={20}
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <h2 className="text-2xl font-bold">مخطط جانت للمشروع</h2>
+        <div className="flex gap-2 items-center text-sm">
+          <span className="flex items-center">
+            <div className="w-3 h-3 bg-primary mr-1 rounded-sm"></div>
+            تم الإنجاز
+          </span>
+          <span className="flex items-center">
+            <div className="w-3 h-3 bg-muted-foreground/30 mr-1 rounded-sm"></div>
+            المخطط
+          </span>
+        </div>
+      </div>
+      
+      <Card>
+        <CardContent className="pt-6">
+          <ScrollArea className="h-[500px] w-full">
+            <div className="min-w-[800px] pr-4">
+              <ChartContainer 
+                config={{
+                  progress: { label: 'Progress', color: 'hsl(var(--primary))' },
+                  planned: { label: 'Planned', color: 'hsl(var(--muted-foreground)/0.3)' }
+                }}
+                className="h-[400px] w-full"
               >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis 
-                  type="number" 
-                  domain={[startDate.getTime(), endDate.getTime()]}
-                  tickFormatter={(time) => new Date(time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  scale="time"
-                  dataKey="start"
-                />
-                <YAxis 
-                  dataKey="task" 
-                  type="category" 
-                  width={80}
-                  tick={{ fill: 'hsl(var(--foreground))' }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar 
-                  dataKey="end" 
-                  fill="hsl(var(--muted-foreground)/0.3)" 
-                  shape={(props: any) => {
-                    const { x, y, width, height, fill } = props;
-                    const taskData = props.payload;
-                    const startPos = x - width; // Adjusted x position based on start date
-                    const endPos = x; // End position is x
-                    const barWidth = endPos - startPos;
-                    
-                    return (
-                      <g>
-                        {/* Full bar (planned) */}
-                        <rect x={startPos} y={y} width={barWidth} height={height} fill={fill} rx={3} />
-                        
-                        {/* Progress bar */}
-                        <rect 
-                          x={startPos} 
-                          y={y} 
-                          width={barWidth * (taskData.progress / 100)} 
-                          height={height} 
-                          fill="hsl(var(--primary))" 
-                          rx={3} 
-                        />
-                        
-                        {/* Today marker if within range */}
-                        {today >= startDate && today <= endDate && (
-                          <line 
-                            x1={(today.getTime() - startDate.getTime()) / (endDate.getTime() - startDate.getTime()) * barWidth + startPos}
-                            y1={y - 5}
-                            x2={(today.getTime() - startDate.getTime()) / (endDate.getTime() - startDate.getTime()) * barWidth + startPos}
-                            y2={y + height + 5}
-                            stroke="red"
-                            strokeWidth={2}
-                            strokeDasharray="3 3"
+                <BarChart
+                  data={tasks}
+                  layout="vertical"
+                  margin={{ top: 20, right: 30, left: 150, bottom: 20 }}
+                  barSize={30}
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis 
+                    type="number" 
+                    domain={[
+                      Math.min(...tasks.map(t => t.start)), 
+                      Math.max(...tasks.map(t => t.end))
+                    ]}
+                    tickFormatter={(time) => new Date(time).toLocaleDateString('ar-SA', { month: 'short', year: 'numeric' })}
+                    scale="time"
+                    dataKey="start"
+                  />
+                  <YAxis 
+                    dataKey="nameAr" 
+                    type="category" 
+                    width={140}
+                    tick={{ fill: 'hsl(var(--foreground))' }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar 
+                    dataKey="end" 
+                    fill="hsl(var(--muted-foreground)/0.3)" 
+                    shape={(props: any) => {
+                      const { x, y, width, height, fill } = props;
+                      const taskData = props.payload;
+                      const startPos = x - width; // Adjusted x position based on start date
+                      const endPos = x; // End position is x
+                      const barWidth = endPos - startPos;
+                      
+                      return (
+                        <g>
+                          {/* Full bar (planned) */}
+                          <rect x={startPos} y={y} width={barWidth} height={height} fill={fill} rx={3} />
+                          
+                          {/* Progress bar */}
+                          <rect 
+                            x={startPos} 
+                            y={y} 
+                            width={barWidth * (taskData.progress / 100)} 
+                            height={height} 
+                            fill={taskData.color || "hsl(var(--primary))"} 
+                            rx={3} 
                           />
-                        )}
-                      </g>
-                    );
-                  }}
-                />
-              </BarChart>
-            </ChartContainer>
-            
-            <div className="flex justify-between items-center px-12 mt-2">
-              <div className="flex space-x-4 text-sm">
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-primary mr-2 rounded-sm"></div>
-                  <span>Progress</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 bg-muted-foreground/30 mr-2 rounded-sm"></div>
-                  <span>Planned</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 border border-red-500 mr-2 rounded-sm"></div>
-                  <span>Today</span>
-                </div>
+                          
+                          {/* Today marker if within range */}
+                          {today >= new Date(taskData.start) && today <= new Date(taskData.end) && (
+                            <line 
+                              x1={(today.getTime() - taskData.start) / (taskData.end - taskData.start) * barWidth + startPos}
+                              y1={y - 5}
+                              x2={(today.getTime() - taskData.start) / (taskData.end - taskData.start) * barWidth + startPos}
+                              y2={y + height + 5}
+                              stroke="red"
+                              strokeWidth={2}
+                              strokeDasharray="3 3"
+                            />
+                          )}
+                        </g>
+                      );
+                    }}
+                  />
+                </BarChart>
+              </ChartContainer>
+              
+              {/* Dependencies visualization would go here in a more complex chart */}
+              
+              <div className="flex justify-end mt-4 text-sm text-muted-foreground">
+                <span>تم التحديث: {new Date().toLocaleDateString('ar-SA')}</span>
               </div>
             </div>
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
