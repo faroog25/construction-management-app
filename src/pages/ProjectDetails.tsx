@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProjectDetailsInfo from '@/components/ProjectDetailsInfo';
 import ProjectStages from '@/components/ProjectStages';
 import GanttChart from '@/components/GanttChart';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Calendar, Clock, Users } from 'lucide-react';
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,7 +45,24 @@ const ProjectDetails = () => {
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">{project.projectName}</h1>
-          <p className="text-muted-foreground mt-1">Project ID: {project.id}</p>
+          <div className="flex flex-wrap gap-4 mt-2">
+            <p className="text-muted-foreground flex items-center">
+              <Calendar className="w-4 h-4 mr-1" /> 
+              Project ID: {project.id}
+            </p>
+            {project.startDate && (
+              <p className="text-muted-foreground flex items-center">
+                <Clock className="w-4 h-4 mr-1" /> 
+                Started: {new Date(project.startDate).toLocaleDateString()}
+              </p>
+            )}
+            {project.clientName && (
+              <p className="text-muted-foreground flex items-center">
+                <Users className="w-4 h-4 mr-1" /> 
+                Client: {project.clientName}
+              </p>
+            )}
+          </div>
         </div>
 
         <Tabs defaultValue="details" className="space-y-4">
