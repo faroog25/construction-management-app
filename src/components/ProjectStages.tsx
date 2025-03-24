@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Project } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
-import { CircleDot, CircleHalf, CirclePercent } from 'lucide-react';
+import { CircleDot, CirclePercent } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ProjectStagesProps {
@@ -96,9 +95,9 @@ const statusConfig = {
 // Progress icon based on progress percentage
 const getProgressIcon = (progress: number) => {
   if (progress === 0) return <CircleDot className="h-4 w-4 text-gray-400" />;
-  if (progress < 50) return <CircleHalf className="h-4 w-4 text-blue-500" />;
+  if (progress < 50) return <CircleDot className="h-4 w-4 text-blue-500 fill-blue-500" />;
   if (progress < 100) return <CirclePercent className="h-4 w-4 text-amber-500" />;
-  return <CircleDot className="h-4 w-4 text-green-500" />;
+  return <CircleDot className="h-4 w-4 text-green-500 fill-green-500" />;
 };
 
 const ProjectStages = ({ project }: ProjectStagesProps) => {
