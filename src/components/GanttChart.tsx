@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   BarChart, 
@@ -22,9 +21,9 @@ import {
   Clock, 
   Calendar, 
   AlertCircle,
-  CircleHalf,
-  CircleDot,
-  CirclePercent 
+  CircleHelp,
+  Circle,
+  CheckCircle 
 } from 'lucide-react';
 import {
   ResizablePanelGroup,
@@ -61,10 +60,10 @@ const statusColors = {
 
 // Icons for progress indicators
 const getProgressIcon = (progress: number) => {
-  if (progress === 0) return <CircleDot className="h-4 w-4 text-gray-400" />;
-  if (progress < 50) return <CircleHalf className="h-4 w-4 text-blue-500" />;
-  if (progress < 100) return <CirclePercent className="h-4 w-4 text-amber-500" />;
-  return <CircleDot className="h-4 w-4 text-green-500" />;
+  if (progress === 0) return <Circle className="h-4 w-4 text-gray-400" />;
+  if (progress < 50) return <CircleHelp className="h-4 w-4 text-blue-500" />;
+  if (progress < 100) return <Clock className="h-4 w-4 text-amber-500" />;
+  return <CheckCircle className="h-4 w-4 text-green-500" />;
 };
 
 const GanttChart = ({ project }: GanttChartProps) => {
@@ -502,19 +501,28 @@ const GanttChart = ({ project }: GanttChartProps) => {
                         <Tooltip content={<CustomTooltip />} />
                         <ReferenceLine x={today.getTime()} stroke="red" strokeWidth={2} strokeDasharray="3 3" label="Today" />
                         <Bar 
-                          dataKey="end" 
+                          dataKey={(dataItem: GanttTask) => {
+                            return dataItem.end;
+                          }}
+                          name="Task"
                           fill="hsl(var(--muted-foreground)/0.3)" 
                           shape={(props: any) => {
-                            const { x, y, width, height, fill } = props;
-                            const taskData = props.payload;
-                            const startPos = x - width; // Adjusted x position based on start date
-                            const endPos = x; // End position is x
+                            const { fill, index } = props;
+                            const taskData = tasks[index];
+                            
+                            const width = props.width || 0;
+                            const height = props.height || 20;
+                            
+                            const timeSpan = projectEnd - projectStart;
+                            const pixelsPerTime = width / timeSpan;
+                            
+                            const startPos = ((taskData.start - projectStart) * pixelsPerTime);
+                            const endPos = ((taskData.end - projectStart) * pixelsPerTime);
                             const barWidth = endPos - startPos;
                             
-                            // Special handling for milestones (diamond shape)
                             if (taskData.type === 'milestone') {
                               const centerX = startPos + (barWidth / 2);
-                              const centerY = y + (height / 2);
+                              const centerY = props.y + (height / 2);
                               const diamondSize = 10;
                               
                               return (
@@ -532,13 +540,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
                               );
                             }
                             
-                            // For subgroups, make slightly taller
                             const barHeight = taskData.type === 'subgroup' ? height * 1.2 : height;
-                            const barY = taskData.type === 'subgroup' ? y - (height * 0.1) : y;
+                            const barY = taskData.type === 'subgroup' ? props.y - (height * 0.1) : props.y;
                             
                             return (
                               <g>
-                                {/* Full bar (planned) */}
                                 <rect 
                                   x={startPos} 
                                   y={barY} 
@@ -548,7 +554,6 @@ const GanttChart = ({ project }: GanttChartProps) => {
                                   rx={3} 
                                 />
                                 
-                                {/* Progress bar */}
                                 <rect 
                                   x={startPos} 
                                   y={barY} 
@@ -558,7 +563,6 @@ const GanttChart = ({ project }: GanttChartProps) => {
                                   rx={3} 
                                 />
                                 
-                                {/* Add progress percentage label */}
                                 <text
                                   x={startPos + (barWidth * (taskData.progress / 100)) - 20}
                                   y={barY + (barHeight / 2) + 5}
@@ -572,7 +576,6 @@ const GanttChart = ({ project }: GanttChartProps) => {
                                   {taskData.progress > 15 ? `${taskData.progress}%` : ''}
                                 </text>
                                 
-                                {/* Add text for subgroups */}
                                 {taskData.type === 'subgroup' && (
                                   <text
                                     x={startPos + 8}

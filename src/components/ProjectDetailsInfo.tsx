@@ -137,8 +137,6 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Project Timeline component - removed from here since it's now in a separate tab */}
     </div>
   );
 };

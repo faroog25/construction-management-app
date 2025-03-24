@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProjectDetailsInfo from '@/components/ProjectDetailsInfo';
 import ProjectStages from '@/components/ProjectStages';
 import GanttChart from '@/components/GanttChart';
+import ProjectTimeline from '@/components/ProjectTimeline';
 import { Loader2, AlertCircle, Calendar, Clock, Users } from 'lucide-react';
 
 const ProjectDetails = () => {
@@ -74,6 +75,7 @@ const ProjectDetails = () => {
           
           <TabsContent value="details" className="space-y-4">
             <ProjectDetailsInfo project={project} />
+            <ProjectTimeline />
           </TabsContent>
           
           <TabsContent value="stages" className="space-y-4">
