@@ -1,5 +1,5 @@
 
-import { Project } from '@/services/projectService';
+import { Project, ProjectWithClient } from '@/services/projectService';
 
 // Interface for project with client data
 export interface ProjectWithClientData {
@@ -62,7 +62,7 @@ export const formatProjectDate = (dateString: string, format: 'short' | 'medium'
 };
 
 // Calculate project health based on progress and days remaining
-export const calculateProjectHealth = (project: ProjectWithClientData): 'good' | 'warning' | 'critical' => {
+export const calculateProjectHealth = (project: ProjectWithClient): 'good' | 'warning' | 'critical' => {
   // If completed, health is always good
   if (project.status === 2) return 'good';
   

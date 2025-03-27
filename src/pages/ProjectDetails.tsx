@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -18,7 +17,8 @@ import {
   Share2,
   Download,
   Printer,
-  MoreHorizontal
+  MoreHorizontal,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
