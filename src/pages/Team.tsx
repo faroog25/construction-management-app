@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeamMembers } from '@/components/TeamMembers';
 import { ClientMembers } from '@/components/ClientMembers';
+import { SiteEngineers } from '@/components/SiteEngineers';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +22,8 @@ import {
   Phone, 
   AtSign, 
   MapPin,
-  UserCog
+  UserCog,
+  HardHat
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -145,6 +147,11 @@ const Team = () => {
               <span>Team Members</span>
               <Badge variant="secondary" className="ml-1">24</Badge>
             </TabsTrigger>
+            <TabsTrigger value="engineers" className="flex items-center gap-2">
+              <HardHat className="h-4 w-4" />
+              <span>Site Engineers</span>
+              <Badge variant="secondary" className="ml-1">18</Badge>
+            </TabsTrigger>
             <TabsTrigger value="clients" className="flex items-center gap-2">
               <Briefcase className="h-4 w-4" />
               <span>Clients</span>
@@ -154,6 +161,10 @@ const Team = () => {
           
           <TabsContent value="team" className="space-y-4 animate-in">
             <TeamMembers />
+          </TabsContent>
+          
+          <TabsContent value="engineers" className="space-y-4 animate-in">
+            <SiteEngineers />
           </TabsContent>
           
           <TabsContent value="clients" className="space-y-4 animate-in">
