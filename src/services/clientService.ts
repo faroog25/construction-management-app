@@ -1,7 +1,21 @@
 import { API_BASE_URL } from '@/config/api';
-import { Client, ClientType } from '@/types/client';
+import { ClientType } from '@/types/client';
 
-// This file contains functions to interact with the clients database
+// Define the Client interface that will be used throughout the application
+export interface Client {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  notes?: string;
+  // Keep the original client properties for backward compatibility
+  fullName?: string;
+  phoneNumber?: string;
+  clientType?: ClientType;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 export interface ClientResponse {
   success: boolean;
@@ -44,7 +58,7 @@ export async function getClients(page: number = 1, pageSize: number = 10): Promi
 export async function getClientById(id: string): Promise<Client | undefined> {
   try {
     const clients = await getClients();
-    return clients.find(client => client.id === id);
+    return clients.find(client => client.id.toString() === id);
   } catch (error) {
     console.error('Error fetching client by ID:', error);
     throw error;
@@ -54,39 +68,36 @@ export async function getClientById(id: string): Promise<Client | undefined> {
 export async function createClient(client: Omit<Client, 'id'>): Promise<Client> {
   // TODO: Implement actual API call
   return {
-    id: Math.random().toString(36).substr(2, 9),
+    id: Math.floor(Math.random() * 1000),
     ...client,
-    createdAt: new Date(),
-    updatedAt: new Date(),
   };
 }
 
 export async function updateClient(id: string, client: Partial<Omit<Client, 'id'>>): Promise<Client> {
   // TODO: Implement actual API call
   return {
-    id,
-    fullName: client.fullName || '',
+    id: parseInt(id),
+    name: client.name || '',
     email: client.email || '',
-    phoneNumber: client.phoneNumber || '',
-    clientType: client.clientType || ClientType.Individual,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    phone: client.phone || '',
+    address: client.address || '',
+    notes: client.notes,
   };
 }
 
 export async function deleteClient(id: string): Promise<void> {
   // TODO: Implement actual API call
+  console.log(`Client with ID ${id} deleted`);
 }
 
 export async function getClient(id: string): Promise<Client> {
   // TODO: Implement actual API call
   return {
-    id,
-    fullName: 'Test Client',
+    id: parseInt(id),
+    name: 'Test Client',
     email: 'test@example.com',
-    phoneNumber: '1234567890',
-    clientType: ClientType.Individual,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    phone: '1234567890',
+    address: '123 Test Street',
+    notes: 'This is a test client',
   };
 }

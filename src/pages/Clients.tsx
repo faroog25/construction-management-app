@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +10,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Plus, Search, SlidersHorizontal, ChevronDown, Loader2, X } from 'lucide-react';
-import { getClients, Client, createClient, updateClient, deleteClient } from '@/services/clientService';
+import { getClients, createClient, updateClient, deleteClient } from '@/services/clientService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+// Define a local Client interface that matches the actual structure used in the component
+interface Client {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  notes?: string;
+}
 
 const ClientCard = ({ client, onDelete, onUpdate }: { client: Client; onDelete: (id: number) => void; onUpdate: (client: Client) => void }) => (
   <Card className="mb-4 p-4">
@@ -59,7 +70,7 @@ const Clients = () => {
 
   // Create client mutation
   const createClientMutation = useMutation({
-    mutationFn: createClient,
+    mutationFn: (clientData: Omit<Client, 'id'>) => createClient(clientData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       setIsModalOpen(false);
@@ -69,7 +80,8 @@ const Clients = () => {
 
   // Update client mutation
   const updateClientMutation = useMutation({
-    mutationFn: updateClient,
+    mutationFn: (params: { id: number, data: Partial<Omit<Client, 'id'>> }) => 
+      updateClient(params.id.toString(), params.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       setIsModalOpen(false);
@@ -80,7 +92,7 @@ const Clients = () => {
 
   // Delete client mutation
   const deleteClientMutation = useMutation({
-    mutationFn: deleteClient,
+    mutationFn: (id: number) => deleteClient(id.toString()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
     },
@@ -93,7 +105,7 @@ const Clients = () => {
     client.phone.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateClient = async (client: Partial<Client>) => {
+  const handleCreateClient = async (client: Omit<Client, 'id'>) => {
     try {
       await createClientMutation.mutateAsync(client);
     } catch (error) {
@@ -101,9 +113,10 @@ const Clients = () => {
     }
   };
 
-  const handleUpdateClient = async (client: Partial<Client>) => {
+  const handleUpdateClient = async (client: Partial<Omit<Client, 'id'>>) => {
     try {
-      await updateClientMutation.mutateAsync([currentClient!.id, client]);
+      if (!currentClient) return;
+      await updateClientMutation.mutateAsync({ id: currentClient.id, data: client });
     } catch (error) {
       console.error('Error updating client:', error);
     }
@@ -117,23 +130,25 @@ const Clients = () => {
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    
     if (isEditing && currentClient) {
       handleUpdateClient({
-        name: e.currentTarget.name.value,
-        email: e.currentTarget.email.value,
-        phone: e.currentTarget.phone.value,
-        address: e.currentTarget.address.value,
-        notes: e.currentTarget.notes.value,
+        name: (form.elements.namedItem('name') as HTMLInputElement).value,
+        email: (form.elements.namedItem('email') as HTMLInputElement).value,
+        phone: (form.elements.namedItem('phone') as HTMLInputElement).value,
+        address: (form.elements.namedItem('address') as HTMLInputElement).value,
+        notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value,
       });
     } else {
       handleCreateClient({
-        name: e.currentTarget.name.value,
-        email: e.currentTarget.email.value,
-        phone: e.currentTarget.phone.value,
-        address: e.currentTarget.address.value,
-        notes: e.currentTarget.notes.value,
+        name: (form.elements.namedItem('name') as HTMLInputElement).value,
+        email: (form.elements.namedItem('email') as HTMLInputElement).value,
+        phone: (form.elements.namedItem('phone') as HTMLInputElement).value,
+        address: (form.elements.namedItem('address') as HTMLInputElement).value,
+        notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value,
       });
     }
   };

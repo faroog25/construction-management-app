@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -46,10 +47,15 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
+      // Ensure all required fields are included and properly typed
       const project = {
-        ...data,
-        startDate: format(data.startDate, 'yyyy-MM-dd'),
-        expectedEndDate: format(data.expectedEndDate, 'yyyy-MM-dd'),
+        projectName: data.projectName,
+        siteAddress: data.siteAddress,
+        clientName: data.clientName,
+        projectStatus: data.projectStatus,
+        description: data.description,
+        startDate: data.startDate ? format(data.startDate, 'yyyy-MM-dd') : '',
+        expectedEndDate: data.expectedEndDate ? format(data.expectedEndDate, 'yyyy-MM-dd') : '',
         actualEndDate: null,
         status: 1, // Active
         orderId: null,
