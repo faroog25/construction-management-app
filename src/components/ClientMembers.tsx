@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { getClients } from '../services/clientService';
 import { Client, ClientType } from '@/types/client';
@@ -7,9 +8,10 @@ import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Search, Building2, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { NewClientModal } from './NewClientModal';
+import { Input } from './ui/input';
 
 const getClientTypeLabel = (type: ClientType): string => {
   switch (type) {
@@ -27,6 +29,7 @@ export function ClientMembers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchClients = async () => {
     try {
@@ -66,6 +69,13 @@ export function ClientMembers() {
     fetchClients();
   }, []);
 
+  // Filter clients based on search query
+  const filteredClients = clients.filter(client => 
+    client.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (error) {
     return (
       <Alert variant="destructive">
@@ -76,22 +86,37 @@ export function ClientMembers() {
 
   return (
     <ErrorBoundary>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Client Team Members</CardTitle>
-          <Button onClick={() => setIsAddModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Client
-          </Button>
+      <Card className="border shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between bg-muted/10 pb-2">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Users className="h-5 w-5 text-primary" />
+            Client Members
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="relative w-64">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search clients..." 
+                className="pl-9 h-9 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button size="sm" className="gap-1" onClick={() => setIsAddModalOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Add
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Type</TableHead>
+              <TableRow className="bg-muted/30 hover:bg-muted/30">
+                <TableHead className="font-medium">Name</TableHead>
+                <TableHead className="font-medium">Email</TableHead>
+                <TableHead className="font-medium">Phone</TableHead>
+                <TableHead className="font-medium">Type</TableHead>
+                <TableHead className="font-medium text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -103,24 +128,53 @@ export function ClientMembers() {
                     <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : clients.length === 0 ? (
+              ) : filteredClients.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">
-                    No client team members found
+                  <TableCell colSpan={5} className="text-center h-32">
+                    {searchQuery ? 
+                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <Search className="h-8 w-8 opacity-30" />
+                        <p>No clients found matching "{searchQuery}"</p>
+                        <Button variant="link" onClick={() => setSearchQuery('')}>Clear search</Button>
+                      </div>
+                      : 
+                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <Users className="h-8 w-8 opacity-30" />
+                        <p>No client members found</p>
+                        <Button variant="outline" size="sm" onClick={() => setIsAddModalOpen(true)}>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add your first client
+                        </Button>
+                      </div>
+                    }
                   </TableCell>
                 </TableRow>
               ) : (
-                clients.map((client) => (
-                  <TableRow key={client.id}>
+                filteredClients.map((client) => (
+                  <TableRow key={client.id} className="group">
                     <TableCell className="font-medium">{client.fullName}</TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.phoneNumber}</TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {getClientTypeLabel(client.clientType)}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {client.clientType === ClientType.Individual ? (
+                          <User className="h-4 w-4 text-blue-600" />
+                        ) : (
+                          <Building2 className="h-4 w-4 text-purple-600" />
+                        )}
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {getClientTypeLabel(client.clientType)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="outline" size="xs">Edit</Button>
+                        <Button variant="destructive" size="xs">Delete</Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -137,4 +191,4 @@ export function ClientMembers() {
       />
     </ErrorBoundary>
   );
-} 
+}

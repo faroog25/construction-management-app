@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   Plus, 
   Search, 
   MoreVertical,
@@ -24,7 +25,11 @@ import {
   MessagesSquare,
   UserCircle,
   Pencil,
-  Trash2
+  Trash2,
+  Filter,
+  UserPlus,
+  UserCog,
+  Phone2
 } from 'lucide-react';
 import { SiteEngineer, getSiteEngineers, deleteSiteEngineer } from '@/services/siteEngineerService';
 import { toast } from 'sonner';
@@ -46,6 +51,7 @@ const Team = () => {
   const [selectedEngineer, setSelectedEngineer] = useState<SiteEngineer | null>(null);
   const [isAddWorkerModalOpen, setIsAddWorkerModalOpen] = useState(false);
   const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('engineers');
 
   const fetchSiteEngineers = async () => {
     try {
@@ -159,141 +165,197 @@ const Team = () => {
       <div className="flex flex-col min-h-screen">
         <div className="h-16"></div> {/* Navbar spacer */}
         <main className="flex-1 container mx-auto px-4 py-8 animate-in">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 bg-white p-4 rounded-lg shadow-sm border">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">إدارة الفريق</h1>
-              <p className="text-muted-foreground mt-1">إدارة أعضاء فريق البناء</p>
+              <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                <Users className="h-6 w-6 text-primary" />
+                إدارة الفريق
+              </h1>
+              <p className="text-muted-foreground mt-1 text-sm">إدارة أعضاء فريق البناء والعملاء</p>
             </div>
             <div className="mt-4 lg:mt-0 flex flex-wrap gap-2">
-              <Button className="rounded-lg" onClick={() => setIsAddModalOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button 
+                className="gap-1 shadow-sm" 
+                onClick={() => {
+                  setActiveTab('engineers');
+                  setIsAddModalOpen(true);
+                }}
+              >
+                <UserPlus className="h-4 w-4" />
                 إضافة مهندس موقع
               </Button>
-              <Button className="rounded-lg" variant="outline" onClick={() => setIsAddWorkerModalOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button 
+                className="gap-1" 
+                variant="outline" 
+                onClick={() => {
+                  setActiveTab('workers');
+                  setIsAddWorkerModalOpen(true);
+                }}
+              >
+                <UserCog className="h-4 w-4" />
                 إضافة عامل
               </Button>
-              <Button className="rounded-lg" variant="outline" onClick={() => setIsAddClientModalOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
+              <Button 
+                className="gap-1" 
+                variant="outline" 
+                onClick={() => {
+                  setActiveTab('clients');
+                  setIsAddClientModalOpen(true);
+                }}
+              >
+                <UserCircle className="h-4 w-4" />
                 إضافة عميل
               </Button>
             </div>
           </div>
 
-          <Tabs defaultValue="engineers" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="engineers" className="flex items-center gap-2">
+          <Tabs 
+            defaultValue="engineers" 
+            className="space-y-4"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
+            <TabsList className="bg-muted/30 p-1">
+              <TabsTrigger value="engineers" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 <Building className="h-4 w-4" />
                 مهندسو الموقع
               </TabsTrigger>
-              <TabsTrigger value="workers" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
+              <TabsTrigger value="workers" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Briefcase className="h-4 w-4" />
                 العمال
               </TabsTrigger>
-              <TabsTrigger value="clients" className="flex items-center gap-2">
+              <TabsTrigger value="clients" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 <UserCircle className="h-4 w-4" />
                 العملاء
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="engineers" className="space-y-4">
-              <Card className="mb-6">
+              <Card className="mb-6 border shadow-sm">
                 <CardContent className="p-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="البحث عن مهندسي الموقع..."
-                      className="pl-10"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                  <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                    <div className="relative grow max-w-md">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="البحث عن مهندسي الموقع..."
+                        className="pl-10"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" className="gap-1">
+                        <Filter className="h-4 w-4" />
+                        تصفية
+                      </Button>
+                      <Button size="sm" className="gap-1" onClick={() => setIsAddModalOpen(true)}>
+                        <Plus className="h-4 w-4" />
+                        إضافة
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredEngineers.map((engineer) => (
-                  <Card 
-                    key={engineer.id} 
-                    className="animate-in transition-all hover:shadow-md overflow-hidden"
-                  >
-                    <CardContent className="p-0">
-                      <div className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-12 w-12 border">
-                              <AvatarFallback>
-                                {getInitials(engineer)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h3 className="font-medium">
-                                {getFullName(engineer)}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {engineer.id ? `الرقم التعريفي: ${engineer.id}` : 'لا يوجد رقم تعريفي'}
-                              </p>
+                {filteredEngineers.length === 0 ? (
+                  <div className="col-span-full flex flex-col items-center justify-center bg-muted/10 rounded-lg p-12 text-center border border-dashed">
+                    <Building className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">لا يوجد مهندسون</h3>
+                    <p className="text-muted-foreground mb-4">لم يتم العثور على مهندسي موقع. أضف مهندساً جديداً للبدء.</p>
+                    <Button onClick={() => setIsAddModalOpen(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      إضافة مهندس موقع
+                    </Button>
+                  </div>
+                ) : (
+                  filteredEngineers.map((engineer) => (
+                    <Card 
+                      key={engineer.id} 
+                      className="group overflow-hidden border hover:shadow-md transition-shadow duration-200"
+                    >
+                      <CardContent className="p-0">
+                        <div className="relative">
+                          <div className="absolute right-2 top-2 z-10">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={() => handleEdit(engineer)}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  تعديل
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleDelete(engineer.id)}
+                                  className="text-red-600 focus:text-red-700 focus:bg-red-50"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  حذف
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6">
+                            <div className="flex items-start gap-4">
+                              <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
+                                <AvatarFallback className="bg-primary text-primary-foreground font-medium">
+                                  {getInitials(engineer)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <h3 className="font-semibold text-lg">
+                                  {getFullName(engineer)}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {engineer.id ? `الرقم التعريفي: ${engineer.id}` : 'لا يوجد رقم تعريفي'}
+                                </p>
+                                <Badge className="mt-2" variant={engineer.isAvailable ? "success" : "destructive"}>
+                                  {engineer.isAvailable ? 'متاح' : 'غير متاح'}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEdit(engineer)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                تعديل
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => handleDelete(engineer.id)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                حذف
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
                         </div>
                         
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
+                        <div className="p-4 space-y-3">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="h-4 w-4 text-blue-600 shrink-0" />
+                            <span className="text-gray-700 truncate">
                               {engineer.email || 'لا يوجد بريد إلكتروني'}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Phone className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Phone className="h-4 w-4 text-green-600 shrink-0" />
+                            <span className="text-gray-700 truncate">
                               {engineer.phoneNumber || 'لا يوجد رقم هاتف'}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
+                          <div className="flex items-center gap-2 text-sm">
+                            <MapPin className="h-4 w-4 text-red-600 shrink-0" />
+                            <span className="text-gray-700 truncate">
                               {engineer.address || 'لا يوجد عنوان'}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              {engineer.isAvailable ? 'متاح' : 'غير متاح'}
-                            </span>
-                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                        
+                        <div className="border-t p-4 bg-muted/10 flex justify-end space-x-2 space-x-reverse">
+                          <Button variant="outline" size="sm" className="gap-1" onClick={() => handleEdit(engineer)}>
+                            <Pencil className="h-3.5 w-3.5" />
+                            تعديل
+                          </Button>
+                          <Button variant="destructive" size="sm" className="gap-1" onClick={() => handleDelete(engineer.id)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                            حذف
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
-
-              {filteredEngineers.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">لم يتم العثور على مهندسي موقع</p>
-                </div>
-              )}
             </TabsContent>
 
             <TabsContent value="workers">
