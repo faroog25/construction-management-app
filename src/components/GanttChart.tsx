@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   BarChart, 
@@ -7,7 +8,8 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  ReferenceLine
+  ReferenceLine,
+  Legend
 } from 'recharts';
 import { Project } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +25,8 @@ import {
   AlertCircle,
   CircleHelp,
   Circle,
-  CheckCircle 
+  CheckCircle,
+  Filter
 } from 'lucide-react';
 import {
   ResizablePanelGroup,
@@ -32,6 +35,16 @@ import {
 } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
 import { formatProjectDate } from '@/utils/projectUtils';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface GanttChartProps {
   project: Project;
@@ -49,6 +62,10 @@ interface GanttTask {
   type: 'task' | 'milestone' | 'subgroup';
   responsible?: string;
   status: 'not-started' | 'in-progress' | 'delayed' | 'completed';
+  actualStart?: number; // actual start timestamp
+  actualEnd?: number; // actual end timestamp
+  estimatedStart?: number; // estimated start timestamp
+  estimatedEnd?: number; // estimated end timestamp
 }
 
 const statusColors = {
@@ -69,6 +86,9 @@ const getProgressIcon = (progress: number) => {
 const GanttChart = ({ project }: GanttChartProps) => {
   const [selectedView, setSelectedView] = useState<'week' | 'month' | 'quarter'>('month');
   const [showCriticalPath, setShowCriticalPath] = useState(false);
+  const [showBaseline, setShowBaseline] = useState(true);
+  const [filteredStatus, setFilteredStatus] = useState<string | null>(null);
+  const [showLabels, setShowLabels] = useState(true);
   
   // Parse dates from project
   const startDate = project.startDate ? new Date(project.startDate) : new Date();
@@ -77,7 +97,7 @@ const GanttChart = ({ project }: GanttChartProps) => {
   // Set today's date for reference
   const today = new Date();
   
-  // More realistic data for tasks with Arabic content
+  // More realistic data for tasks with Arabic content - now with baseline data
   const tasks: GanttTask[] = [
     {
       id: 1,
@@ -89,7 +109,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#4CAF50",
       type: 'task',
       status: 'completed',
-      responsible: 'Ahmed'
+      responsible: 'Ahmed',
+      actualStart: new Date('2023-09-01').getTime(),
+      actualEnd: new Date('2023-09-17').getTime(),
+      estimatedStart: new Date('2023-09-01').getTime(),
+      estimatedEnd: new Date('2023-09-15').getTime()
     },
     {
       id: 2,
@@ -102,7 +126,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#4CAF50",
       type: 'task',
       status: 'completed',
-      responsible: 'Sara'
+      responsible: 'Sara',
+      actualStart: new Date('2023-09-18').getTime(),
+      actualEnd: new Date('2023-10-08').getTime(),
+      estimatedStart: new Date('2023-09-16').getTime(),
+      estimatedEnd: new Date('2023-10-05').getTime()
     },
     {
       id: 3,
@@ -115,7 +143,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#9C27B0",
       type: 'milestone',
       status: 'completed',
-      responsible: 'Mohammed'
+      responsible: 'Mohammed',
+      actualStart: new Date('2023-10-09').getTime(),
+      actualEnd: new Date('2023-10-09').getTime(),
+      estimatedStart: new Date('2023-10-06').getTime(),
+      estimatedEnd: new Date('2023-10-06').getTime()
     },
     {
       id: 4,
@@ -128,7 +160,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#2196F3",
       type: 'subgroup',
       status: 'completed',
-      responsible: 'Team A'
+      responsible: 'Team A',
+      actualStart: new Date('2023-10-10').getTime(),
+      actualEnd: new Date('2023-11-25').getTime(),
+      estimatedStart: new Date('2023-10-07').getTime(),
+      estimatedEnd: new Date('2023-11-20').getTime()
     },
     {
       id: 5,
@@ -141,7 +177,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#2196F3",
       type: 'task',
       status: 'completed',
-      responsible: 'Khalid'
+      responsible: 'Khalid',
+      actualStart: new Date('2023-10-10').getTime(),
+      actualEnd: new Date('2023-10-23').getTime(),
+      estimatedStart: new Date('2023-10-07').getTime(),
+      estimatedEnd: new Date('2023-10-20').getTime()
     },
     {
       id: 6,
@@ -154,7 +194,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#2196F3",
       type: 'task',
       status: 'completed',
-      responsible: 'Yusuf'
+      responsible: 'Yusuf',
+      actualStart: new Date('2023-10-24').getTime(),
+      actualEnd: new Date('2023-11-13').getTime(),
+      estimatedStart: new Date('2023-10-21').getTime(),
+      estimatedEnd: new Date('2023-11-10').getTime()
     },
     {
       id: 7,
@@ -167,7 +211,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#2196F3",
       type: 'task',
       status: 'completed',
-      responsible: 'Team A'
+      responsible: 'Team A',
+      actualStart: new Date('2023-11-14').getTime(),
+      actualEnd: new Date('2023-11-25').getTime(),
+      estimatedStart: new Date('2023-11-11').getTime(),
+      estimatedEnd: new Date('2023-11-20').getTime()
     },
     {
       id: 8,
@@ -180,7 +228,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#9C27B0",
       type: 'milestone',
       status: 'completed',
-      responsible: 'Inspector'
+      responsible: 'Inspector',
+      actualStart: new Date('2023-11-26').getTime(),
+      actualEnd: new Date('2023-11-26').getTime(),
+      estimatedStart: new Date('2023-11-21').getTime(),
+      estimatedEnd: new Date('2023-11-21').getTime()
     },
     {
       id: 9,
@@ -193,7 +245,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#FFC107",
       type: 'subgroup',
       status: 'in-progress',
-      responsible: 'Team B'
+      responsible: 'Team B',
+      actualStart: new Date('2023-11-27').getTime(),
+      actualEnd: null,
+      estimatedStart: new Date('2023-11-22').getTime(),
+      estimatedEnd: new Date('2024-02-28').getTime()
     },
     {
       id: 10,
@@ -206,7 +262,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#FFC107",
       type: 'task',
       status: 'completed',
-      responsible: 'Omar'
+      responsible: 'Omar',
+      actualStart: new Date('2023-11-27').getTime(),
+      actualEnd: new Date('2024-01-05').getTime(),
+      estimatedStart: new Date('2023-11-22').getTime(),
+      estimatedEnd: new Date('2023-12-31').getTime()
     },
     {
       id: 11,
@@ -219,7 +279,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#FFC107",
       type: 'task',
       status: 'completed',
-      responsible: 'Team C'
+      responsible: 'Team C',
+      actualStart: new Date('2024-01-06').getTime(),
+      actualEnd: new Date('2024-02-05').getTime(),
+      estimatedStart: new Date('2024-01-01').getTime(),
+      estimatedEnd: new Date('2024-01-31').getTime()
     },
     {
       id: 12,
@@ -232,7 +296,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#FFC107",
       type: 'task',
       status: 'delayed',
-      responsible: 'Layla'
+      responsible: 'Layla',
+      actualStart: new Date('2024-02-06').getTime(),
+      actualEnd: null,
+      estimatedStart: new Date('2024-02-01').getTime(),
+      estimatedEnd: new Date('2024-02-28').getTime()
     },
     {
       id: 13,
@@ -245,7 +313,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#9C27B0",
       type: 'milestone',
       status: 'not-started',
-      responsible: 'Inspector'
+      responsible: 'Inspector',
+      actualStart: null,
+      actualEnd: null,
+      estimatedStart: new Date('2024-03-01').getTime(),
+      estimatedEnd: new Date('2024-03-01').getTime()
     },
     {
       id: 14,
@@ -258,7 +330,11 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#9C27B0",
       type: 'subgroup',
       status: 'not-started',
-      responsible: 'Team D'
+      responsible: 'Team D',
+      actualStart: null,
+      actualEnd: null,
+      estimatedStart: new Date('2024-03-02').getTime(),
+      estimatedEnd: new Date('2024-05-15').getTime()
     },
     {
       id: 15,
@@ -271,9 +347,18 @@ const GanttChart = ({ project }: GanttChartProps) => {
       color: "#E91E63",
       type: 'subgroup',
       status: 'not-started',
-      responsible: 'Team E'
+      responsible: 'Team E',
+      actualStart: null,
+      actualEnd: null,
+      estimatedStart: new Date('2024-05-16').getTime(),
+      estimatedEnd: new Date('2024-06-30').getTime()
     }
   ];
+
+  // Filter tasks based on selected status if any
+  const filteredTasks = filteredStatus 
+    ? tasks.filter(task => task.status === filteredStatus) 
+    : tasks;
   
   // Calculate project timeline
   const projectStart = Math.min(...tasks.map(t => t.start));
@@ -282,7 +367,7 @@ const GanttChart = ({ project }: GanttChartProps) => {
   // Format date for axis
   const formatAxisDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString('ar-SA', { 
+    return date.toLocaleDateString('en-US', { 
       month: selectedView === 'week' ? '2-digit' : 'short', 
       year: selectedView === 'month' || selectedView === 'quarter' ? 'numeric' : undefined,
       day: selectedView === 'week' ? '2-digit' : undefined
@@ -294,33 +379,97 @@ const GanttChart = ({ project }: GanttChartProps) => {
     if (active && payload && payload.length) {
       const task = payload[0].payload;
       
+      // Calculate duration in days
+      const estimatedDuration = Math.ceil((task.estimatedEnd - task.estimatedStart) / (1000 * 60 * 60 * 24));
+      
+      // Calculate actual duration if available
+      let actualDuration = null;
+      if (task.actualStart && task.actualEnd) {
+        actualDuration = Math.ceil((task.actualEnd - task.actualStart) / (1000 * 60 * 60 * 24));
+      }
+      
+      // Calculate variance
+      let variance = null;
+      if (actualDuration) {
+        variance = actualDuration - estimatedDuration;
+      }
+      
       return (
         <div className="bg-background border rounded-md p-3 shadow-md text-sm">
           <p className="font-medium mb-1">{task.name}</p>
           <p className="text-muted-foreground">{task.nameAr}</p>
           <div className="my-2 border-t pt-2">
-            <p className="flex items-center gap-2 mb-1">
-              <Calendar className="h-3.5 w-3.5" />
-              <span className="font-medium">Start:</span> {new Date(task.start).toLocaleDateString()}
-            </p>
-            <p className="flex items-center gap-2 mb-1">
-              <Calendar className="h-3.5 w-3.5" />
-              <span className="font-medium">End:</span> {new Date(task.end).toLocaleDateString()}
-            </p>
-            <div className="flex flex-col gap-1 mt-2">
-              <p className="flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5" />
-                <span className="font-medium">Progress:</span> {task.progress}%
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+              <p className="flex items-center gap-1 font-medium text-primary">
+                <Calendar className="h-3 w-3" /> Planned Start:
               </p>
+              <p>{new Date(task.estimatedStart).toLocaleDateString()}</p>
+              
+              <p className="flex items-center gap-1 font-medium text-primary">
+                <Calendar className="h-3 w-3" /> Planned End:
+              </p>
+              <p>{new Date(task.estimatedEnd).toLocaleDateString()}</p>
+              
+              {task.actualStart && (
+                <>
+                  <p className="flex items-center gap-1 font-medium text-blue-600">
+                    <Calendar className="h-3 w-3" /> Actual Start:
+                  </p>
+                  <p>{new Date(task.actualStart).toLocaleDateString()}</p>
+                </>
+              )}
+              
+              {task.actualEnd && (
+                <>
+                  <p className="flex items-center gap-1 font-medium text-blue-600">
+                    <Calendar className="h-3 w-3" /> Actual End:
+                  </p>
+                  <p>{new Date(task.actualEnd).toLocaleDateString()}</p>
+                </>
+              )}
+              
+              <p className="flex items-center gap-1 font-medium">
+                <Clock className="h-3 w-3" /> Planned Duration:
+              </p>
+              <p>{estimatedDuration} days</p>
+              
+              {actualDuration && (
+                <>
+                  <p className="flex items-center gap-1 font-medium">
+                    <Clock className="h-3 w-3" /> Actual Duration:
+                  </p>
+                  <p>{actualDuration} days</p>
+                </>
+              )}
+              
+              {variance !== null && (
+                <>
+                  <p className="flex items-center gap-1 font-medium">
+                    Variance:
+                  </p>
+                  <p className={variance > 0 ? 'text-red-500' : variance < 0 ? 'text-green-500' : 'text-gray-500'}>
+                    {variance > 0 ? `+${variance}` : variance} days
+                  </p>
+                </>
+              )}
+            </div>
+            
+            <div className="flex flex-col gap-1 mt-3">
+              <div className="flex justify-between items-center text-xs">
+                <p className="font-medium">Progress:</p>
+                <p className="font-medium">{task.progress}%</p>
+              </div>
               <Progress value={task.progress} className="h-2" />
             </div>
           </div>
-          <Badge className={statusColors[task.status]}>
-            {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ')}
-          </Badge>
-          {task.responsible && (
-            <p className="text-xs mt-2 text-muted-foreground">Responsible: {task.responsible}</p>
-          )}
+          <div className="flex items-center justify-between mt-2">
+            <Badge className={statusColors[task.status]}>
+              {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ')}
+            </Badge>
+            {task.responsible && (
+              <p className="text-xs text-muted-foreground">Assigned: {task.responsible}</p>
+            )}
+          </div>
         </div>
       );
     }
@@ -339,6 +488,22 @@ const GanttChart = ({ project }: GanttChartProps) => {
       default: return task.color || "#2196F3";
     }
   };
+
+  const getBaselineFill = (task: GanttTask) => {
+    return "rgba(0, 0, 0, 0.15)";
+  };
+
+  // Calculate task critical path (simple implementation)
+  const criticalPath = showCriticalPath ? 
+    tasks
+      .filter(task => {
+        // For this example, we'll consider a task critical if it has dependencies and is delayed or in progress
+        const hasDependencies = task.dependencies && task.dependencies.length > 0;
+        const isDelayedOrInProgress = task.status === 'delayed' || task.status === 'in-progress';
+        const isHighProgress = task.progress > 75;
+        return hasDependencies && (isDelayedOrInProgress || isHighProgress);
+      })
+      .map(task => task.id) : [];
   
   return (
     <div className="space-y-4">
@@ -348,7 +513,7 @@ const GanttChart = ({ project }: GanttChartProps) => {
           <h2 className="text-2xl font-bold">Project Timeline</h2>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <div className="flex border rounded-md overflow-hidden">
             <button 
               className={cn(
@@ -384,27 +549,84 @@ const GanttChart = ({ project }: GanttChartProps) => {
               Quarter
             </button>
           </div>
+          
+          <Select 
+            onValueChange={(value) => setFilteredStatus(value === 'all' ? null : value)}
+            defaultValue="all"
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Filter status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tasks</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="in-progress">In Progress</SelectItem>
+              <SelectItem value="delayed">Delayed</SelectItem>
+              <SelectItem value="not-started">Not Started</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="p-4 rounded-lg border bg-muted/20">
+        <div className="flex flex-wrap gap-4 items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="baseline"
+                checked={showBaseline}
+                onCheckedChange={setShowBaseline}
+              />
+              <Label htmlFor="baseline">Show Baseline</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="critical"
+                checked={showCriticalPath}
+                onCheckedChange={setShowCriticalPath}
+              />
+              <Label htmlFor="critical">Show Critical Path</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="labels"
+                checked={showLabels}
+                onCheckedChange={setShowLabels}
+              />
+              <Label htmlFor="labels">Show Progress Labels</Label>
+            </div>
+          </div>
+          
+          <div className="text-sm text-muted-foreground flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <span>
+              {filteredTasks.length} tasks displayed out of {tasks.length} total
+            </span>
+          </div>
         </div>
       </div>
 
       <ResizablePanelGroup direction="horizontal" className="rounded-lg border">
         <ResizablePanel defaultSize={20} minSize={15}>
-          <div className="h-[calc(100vh-220px)] p-2">
+          <div className="h-[calc(100vh-300px)] p-2">
             <div className="space-y-1 p-2">
               <h3 className="text-sm font-medium">Task List</h3>
               <p className="text-xs text-muted-foreground">
-                {tasks.length} tasks in this project
+                {filteredTasks.length} tasks in view
               </p>
             </div>
             <ScrollArea className="h-[calc(100%-50px)]">
               <div className="space-y-1 p-2">
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                   <div 
                     key={task.id} 
                     className={cn(
                       "flex justify-between items-center rounded-md px-3 py-2 text-sm",
                       task.type === 'subgroup' && "font-medium",
-                      task.type === 'milestone' && "bg-purple-50"
+                      task.type === 'milestone' && "bg-purple-50",
+                      criticalPath.includes(task.id) && "border-l-4 border-orange-500 pl-2"
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -441,18 +663,19 @@ const GanttChart = ({ project }: GanttChartProps) => {
         <ResizablePanel defaultSize={80}>
           <Card className="border-0 rounded-none">
             <CardContent className="p-0">
-              <div className="h-[calc(100vh-220px)]">
+              <div className="h-[calc(100vh-300px)]">
                 <ScrollArea className="h-full">
                   <div className="p-6 min-w-[800px]">
                     <ChartContainer 
                       config={{
-                        progress: { label: 'Progress', color: 'hsl(var(--primary))' },
-                        planned: { label: 'Planned', color: 'hsl(var(--muted-foreground)/0.3)' }
+                        actual: { label: 'Actual', color: 'hsl(var(--primary))' },
+                        baseline: { label: 'Baseline', color: 'rgba(0, 0, 0, 0.15)' },
+                        critical: { label: 'Critical Path', color: 'hsl(25, 95%, 53%)' }
                       }}
-                      className="h-[550px] w-full"
+                      className="h-[600px] w-full"
                     >
                       <BarChart
-                        data={tasks}
+                        data={filteredTasks}
                         layout="vertical"
                         margin={{ top: 20, right: 30, left: 180, bottom: 20 }}
                         barSize={20}
@@ -475,7 +698,7 @@ const GanttChart = ({ project }: GanttChartProps) => {
                           width={170}
                           tick={(props) => {
                             const { x, y, payload } = props;
-                            const task = tasks.find(t => t.name === payload.value);
+                            const task = filteredTasks.find(t => t.name === payload.value);
                             if (!task) return null;
                             
                             return (
@@ -489,7 +712,8 @@ const GanttChart = ({ project }: GanttChartProps) => {
                                   className={cn(
                                     "text-xs",
                                     task.type === 'subgroup' && "font-medium",
-                                    task.type !== 'subgroup' && task.type !== 'milestone' && "translate-x-4"
+                                    task.type !== 'subgroup' && task.type !== 'milestone' && "translate-x-4",
+                                    criticalPath.includes(task.id) && "font-bold text-orange-500"
                                   )}
                                 >
                                   {task.name}
@@ -499,16 +723,80 @@ const GanttChart = ({ project }: GanttChartProps) => {
                           }}
                         />
                         <Tooltip content={<CustomTooltip />} />
-                        <ReferenceLine x={today.getTime()} stroke="red" strokeWidth={2} strokeDasharray="3 3" label="Today" />
+                        <Legend />
+                        <ReferenceLine x={today.getTime()} stroke="red" strokeWidth={2} strokeDasharray="3 3" label={{ position: 'top', value: 'Today', fill: 'red' }} />
+                        
+                        {/* Baseline Bars (if enabled) */}
+                        {showBaseline && (
+                          <Bar 
+                            dataKey={(dataItem: GanttTask) => {
+                              return dataItem.estimatedEnd;
+                            }}
+                            name="Baseline"
+                            fill="rgba(0, 0, 0, 0.15)" 
+                            shape={(props: any) => {
+                              const { fill, index } = props;
+                              const taskData = filteredTasks[index];
+                              
+                              const width = props.width || 0;
+                              const height = props.height || 20;
+                              
+                              const timeSpan = projectEnd - projectStart;
+                              const pixelsPerTime = width / timeSpan;
+                              
+                              const startPos = ((taskData.estimatedStart - projectStart) * pixelsPerTime);
+                              const endPos = ((taskData.estimatedEnd - projectStart) * pixelsPerTime);
+                              const barWidth = endPos - startPos;
+                              
+                              if (taskData.type === 'milestone') {
+                                const centerX = startPos + (barWidth / 2);
+                                const centerY = props.y + (height / 2);
+                                const diamondSize = 8;
+                                
+                                return (
+                                  <g>
+                                    <polygon
+                                      points={`
+                                        ${centerX},${centerY-diamondSize} 
+                                        ${centerX+diamondSize},${centerY} 
+                                        ${centerX},${centerY+diamondSize} 
+                                        ${centerX-diamondSize},${centerY}
+                                      `}
+                                      fill="rgba(0, 0, 0, 0.15)"
+                                    />
+                                  </g>
+                                );
+                              }
+                              
+                              const barHeight = taskData.type === 'subgroup' ? height * 1.2 : height;
+                              const barY = taskData.type === 'subgroup' ? props.y - (height * 0.1) : props.y;
+                              
+                              return (
+                                <g>
+                                  <rect 
+                                    x={startPos} 
+                                    y={barY} 
+                                    width={barWidth} 
+                                    height={barHeight} 
+                                    fill={fill} 
+                                    rx={3} 
+                                  />
+                                </g>
+                              );
+                            }}
+                          />
+                        )}
+                        
+                        {/* Actual Bars */}
                         <Bar 
                           dataKey={(dataItem: GanttTask) => {
                             return dataItem.end;
                           }}
-                          name="Task"
-                          fill="hsl(var(--muted-foreground)/0.3)" 
+                          name="Actual"
+                          fill="hsl(var(--primary))" 
                           shape={(props: any) => {
                             const { fill, index } = props;
-                            const taskData = tasks[index];
+                            const taskData = filteredTasks[index];
                             
                             const width = props.width || 0;
                             const height = props.height || 20;
@@ -516,8 +804,12 @@ const GanttChart = ({ project }: GanttChartProps) => {
                             const timeSpan = projectEnd - projectStart;
                             const pixelsPerTime = width / timeSpan;
                             
-                            const startPos = ((taskData.start - projectStart) * pixelsPerTime);
-                            const endPos = ((taskData.end - projectStart) * pixelsPerTime);
+                            // Use actual start/end if available, otherwise use planned values
+                            const actualStart = taskData.actualStart || taskData.start;
+                            const actualEnd = taskData.actualEnd || taskData.end;
+                            
+                            const startPos = ((actualStart - projectStart) * pixelsPerTime);
+                            const endPos = ((actualEnd - projectStart) * pixelsPerTime);
                             const barWidth = endPos - startPos;
                             
                             if (taskData.type === 'milestone') {
@@ -535,6 +827,8 @@ const GanttChart = ({ project }: GanttChartProps) => {
                                       ${centerX-diamondSize},${centerY}
                                     `}
                                     fill={taskData.color || "#9C27B0"}
+                                    stroke={criticalPath.includes(taskData.id) ? "hsl(25, 95%, 53%)" : "transparent"}
+                                    strokeWidth={criticalPath.includes(taskData.id) ? 2 : 0}
                                   />
                                 </g>
                               );
@@ -543,39 +837,52 @@ const GanttChart = ({ project }: GanttChartProps) => {
                             const barHeight = taskData.type === 'subgroup' ? height * 1.2 : height;
                             const barY = taskData.type === 'subgroup' ? props.y - (height * 0.1) : props.y;
                             
+                            const barFill = getBarFill(taskData);
+                            
                             return (
                               <g>
+                                {/* Main task bar */}
                                 <rect 
                                   x={startPos} 
                                   y={barY} 
                                   width={barWidth} 
                                   height={barHeight} 
-                                  fill={fill} 
-                                  rx={3} 
+                                  fill={barFill} 
+                                  fillOpacity={0.3}
+                                  rx={3}
+                                  stroke={criticalPath.includes(taskData.id) ? "hsl(25, 95%, 53%)" : "transparent"}
+                                  strokeWidth={criticalPath.includes(taskData.id) ? 2 : 0}
                                 />
                                 
+                                {/* Progress bar */}
                                 <rect 
                                   x={startPos} 
                                   y={barY} 
                                   width={barWidth * (taskData.progress / 100)} 
                                   height={barHeight} 
-                                  fill={getBarFill(taskData)} 
+                                  fill={barFill} 
                                   rx={3} 
+                                  stroke={criticalPath.includes(taskData.id) ? "hsl(25, 95%, 53%)" : "transparent"}
+                                  strokeWidth={criticalPath.includes(taskData.id) ? 2 : 0}
                                 />
                                 
-                                <text
-                                  x={startPos + (barWidth * (taskData.progress / 100)) - 20}
-                                  y={barY + (barHeight / 2) + 5}
-                                  fill="white"
-                                  fontSize={10}
-                                  fontWeight="bold"
-                                  textAnchor="end"
-                                  dominantBaseline="middle"
-                                  style={{ pointerEvents: 'none' }}
-                                >
-                                  {taskData.progress > 15 ? `${taskData.progress}%` : ''}
-                                </text>
+                                {/* Progress percentage text */}
+                                {showLabels && taskData.progress > 15 && (
+                                  <text
+                                    x={startPos + (barWidth * (taskData.progress / 100)) - 20}
+                                    y={barY + (barHeight / 2) + 5}
+                                    fill="white"
+                                    fontSize={10}
+                                    fontWeight="bold"
+                                    textAnchor="end"
+                                    dominantBaseline="middle"
+                                    style={{ pointerEvents: 'none' }}
+                                  >
+                                    {taskData.progress}%
+                                  </text>
+                                )}
                                 
+                                {/* Subgroup Arabic name */}
                                 {taskData.type === 'subgroup' && (
                                   <text
                                     x={startPos + 8}
@@ -586,6 +893,33 @@ const GanttChart = ({ project }: GanttChartProps) => {
                                   >
                                     {taskData.nameAr}
                                   </text>
+                                )}
+                                
+                                {/* Date markers */}
+                                {showLabels && taskData.type !== 'milestone' && barWidth > 80 && (
+                                  <>
+                                    <text
+                                      x={startPos + 5}
+                                      y={barY - 5}
+                                      fill="currentColor"
+                                      fontSize={8}
+                                      opacity={0.7}
+                                    >
+                                      {new Date(actualStart).toLocaleDateString()}
+                                    </text>
+                                    <text
+                                      x={endPos - 5}
+                                      y={barY - 5}
+                                      fill="currentColor"
+                                      fontSize={8}
+                                      textAnchor="end"
+                                      opacity={0.7}
+                                    >
+                                      {taskData.actualEnd || taskData.status === 'completed' 
+                                        ? new Date(actualEnd).toLocaleDateString() 
+                                        : `Est. ${new Date(taskData.end).toLocaleDateString()}`}
+                                    </text>
+                                  </>
                                 )}
                               </g>
                             );
@@ -616,6 +950,12 @@ const GanttChart = ({ project }: GanttChartProps) => {
                           <div className="h-3 w-3 bg-purple-500 transform rotate-45"></div>
                           <span>Milestone</span>
                         </div>
+                        {showCriticalPath && (
+                          <div className="flex items-center gap-2">
+                            <div className="h-3 w-3 border-2 border-orange-500"></div>
+                            <span>Critical Path</span>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex items-center">
