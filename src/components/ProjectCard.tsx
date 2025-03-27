@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { 
   Calendar, 
   ArrowRight, 
@@ -11,7 +10,8 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   Clock3, 
-  Users 
+  Users,
+  Building
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -90,20 +90,27 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const progressColor = getProgressColor(progress);
 
   return (
-    <Card className={cn("flex flex-col overflow-hidden h-full transition-all duration-200 hover:shadow-md border", className)} style={style}>
+    <Card 
+      className={cn(
+        "flex flex-col overflow-hidden h-full transition-all duration-200 hover:shadow-md border border-opacity-40",
+        isOverdue && status !== 2 ? "border-l-red-500 border-l-4" : "",
+        className
+      )} 
+      style={style}
+    >
       <CardContent className="flex-1 p-5">
         <div className="flex justify-between items-start mb-3">
-          <Badge variant="outline" className={cn(statusInfo.className, "flex items-center gap-1")}>
+          <Badge variant="outline" className={cn(statusInfo.className, "flex items-center gap-1 font-medium")}>
             <StatusIcon className="h-3 w-3" />
             {statusInfo.label}
           </Badge>
-          <span className="text-sm text-muted-foreground">ID: {id}</span>
+          <span className="text-sm text-muted-foreground font-medium">ID: {id}</span>
         </div>
         
         <h3 className="font-semibold text-lg mb-2 line-clamp-2 hover:text-primary transition-colors cursor-pointer" onClick={handleClick}>{name}</h3>
         
         <div className="flex items-center gap-1 mb-4">
-          <Users className="h-3.5 w-3.5 text-muted-foreground" />
+          <Building className="h-3.5 w-3.5 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">{client_name}</p>
         </div>
         
@@ -113,7 +120,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               <span className="text-muted-foreground">Progress</span>
               <span className="font-medium">{progress}%</span>
             </div>
-            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
               <div
                 className={`h-full ${progressColor} transition-all duration-300`}
                 style={{ width: `${progress}%` }}
@@ -130,9 +137,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="flex items-center text-sm">
               <Clock className="h-3.5 w-3.5 mr-1.5" />
               <span className={cn(
-                isOverdue ? "text-red-600 font-medium" : "text-muted-foreground"
+                isOverdue && status !== 2 ? "text-red-600 font-medium" : "text-muted-foreground"
               )}>
-                {isOverdue ? `Overdue by ${days} days` : `Due: ${formatDate(expected_end_date)}`}
+                {isOverdue && status !== 2 ? `Overdue by ${days} days` : `Due: ${formatDate(expected_end_date)}`}
               </span>
             </div>
           </div>
@@ -140,9 +147,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       </CardContent>
       
       <CardFooter className="pt-0 px-5 pb-5">
-        <Button variant="outline" className="w-full hover:bg-primary hover:text-white transition-colors" onClick={handleClick}>
+        <Button 
+          variant="outline" 
+          className="w-full hover:bg-primary hover:text-white transition-colors group" 
+          onClick={handleClick}
+        >
           View Details
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Button>
       </CardFooter>
     </Card>

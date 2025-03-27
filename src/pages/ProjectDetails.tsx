@@ -17,10 +17,18 @@ import {
   ChevronLeft, 
   Share2,
   Download,
-  Printer
+  Printer,
+  MoreHorizontal
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -78,7 +86,7 @@ const ProjectDetails = () => {
     <div className="flex flex-col min-h-screen">
       <div className="h-16"></div> {/* Navbar spacer */}
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
           <div>
             <div className="flex items-center gap-2">
               <Button 
@@ -112,18 +120,35 @@ const ProjectDetails = () => {
             </div>
           </div>
           
-          <div className="flex gap-2 print:hidden">
-            <Button variant="outline" size="sm" onClick={handleShare}>
-              <Share2 className="h-4 w-4 mr-1" />
+          <div className="flex gap-2 print:hidden sm:mt-0 mt-4 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={handleShare} className="flex-1 sm:flex-none">
+              <Share2 className="h-4 w-4 mr-1.5" />
               Share
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-1" />
-              Export
-            </Button>
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="h-4 w-4 mr-1" />
-              Print
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExport}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handlePrint}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => toast.info("Archive functionality coming soon")}>
+                  Archive Project
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button className="flex-1 sm:flex-none">
+              <Plus className="h-4 w-4 mr-1.5" />
+              Add Task
             </Button>
           </div>
         </div>

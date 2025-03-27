@@ -16,7 +16,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock3,
-  Timer
+  Timer,
+  DollarSign,
+  Briefcase,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -88,8 +91,8 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <CardTitle className="text-xl font-bold">Project Overview</CardTitle>
                 <CardDescription>Key information about this project</CardDescription>
               </div>
-              <Button size="sm" variant="ghost" onClick={handleEdit}>
-                <Edit className="h-4 w-4 mr-1" />
+              <Button size="sm" variant="outline" className="gap-1" onClick={handleEdit}>
+                <Edit className="h-3.5 w-3.5" />
                 Edit
               </Button>
             </div>
@@ -98,7 +101,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
             {project.description && (
               <div className="mb-6 pb-6 border-b">
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
-                <p className="text-base">{project.description}</p>
+                <p className="text-base">{project.description || "No description provided"}</p>
               </div>
             )}
             
@@ -132,8 +135,24 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
               <div className="flex items-start gap-3">
                 <Calendar className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Created On</p>
+                  <p className="text-sm text-muted-foreground">Started On</p>
                   <p className="font-medium">{formatDate(project.startDate)}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <DollarSign className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Budget</p>
+                  <p className="font-medium">Not set</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Briefcase className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Project Type</p>
+                  <p className="font-medium">Construction</p>
                 </div>
               </div>
             </div>
@@ -158,7 +177,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <span className="text-muted-foreground">Progress</span>
                 <span className="font-medium">{progressValue}%</span>
               </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+              <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden">
                 <div
                   className={`h-full ${progressColor} transition-all duration-300`}
                   style={{ width: `${progressValue}%` }}
@@ -175,7 +194,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
               {isOverdue ? (
                 <div className="flex items-center justify-between text-red-600 font-medium">
                   <div className="flex items-center">
-                    <AlertTriangle className="h-4 w-4 mr-1" />
+                    <AlertTriangle className="h-4 w-4 mr-1.5" />
                     <span>Overdue</span>
                   </div>
                   <span>{days} days</span>
@@ -183,7 +202,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
               ) : (
                 <div className="flex items-center justify-between text-blue-600 font-medium">
                   <div className="flex items-center">
-                    <Timer className="h-4 w-4 mr-1" />
+                    <Timer className="h-4 w-4 mr-1.5" />
                     <span>Remaining</span>
                   </div>
                   <span>{days} days</span>
@@ -196,6 +215,13 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                   <span className="font-medium">{formatDate(project.actualEndDate)}</span>
                 </div>
               )}
+            </div>
+
+            <div className="mt-4 pt-4 border-t">
+              <Button variant="outline" className="w-full gap-2" onClick={handleEdit}>
+                <FileText className="h-4 w-4" />
+                Generate Report
+              </Button>
             </div>
           </CardContent>
         </Card>

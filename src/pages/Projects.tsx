@@ -24,6 +24,20 @@ import {
 import ProjectDetailsModal from '@/components/ProjectDetailsModal';
 import { useNavigate } from 'react-router-dom';
 
+interface Client {
+  id: number;
+  fullName: string;
+}
+
+const getClients = async (): Promise<Client[]> => {
+  return [
+    { id: 1, fullName: 'John Doe' },
+    { id: 2, fullName: 'Jane Smith' },
+    { id: 3, fullName: 'Michael Johnson' },
+    { id: 4, fullName: 'Sara Williams' },
+  ];
+};
+
 interface ProjectAdapter {
   id: number;
   name: string;

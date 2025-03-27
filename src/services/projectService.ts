@@ -18,6 +18,18 @@ export interface Project {
   stageId?: number;
 }
 
+// Add the ProjectWithClient interface that was referenced but not defined
+export interface ProjectWithClient {
+  id: number;
+  name: string;
+  client_name: string;
+  expected_end_date: string;
+  start_date: string;
+  progress: number;
+  status: number;
+  client_id?: number;
+}
+
 export interface ProjectResponse {
   success: boolean;
   message: string;
