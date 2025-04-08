@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getProjectById, Project } from '@/services/projectService';
+import { getProjectById } from '@/services/projectService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProjectDetailsInfo from '@/components/ProjectDetailsInfo';
 import ProjectStages from '@/components/ProjectStages';

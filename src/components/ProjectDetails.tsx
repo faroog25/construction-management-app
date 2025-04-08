@@ -17,7 +17,19 @@ const statusConfig = {
 };
 
 interface ProjectDetailsProps {
-  project: Project;
+  project: {
+    id: number;
+    projectName: string;
+    status?: number;
+    description?: string;
+    clientName?: string;
+    siteAddress?: string;
+    siteEngineerId?: number;
+    startDate?: string;
+    expectedEndDate?: string;
+    actualEndDate?: string;
+    orderId?: number;
+  };
 }
 
 const ProjectDetails = ({ project }: ProjectDetailsProps) => {
