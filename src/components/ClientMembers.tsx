@@ -55,7 +55,7 @@ export function ClientMembers() {
         );
       });
 
-      setClients(validClients);
+      setClients(validClients as Client[]);
     } catch (err) {
       console.error('Error fetching clients:', err);
       setError(err instanceof Error ? err.message : 'فشل في جلب العملاء');

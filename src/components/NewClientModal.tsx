@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -163,4 +164,4 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
       </DialogContent>
     </Dialog>
   );
-} 
+}

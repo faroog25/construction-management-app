@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Project, getStatusFromCode } from '@/services/projectService';
+import { Project as ProjectType, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -16,6 +16,7 @@ const statusConfig = {
   delayed: { label: 'Delayed', className: 'bg-red-100 text-red-800' },
 };
 
+// Define a project interface specific to this component
 interface ProjectDetailsProps {
   project: {
     id: number;

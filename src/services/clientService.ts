@@ -1,27 +1,13 @@
+
 import { API_BASE_URL } from '@/config/api';
-import { ClientType } from '@/types/client';
+import { Client as ClientType, ClientType as ClientTypeEnum } from '@/types/client';
 
-// Define the Client interface that will be used throughout the application
-export interface Client {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  notes?: string;
-  // Keep the original client properties for backward compatibility
-  fullName?: string;
-  phoneNumber?: string;
-  clientType?: ClientType;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
+// Define a response interface for the API
 export interface ClientResponse {
   success: boolean;
   message: string;
   data: {
-    items: Client[];
+    items: ClientType[];
     totalItems: number;
     totalPages: number;
     currentPage: number;
@@ -32,9 +18,9 @@ export interface ClientResponse {
 }
 
 // Re-export ClientType from types
-export { ClientType } from '@/types/client';
+export { ClientType as ClientTypeEnum } from '@/types/client';
 
-export async function getClients(page: number = 1, pageSize: number = 10): Promise<Client[]> {
+export async function getClients(page: number = 1, pageSize: number = 10): Promise<ClientType[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/clients?page=${page}&pageSize=${pageSize}`);
     
@@ -48,56 +34,47 @@ export async function getClients(page: number = 1, pageSize: number = 10): Promi
       throw new Error(result.message || 'Failed to fetch clients');
     }
     
-    return result.data.items;
+    return result.data.items.map(client => ({
+      ...client,
+      // Convert id to string to match the ClientType interface
+      id: client.id.toString()
+    }));
   } catch (error) {
     console.error('Error fetching clients:', error);
     throw error;
   }
 }
 
-export async function getClientById(id: string): Promise<Client | undefined> {
+export async function getClientById(id: string): Promise<ClientType | undefined> {
   try {
     const clients = await getClients();
-    return clients.find(client => client.id.toString() === id);
+    return clients.find(client => client.id === id);
   } catch (error) {
     console.error('Error fetching client by ID:', error);
     throw error;
   }
 }
 
-export async function createClient(client: Omit<Client, 'id'>): Promise<Client> {
+export async function createClient(client: Omit<ClientType, 'id'>): Promise<ClientType> {
   // TODO: Implement actual API call
   return {
-    id: Math.floor(Math.random() * 1000),
+    id: Math.floor(Math.random() * 1000).toString(),
     ...client,
   };
 }
 
-export async function updateClient(id: string, client: Partial<Omit<Client, 'id'>>): Promise<Client> {
+export async function updateClient(id: string, client: Partial<Omit<ClientType, 'id'>>): Promise<ClientType> {
   // TODO: Implement actual API call
   return {
-    id: parseInt(id),
-    name: client.name || '',
+    id: id,
+    fullName: client.fullName || '',
     email: client.email || '',
-    phone: client.phone || '',
-    address: client.address || '',
-    notes: client.notes,
+    phoneNumber: client.phoneNumber || '',
+    clientType: client.clientType || ClientTypeEnum.Individual,
   };
 }
 
 export async function deleteClient(id: string): Promise<void> {
   // TODO: Implement actual API call
   console.log(`Client with ID ${id} deleted`);
-}
-
-export async function getClient(id: string): Promise<Client> {
-  // TODO: Implement actual API call
-  return {
-    id: parseInt(id),
-    name: 'Test Client',
-    email: 'test@example.com',
-    phone: '1234567890',
-    address: '123 Test Street',
-    notes: 'This is a test client',
-  };
 }
