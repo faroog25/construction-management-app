@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useSearchParams } from 'react-router-dom';
@@ -35,7 +34,7 @@ const Equipment = () => {
         <title>Equipment Management | Construction Management</title>
       </Helmet>
       
-      <Container className="py-8">
+      <Container className="py-8 mt-16">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Equipment Management</h1>
           <p className="text-muted-foreground">
