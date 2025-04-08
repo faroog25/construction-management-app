@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,15 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Folder, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { 
   Plus, 
   Search, 
@@ -31,11 +31,27 @@ import {
   Download,
   Eye,
   Share,
-  Clock,
+  Folder,
+  FolderPlus,
+  Upload,
+  Filter,
+  ArrowUpDown,
   Calendar,
-  User,
-  Upload
+  Edit,
+  Trash,
+  FilePlus,
+  Clock,
+  Settings,
+  LinkIcon,
+  CheckCircle2,
+  Archive,
+  User
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import DocumentsViewToggle from '@/components/documents/DocumentsViewToggle';
+import DocumentCard from '@/components/documents/DocumentCard';
+import { DocumentsFilter } from '@/components/documents/DocumentsFilter';
 
 interface Document {
   id: number;
@@ -157,6 +173,97 @@ const getStatusBadge = (status: Document['status']) => {
 };
 
 const Documents = () => {
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortColumn, setSortColumn] = useState<string>('dateModified');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [filterStatus, setFilterStatus] = useState<Document['status'] | 'all'>('all');
+  const [filterType, setFilterType] = useState<string>('all');
+  
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  const handleUpload = () => {
+    toast.info('Upload feature will be implemented soon');
+  };
+
+  const handleNewFolder = () => {
+    toast.info('New folder feature will be implemented soon');
+  };
+  
+  const handleNewDocument = () => {
+    toast.info('New document feature will be implemented soon');
+  };
+  
+  const handleDownload = (id: number) => {
+    toast.success(`Document ${id} downloaded successfully`);
+  };
+  
+  const handleView = (id: number) => {
+    toast.info(`Viewing document ${id}`);
+  };
+  
+  const handleShare = (id: number) => {
+    toast.info(`Share options for document ${id}`);
+  };
+  
+  const handleDelete = (id: number) => {
+    toast.error(`Document ${id} deleted`);
+  };
+  
+  const handleEdit = (id: number) => {
+    toast.info(`Editing document ${id}`);
+  };
+
+  // Filter documents based on search query and selected filters
+  const filteredDocuments = DOCUMENTS.filter(doc => {
+    const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         doc.project.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || doc.status === filterStatus;
+    const matchesType = filterType === 'all' || doc.type === filterType;
+    
+    return matchesSearch && matchesStatus && matchesType;
+  });
+  
+  // Sort filtered documents
+  const sortedDocuments = [...filteredDocuments].sort((a, b) => {
+    let comparison = 0;
+    
+    switch (sortColumn) {
+      case 'name':
+        comparison = a.name.localeCompare(b.name);
+        break;
+      case 'project':
+        comparison = a.project.localeCompare(b.project);
+        break;
+      case 'dateModified':
+        comparison = new Date(b.dateModified).getTime() - new Date(a.dateModified).getTime();
+        break;
+      case 'type':
+        comparison = a.type.localeCompare(b.type);
+        break;
+      case 'size':
+        const sizeA = parseFloat(a.size.split(' ')[0]);
+        const sizeB = parseFloat(b.size.split(' ')[0]);
+        comparison = sizeA - sizeB;
+        break;
+      default:
+        comparison = 0;
+    }
+    
+    return sortDirection === 'asc' ? comparison : -comparison;
+  });
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="h-16"></div> {/* Navbar spacer */}
@@ -167,22 +274,42 @@ const Documents = () => {
             <p className="text-muted-foreground mt-1">Manage and access project documentation</p>
           </div>
           <div className="mt-4 lg:mt-0 flex flex-wrap gap-3">
-            <Button className="rounded-lg">
+            <Button className="rounded-lg" onClick={handleUpload}>
               <Upload className="mr-2 h-4 w-4" />
               Upload File
             </Button>
-            <Button variant="outline" className="rounded-lg">
-              <Plus className="mr-2 h-4 w-4" />
+            <Button variant="outline" className="rounded-lg" onClick={handleNewFolder}>
+              <FolderPlus className="mr-2 h-4 w-4" />
               New Folder
+            </Button>
+            <Button variant="outline" className="rounded-lg" onClick={handleNewDocument}>
+              <FilePlus className="mr-2 h-4 w-4" />
+              New Document
             </Button>
           </div>
         </div>
         
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search documents..." className="pl-10" />
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search documents..." 
+                  className="pl-10" 
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+              </div>
+              <div className="flex gap-2">
+                <DocumentsFilter 
+                  filterStatus={filterStatus}
+                  setFilterStatus={setFilterStatus}
+                  filterType={filterType}
+                  setFilterType={setFilterType}
+                />
+                <DocumentsViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -197,136 +324,330 @@ const Documents = () => {
           </TabsList>
           
           <TabsContent value="all" className="space-y-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead>Project</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium flex items-center gap-2">
-                    <Folder className="h-5 w-5 text-blue-500" />
-                    Project Blueprints
-                  </TableCell>
-                  <TableCell>June 12, 2023</TableCell>
-                  <TableCell>--</TableCell>
-                  <TableCell>Multiple</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Open</DropdownMenuItem>
-                        <DropdownMenuItem>Share</DropdownMenuItem>
-                        <DropdownMenuItem>Download</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium flex items-center gap-2">
-                    <File className="h-5 w-5 text-red-500" />
-                    West Heights Contract.pdf
-                  </TableCell>
-                  <TableCell>August 3, 2023</TableCell>
-                  <TableCell>2.4 MB</TableCell>
-                  <TableCell>West Heights Tower</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View</DropdownMenuItem>
-                        <DropdownMenuItem>Share</DropdownMenuItem>
-                        <DropdownMenuItem>Download</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium flex items-center gap-2">
-                    <File className="h-5 w-5 text-green-500" />
-                    Cost Estimates.xlsx
-                  </TableCell>
-                  <TableCell>July 15, 2023</TableCell>
-                  <TableCell>1.8 MB</TableCell>
-                  <TableCell>Various</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View</DropdownMenuItem>
-                        <DropdownMenuItem>Share</DropdownMenuItem>
-                        <DropdownMenuItem>Download</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium flex items-center gap-2">
-                    <File className="h-5 w-5 text-blue-500" />
-                    Riverside Site Analysis.pdf
-                  </TableCell>
-                  <TableCell>July 28, 2023</TableCell>
-                  <TableCell>5.2 MB</TableCell>
-                  <TableCell>Riverside Office Complex</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View</DropdownMenuItem>
-                        <DropdownMenuItem>Share</DropdownMenuItem>
-                        <DropdownMenuItem>Download</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            {viewMode === 'list' ? (
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50 hover:bg-muted/50">
+                      <TableHead className="w-[400px] cursor-pointer" onClick={() => handleSort('name')}>
+                        <div className="flex items-center">
+                          Name
+                          {sortColumn === 'name' && (
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="cursor-pointer" onClick={() => handleSort('dateModified')}>
+                        <div className="flex items-center">
+                          Modified
+                          {sortColumn === 'dateModified' && (
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="cursor-pointer" onClick={() => handleSort('size')}>
+                        <div className="flex items-center">
+                          Size
+                          {sortColumn === 'size' && (
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="cursor-pointer" onClick={() => handleSort('project')}>
+                        <div className="flex items-center">
+                          Project
+                          {sortColumn === 'project' && (
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="cursor-pointer" onClick={() => handleSort('status')}>
+                        <div className="flex items-center">
+                          Status
+                        </div>
+                      </TableHead>
+                      <TableHead className="w-[80px]"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium flex items-center gap-2">
+                        <Folder className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                        <span className="truncate">Project Blueprints</span>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <div className="flex items-center">
+                          <Calendar className="mr-2 h-4 w-4" />
+                          June 12, 2023
+                        </div>
+                      </TableCell>
+                      <TableCell>--</TableCell>
+                      <TableCell>Multiple</TableCell>
+                      <TableCell>--</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleView(0)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Open
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleShare(0)}>
+                              <Share className="mr-2 h-4 w-4" />
+                              Share
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleEdit(0)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(0)}>
+                              <Trash className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                    
+                    {sortedDocuments.map((doc) => (
+                      <TableRow key={doc.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            {getDocumentIcon(doc.type)}
+                            <div className="flex flex-col">
+                              <span className="truncate font-medium">{doc.name}</span>
+                              <span className="text-xs text-muted-foreground">{doc.type.toUpperCase()}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          <div className="flex items-center">
+                            <Clock className="mr-2 h-4 w-4" />
+                            {doc.dateModified}
+                          </div>
+                        </TableCell>
+                        <TableCell>{doc.size}</TableCell>
+                        <TableCell>{doc.project}</TableCell>
+                        <TableCell>{getStatusBadge(doc.status)}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleView(doc.id)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDownload(doc.id)}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Download
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleShare(doc.id)}>
+                                <Share className="mr-2 h-4 w-4" />
+                                Share
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleEdit(doc.id)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(doc.id)}>
+                                <Trash className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-0">
+                    <div className="flex items-center justify-center h-32 bg-blue-50">
+                      <Folder className="h-16 w-16 text-blue-500" />
+                    </div>
+                    <div className="p-4 flex flex-col">
+                      <h3 className="font-medium text-lg">Project Blueprints</h3>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-xs text-muted-foreground">Folder</span>
+                        <span className="text-xs text-muted-foreground">June 12, 2023</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {sortedDocuments.map((doc) => (
+                  <DocumentCard 
+                    key={doc.id}
+                    document={doc}
+                    onView={() => handleView(doc.id)}
+                    onDownload={() => handleDownload(doc.id)}
+                    onShare={() => handleShare(doc.id)}
+                    onEdit={() => handleEdit(doc.id)}
+                    onDelete={() => handleDelete(doc.id)}
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="recent">
-            <div className="p-4 text-center text-muted-foreground">
-              <Clock className="mx-auto h-8 w-8 mb-2" />
-              <p>Your recently accessed documents will appear here</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Documents</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col gap-3">
+                  {sortedDocuments.slice(0, 5).map(doc => (
+                    <div key={`recent-${doc.id}`} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {getDocumentIcon(doc.type)}
+                        <div>
+                          <p className="font-medium">{doc.name}</p>
+                          <p className="text-sm text-muted-foreground">Accessed 2 days ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <Button variant="ghost" size="icon" onClick={() => handleView(doc.id)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDownload(doc.id)}>
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="shared">
-            <div className="p-4 text-center text-muted-foreground">
-              <p>Documents shared with you will appear here</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Shared Documents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-4">
+                  {sortedDocuments.slice(2, 6).map(doc => (
+                    <div key={`shared-${doc.id}`} className="flex items-center justify-between border-b pb-3">
+                      <div className="flex items-center gap-3">
+                        {getDocumentIcon(doc.type)}
+                        <div>
+                          <p className="font-medium">{doc.name}</p>
+                          <div className="flex items-center text-sm text-muted-foreground gap-2 mt-1">
+                            <User className="h-3 w-3" />
+                            <span>Shared with: Team</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => handleView(doc.id)}>
+                          <Eye className="mr-1 h-4 w-4" />
+                          View
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleShare(doc.id)}>
+                          <LinkIcon className="mr-1 h-4 w-4" />
+                          Copy Link
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="blueprints">
-            <div className="p-4 text-center text-muted-foreground">
-              <p>Blueprint documents will appear here</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Blueprints</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {sortedDocuments
+                  .filter(doc => doc.name.toLowerCase().includes('plan') || doc.name.toLowerCase().includes('schematic'))
+                  .map(doc => (
+                    <div key={`blueprint-${doc.id}`} className="flex items-center justify-between border-b py-3">
+                      <div className="flex items-center gap-3">
+                        {getDocumentIcon(doc.type)}
+                        <div>
+                          <p className="font-medium">{doc.name}</p>
+                          <p className="text-sm text-muted-foreground">{doc.project}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(doc.status)}
+                        <Button variant="outline" size="sm" onClick={() => handleView(doc.id)}>View</Button>
+                      </div>
+                    </div>
+                  ))}
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="contracts">
-            <div className="p-4 text-center text-muted-foreground">
-              <p>Contract documents will appear here</p>
-            </div>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle>Contracts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1">
+                  {sortedDocuments
+                    .filter(doc => doc.name.toLowerCase().includes('contract') || doc.name.toLowerCase().includes('agreement'))
+                    .length > 0 ? (
+                    sortedDocuments
+                      .filter(doc => doc.name.toLowerCase().includes('contract') || doc.name.toLowerCase().includes('agreement'))
+                      .map(doc => (
+                        <div key={`contract-${doc.id}`} className="flex items-center justify-between border-b py-3">
+                          <div className="flex items-center gap-3">
+                            <CheckCircle2 className={cn(
+                              "h-5 w-5",
+                              doc.status === 'approved' ? "text-green-500" : "text-amber-500"
+                            )} />
+                            <div>
+                              <p className="font-medium">{doc.name}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline">{doc.project}</Badge>
+                                <span className="text-xs text-muted-foreground">{doc.dateModified}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => handleDownload(doc.id)}>
+                              <Download className="mr-1 h-3 w-3" />
+                              Download
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleView(doc.id)}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Archive className="mx-auto h-12 w-12 mb-3 text-muted-foreground/50" />
+                      <p>No contract documents found</p>
+                      <Button variant="outline" size="sm" className="mt-4" onClick={handleNewDocument}>
+                        <FilePlus className="mr-2 h-4 w-4" />
+                        Create Contract
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>
