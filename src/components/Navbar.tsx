@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, Search, Code2 } from 'lucide-react';
+import { Menu, X, Bell, Search, Code2, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -27,6 +28,7 @@ const Navbar = () => {
     { name: 'Projects', path: '/projects' },
     { name: 'Documents', path: '/documents' },
     { name: 'Team', path: '/team' },
+    { name: 'Equipment', path: '/equipment', icon: <Truck size={16} className="mr-1" /> },
     { name: 'API Docs', path: '/api-docs', icon: <Code2 size={16} className="mr-1" /> }
   ];
   
