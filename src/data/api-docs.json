@@ -1,0 +1,224 @@
+{
+  "Project": {
+    "endpoints": {
+      "getProjects": {
+        "method": "GET",
+        "url": "/api/projects",
+        "response": {
+          "projects": {
+            "type": "array",
+            "items": {
+              "id": "string",
+              "name": "string",
+              "description": "string",
+              "startDate": "string",
+              "endDate": "string",
+              "status": "string",
+              "budget": "number",
+              "client": "string"
+            }
+          }
+        }
+      },
+      "createProject": {
+        "method": "POST",
+        "url": "/api/projects",
+        "body": {
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "budget": "number",
+          "client": "string"
+        },
+        "response": {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "status": "string",
+          "budget": "number",
+          "client": "string"
+        }
+      },
+      "updateProject": {
+        "method": "PUT",
+        "url": "/api/projects/{id}",
+        "body": {
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "budget": "number",
+          "client": "string"
+        },
+        "response": {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "status": "string",
+          "budget": "number",
+          "client": "string"
+        }
+      },
+      "deleteProject": {
+        "method": "DELETE",
+        "url": "/api/projects/{id}",
+        "response": {
+          "message": "string"
+        }
+      }
+    }
+  },
+  "Task": {
+    "endpoints": {
+      "getTasks": {
+        "method": "GET",
+        "url": "/api/tasks",
+        "response": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "id": "string",
+              "name": "string",
+              "description": "string",
+              "startDate": "string",
+              "endDate": "string",
+              "status": "string",
+              "priority": "string",
+              "projectId": "string",
+              "assignedTo": "string"
+            }
+          }
+        }
+      },
+      "createTask": {
+        "method": "POST",
+        "url": "/api/tasks",
+        "body": {
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "priority": "string",
+          "projectId": "string",
+          "assignedTo": "string"
+        },
+        "response": {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "status": "string",
+          "priority": "string",
+          "projectId": "string",
+          "assignedTo": "string"
+        }
+      },
+      "updateTask": {
+        "method": "PUT",
+        "url": "/api/tasks/{id}",
+        "body": {
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "priority": "string",
+          "projectId": "string",
+          "assignedTo": "string"
+        },
+        "response": {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "status": "string",
+          "priority": "string",
+          "projectId": "string",
+          "assignedTo": "string"
+        }
+      },
+      "deleteTask": {
+        "method": "DELETE",
+        "url": "/api/tasks/{id}",
+        "response": {
+          "message": "string"
+        }
+      }
+    }
+  },
+  "Stage": {
+    "endpoints": {
+      "getStages": {
+        "method": "GET",
+        "url": "/api/stages",
+        "response": {
+          "stages": {
+            "type": "array",
+            "items": {
+              "id": "string",
+              "name": "string",
+              "description": "string",
+              "startDate": "string",
+              "endDate": "string",
+              "status": "string",
+              "projectId": "string"
+            }
+          }
+        }
+      },
+      "createStage": {
+        "method": "POST",
+        "url": "/api/stages",
+        "body": {
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "projectId": "string"
+        },
+        "response": {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "status": "string",
+          "projectId": "string"
+        }
+      },
+      "updateStage": {
+        "method": "PUT",
+        "url": "/api/stages/{id}",
+        "body": {
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "projectId": "string"
+        },
+        "response": {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "startDate": "string",
+          "endDate": "string",
+          "status": "string",
+          "projectId": "string"
+        }
+      },
+      "deleteStage": {
+        "method": "DELETE",
+        "url": "/api/stages/{id}",
+        "response": {
+          "message": "string"
+        }
+      }
+    }
+  }
+} 

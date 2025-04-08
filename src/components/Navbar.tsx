@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, Search } from 'lucide-react';
+import { Menu, X, Bell, Search, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -27,7 +26,8 @@ const Navbar = () => {
     { name: 'Dashboard', path: '/' },
     { name: 'Projects', path: '/projects' },
     { name: 'Documents', path: '/documents' },
-    { name: 'Team', path: '/team' }
+    { name: 'Team', path: '/team' },
+    { name: 'API Docs', path: '/api-docs', icon: <Code2 size={16} className="mr-1" /> }
   ];
   
   return (
@@ -50,10 +50,11 @@ const Navbar = () => {
                 key={link.path} 
                 to={link.path}
                 className={({ isActive }) => cn(
-                  "nav-link", 
+                  "nav-link flex items-center", 
                   isActive && "active"
                 )}
               >
+                {link.icon}
                 {link.name}
               </NavLink>
             ))}
@@ -94,12 +95,13 @@ const Navbar = () => {
                       key={link.path} 
                       to={link.path}
                       className={cn(
-                        "text-lg px-2 py-3 rounded-md transition-colors",
+                        "text-lg px-2 py-3 rounded-md transition-colors flex items-center",
                         location.pathname === link.path 
                           ? "bg-primary/10 text-primary font-medium" 
                           : "hover:bg-muted"
                       )}
                     >
+                      {link.icon}
                       {link.name}
                     </NavLink>
                   ))}
