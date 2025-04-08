@@ -88,7 +88,7 @@ const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
                       <TableCell>${booking.totalCost.toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge 
-                          variant={booking.status === 'Confirmed' ? 'success' : 'outline'}
+                          variant={booking.status === 'Confirmed' ? 'default' : 'outline'}
                           className={booking.status === 'Confirmed' ? 'bg-green-500' : ''}
                         >
                           {booking.status}

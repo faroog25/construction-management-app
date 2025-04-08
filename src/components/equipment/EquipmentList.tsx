@@ -115,7 +115,7 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                     <TableCell>${item.dailyRate.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge 
-                        variant={item.status === 'Available' ? 'success' : 'destructive'}
+                        variant={item.status === 'Available' ? 'default' : 'destructive'}
                         className={item.status === 'Available' ? 'bg-green-500' : ''}
                       >
                         {item.status}
