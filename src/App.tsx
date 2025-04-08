@@ -10,6 +10,7 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Documents from "./pages/Documents";
 import Team from "./pages/Team";
+import Equipment from "./pages/Equipment";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
 import ApiDocsPage from "./pages/ApiDocsPage";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/projects/:id" element={<ProjectDetails />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/team" element={<Team />} />
+            <Route path="/equipment" element={<Equipment />} />
             <Route path="/api-docs" element={<ApiDocsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
