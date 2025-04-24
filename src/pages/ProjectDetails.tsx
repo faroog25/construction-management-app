@@ -31,6 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Project } from '@/types/project';
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,6 +43,12 @@ const ProjectDetails = () => {
     queryFn: () => getProjectById(projectId),
     enabled: !!projectId,
   });
+
+  const enhancedProject: Project | undefined = project ? {
+    ...project,
+    createdAt: project.createdAt || new Date().toISOString(),
+    updatedAt: project.updatedAt || new Date().toISOString()
+  } : undefined;
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -69,7 +76,7 @@ const ProjectDetails = () => {
     );
   }
 
-  if (error || !project) {
+  if (error || !enhancedProject) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <div className="flex items-center text-destructive">
@@ -101,22 +108,22 @@ const ProjectDetails = () => {
                 Projects
               </Button>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight mt-2">{project.projectName}</h1>
+            <h1 className="text-3xl font-bold tracking-tight mt-2">{enhancedProject?.projectName}</h1>
             <div className="flex flex-wrap gap-4 mt-2">
               <p className="text-muted-foreground flex items-center">
                 <Calendar className="w-4 h-4 mr-1" /> 
-                Project ID: {project.id}
+                Project ID: {enhancedProject?.id}
               </p>
-              {project.startDate && (
+              {enhancedProject?.startDate && (
                 <p className="text-muted-foreground flex items-center">
                   <Clock className="w-4 h-4 mr-1" /> 
-                  Started: {new Date(project.startDate).toLocaleDateString()}
+                  Started: {new Date(enhancedProject?.startDate).toLocaleDateString()}
                 </p>
               )}
-              {project.clientName && (
+              {enhancedProject?.clientName && (
                 <p className="text-muted-foreground flex items-center">
                   <Users className="w-4 h-4 mr-1" /> 
-                  Client: {project.clientName}
+                  Client: {enhancedProject?.clientName}
                 </p>
               )}
             </div>
@@ -164,20 +171,20 @@ const ProjectDetails = () => {
           </TabsList>
           
           <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
-            <ProjectDetailsInfo project={project} />
+            <ProjectDetailsInfo project={enhancedProject} />
             <ProjectTimeline />
           </TabsContent>
           
           <TabsContent value="stages" className="space-y-6 animate-in fade-in-50">
-            <ProjectStages project={project} />
+            <ProjectStages project={enhancedProject} />
           </TabsContent>
           
           <TabsContent value="gantt" className="space-y-6 animate-in fade-in-50">
-            <GanttChart project={project} />
+            <GanttChart project={enhancedProject} />
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6 animate-in fade-in-50">
-            <Documents projectId={project.id} />
+            <Documents projectId={enhancedProject?.id} />
           </TabsContent>
         </Tabs>
       </main>

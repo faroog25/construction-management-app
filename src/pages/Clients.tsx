@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,12 +8,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Search, SlidersHorizontal, ChevronDown, Loader2, X } from 'lucide-react';
+import { Plus, Search, SlidersHorizontal, ChevronDown, Loader2, X, Check } from 'lucide-react';
 import { getClients, createClient, updateClient, deleteClient } from '@/services/clientService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Client as ClientType, ClientType as ClientTypeEnum } from '@/types/client';
 
-// Define a local Client interface that matches the actual structure used in the component
-interface Client {
+interface LocalClient {
   id: number;
   name: string;
   email: string;
@@ -23,7 +22,30 @@ interface Client {
   notes?: string;
 }
 
-const ClientCard = ({ client, onDelete, onUpdate }: { client: Client; onDelete: (id: number) => void; onUpdate: (client: Client) => void }) => (
+const adaptToLocalClient = (client: ClientType): LocalClient => {
+  return {
+    id: parseInt(client.id),
+    name: client.fullName || client.name || '',
+    email: client.email || '',
+    phone: client.phoneNumber || client.phone || '',
+    address: client.address || '',
+    notes: ''
+  };
+};
+
+const adaptToApiClient = (client: LocalClient): Omit<ClientType, 'id'> => {
+  return {
+    fullName: client.name,
+    email: client.email,
+    phoneNumber: client.phone,
+    clientType: ClientTypeEnum.Individual,
+    name: client.name,
+    phone: client.phone,
+    address: client.address
+  };
+};
+
+const ClientCard = ({ client, onDelete, onUpdate }: { client: LocalClient; onDelete: (id: number) => void; onUpdate: (client: LocalClient) => void }) => (
   <Card className="mb-4 p-4">
     <div className="flex justify-between items-start">
       <div>
@@ -58,19 +80,21 @@ const ClientCard = ({ client, onDelete, onUpdate }: { client: Client; onDelete: 
 const Clients = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentClient, setCurrentClient] = useState<Client | null>(null);
+  const [currentClient, setCurrentClient] = useState<LocalClient | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
 
-  // Fetch clients using React Query
-  const { data: clients = [], isLoading, isError } = useQuery({
+  const { data: clientsData = [], isLoading, isError } = useQuery({
     queryKey: ['clients'],
     queryFn: () => getClients(1, 10),
   });
 
-  // Create client mutation
+  const clients: LocalClient[] = React.useMemo(() => {
+    return clientsData.map(adaptToLocalClient);
+  }, [clientsData]);
+
   const createClientMutation = useMutation({
-    mutationFn: (clientData: Omit<Client, 'id'>) => createClient(clientData),
+    mutationFn: (clientData: Omit<LocalClient, 'id'>) => createClient(adaptToApiClient(clientData as LocalClient)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       setIsModalOpen(false);
@@ -78,9 +102,8 @@ const Clients = () => {
     },
   });
 
-  // Update client mutation
   const updateClientMutation = useMutation({
-    mutationFn: (params: { id: number, data: Partial<Omit<Client, 'id'>> }) => 
+    mutationFn: (params: { id: number, data: Partial<Omit<LocalClient, 'id'>> }) => 
       updateClient(params.id.toString(), params.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
@@ -90,7 +113,6 @@ const Clients = () => {
     },
   });
 
-  // Delete client mutation
   const deleteClientMutation = useMutation({
     mutationFn: (id: number) => deleteClient(id.toString()),
     onSuccess: () => {
@@ -98,14 +120,13 @@ const Clients = () => {
     },
   });
 
-  // Filter clients based on search query
   const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.phone.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateClient = async (client: Omit<Client, 'id'>) => {
+  const handleCreateClient = async (client: Omit<LocalClient, 'id'>) => {
     try {
       await createClientMutation.mutateAsync(client);
     } catch (error) {
@@ -113,7 +134,7 @@ const Clients = () => {
     }
   };
 
-  const handleUpdateClient = async (client: Partial<Omit<Client, 'id'>>) => {
+  const handleUpdateClient = async (client: Partial<Omit<LocalClient, 'id'>>) => {
     try {
       if (!currentClient) return;
       await updateClientMutation.mutateAsync({ id: currentClient.id, data: client });
@@ -155,7 +176,7 @@ const Clients = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="h-16"></div> {/* Navbar spacer */}
+      <div className="h-16"></div>
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>
@@ -217,7 +238,6 @@ const Clients = () => {
           </div>
         )}
 
-        {/* Client Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-96 max-w-md">

@@ -12,7 +12,8 @@ import { toast } from 'sonner';
 import { NewSiteEngineerModal } from './NewSiteEngineerModal';
 import { deleteSiteEngineer } from '../services/siteEngineerService';
 
-interface BaseEngineer {
+// Define BaseEngineer interface to fix type issues
+export interface BaseEngineer {
   id: number;
   fullName: string;
   phoneNumber: string;
@@ -27,7 +28,7 @@ export function SiteEngineers() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState<string>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortDirection, setSortDirection<'asc' | 'desc'>('asc');
   const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
   const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<BaseEngineer | null>(null);
@@ -131,176 +132,195 @@ export function SiteEngineers() {
   }
 
   return (
-    <ErrorBoundary>
-      <Card className="border shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between bg-muted/10 pb-2">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <HardHat className="h-5 w-5 text-primary" />
-            Site Engineers
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <div className="relative w-64">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search engineers..." 
-                className="pl-9 h-9 w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Button size="sm" className="gap-1" onClick={() => setIsNewEngineerModalOpen(true)}>
+    
+      
+        
+          
+            
+              <HardHat className="h-5 w-5 text-primary" />
+              Site Engineers
+            
+          
+          
+            
+              
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search engineers..." 
+                  className="pl-9 h-9 w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              
+            
+            
               <Plus className="h-4 w-4" />
               Add
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead 
-                  className="font-medium cursor-pointer"
-                  onClick={() => handleSort('name')}
-                >
-                  <div className="flex items-center">
+            
+          
+        
+        
+          
+            
+              
+                
+                  
                     Name
                     <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="font-medium cursor-pointer"
-                  onClick={() => handleSort('phone')}
-                >
-                  <div className="flex items-center">
+                  
+                
+                
+                  
                     Phone
                     <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="font-medium cursor-pointer"
-                  onClick={() => handleSort('email')}
-                >
-                  <div className="flex items-center">
+                  
+                
+                
+                  
                     Email
                     <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="font-medium cursor-pointer"
-                  onClick={() => handleSort('address')}
-                >
-                  <div className="flex items-center">
+                  
+                
+                
+                  
                     Address
                     <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="font-medium cursor-pointer"
-                  onClick={() => handleSort('status')}
-                >
-                  <div className="flex items-center">
+                  
+                
+                
+                  
                     Status
                     <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead className="font-medium text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+                  
+                
+                Actions
+              
+            
+            
               {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-[180px]" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
-                  </TableRow>
+                  
+                    
+                      <Skeleton className="h-4 w-[150px]" />
+                    
+                    
+                      <Skeleton className="h-4 w-[120px]" />
+                    
+                    
+                      <Skeleton className="h-4 w-[180px]" />
+                    
+                    
+                      <Skeleton className="h-4 w-[150px]" />
+                    
+                    
+                      <Skeleton className="h-4 w-[80px]" />
+                    
+                    
+                      <Skeleton className="h-8 w-[100px] ml-auto" />
+                    
+                  
                 ))
               ) : sortedEngineers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center h-32">
+                
+                  
                     {searchQuery ? 
-                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                        <Search className="h-8 w-8 opacity-30" />
-                        <p>No engineers found matching "{searchQuery}"</p>
-                        <Button variant="link" onClick={() => setSearchQuery('')}>Clear search</Button>
-                      </div>
+                      
+                        
+                          <Search className="h-8 w-8 opacity-30" />
+                          
+                            No engineers found matching "{searchQuery}"
+                          
+                          Clear search
+                        
+                      
                       : 
-                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                        <HardHat className="h-8 w-8 opacity-30" />
-                        <p>No site engineers found</p>
-                        <Button variant="outline" size="sm" onClick={() => setIsNewEngineerModalOpen(true)}>
-                          <Plus className="mr-2 h-4 w-4" />
-                          Add your first site engineer
-                        </Button>
-                      </div>
+                      
+                        
+                          <HardHat className="h-8 w-8 opacity-30" />
+                          
+                            No site engineers found
+                          
+                          
+                            
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add your first site engineer
+                            
+                          
+                        
+                      
                     }
-                  </TableCell>
-                </TableRow>
+                  
+                
               ) : (
                 sortedEngineers.map((engineer) => (
-                  <TableRow key={engineer.id} className="group">
-                    <TableCell className="font-medium">{engineer.fullName}</TableCell>
-                    <TableCell>{engineer.phoneNumber}</TableCell>
-                    <TableCell>{engineer.email || '-'}</TableCell>
-                    <TableCell>{engineer.address || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5">
+                  
+                    
+                      {engineer.fullName}
+                    
+                    {engineer.phoneNumber}
+                    {engineer.email || '-'}
+                    {engineer.address || '-'}
+                    
+                      
                         {engineer.isAvailable ? (
-                          <>
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            <span className="text-green-700 text-sm font-medium">Available</span>
-                          </>
+                          
+                            
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              
+                                Available
+                              
+                            
+                          
                         ) : (
-                          <>
-                            <XCircle className="h-4 w-4 text-red-600" />
-                            <span className="text-red-700 text-sm font-medium">Unavailable</span>
-                          </>
+                          
+                            
+                              <XCircle className="h-4 w-4 text-red-600" />
+                              
+                                Unavailable
+                              
+                            
+                          
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button 
-                          variant="outline" 
-                          size="xs" 
-                          onClick={() => handleEditEngineer(engineer)}
-                        >
-                          <ArrowUpDown className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button 
-                          variant="destructive" 
-                          size="xs"
-                          onClick={() => handleDeleteEngineer(engineer.id)}
-                        >
-                          <ArrowUpDown className="h-3 w-3 mr-1" />
-                          Delete
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                      
+                    
+                    
+                      
+                        
+                          
+                            
+                              <ArrowUpDown className="h-3 w-3 mr-1" />
+                              Edit
+                            
+                          
+                          
+                            
+                              <ArrowUpDown className="h-3 w-3 mr-1" />
+                              Delete
+                            
+                          
+                        
+                      
+                    
+                  
                 ))
               )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            
+          
+        
+      
 
-      <NewSiteEngineerModal
+      
         isOpen={isNewEngineerModalOpen}
         onOpenChange={setIsNewEngineerModalOpen}
         onEngineerCreated={fetchEngineers}
-      />
-
-      <EditSiteEngineerModal
-        isOpen={isEditEngineerModalOpen}
-        onOpenChange={setIsEditEngineerModalOpen}
-        onEngineerUpdated={fetchEngineers}
-        engineer={selectedEngineer}
-      />
-    </ErrorBoundary>
+      
+      {isEditEngineerModalOpen && selectedEngineer && (
+        <NewSiteEngineerModal
+          isOpen={isEditEngineerModalOpen}
+          onOpenChange={setIsEditEngineerModalOpen}
+          onEngineerCreated={fetchEngineers}
+        />
+      )}
+    
   );
 }
