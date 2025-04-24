@@ -28,7 +28,7 @@ export function SiteEngineers() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState<string>('name');
-  const [sortDirection, setSortDirection<'asc' | 'desc'>('asc');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
   const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<BaseEngineer | null>(null);
@@ -132,195 +132,186 @@ export function SiteEngineers() {
   }
 
   return (
-    
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-xl flex items-center gap-2">
+          <HardHat className="h-5 w-5 text-primary" />
+          Site Engineers
+        </CardTitle>
+        
+        <div className="flex gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search engineers..." 
+              className="pl-9 h-9 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <Button size="sm" onClick={() => setIsNewEngineerModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            Add
+          </Button>
+        </div>
+      </CardHeader>
       
-        
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
+                <div className="flex items-center">
+                  Name
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort('phone')} className="cursor-pointer">
+                <div className="flex items-center">
+                  Phone
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort('email')} className="cursor-pointer">
+                <div className="flex items-center">
+                  Email
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort('address')} className="cursor-pointer">
+                <div className="flex items-center">
+                  Address
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </div>
+              </TableHead>
+              <TableHead onClick={() => handleSort('status')} className="cursor-pointer">
+                <div className="flex items-center">
+                  Status
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </div>
+              </TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
           
-            
-              <HardHat className="h-5 w-5 text-primary" />
-              Site Engineers
-            
-          
-          
-            
-              
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search engineers..." 
-                  className="pl-9 h-9 w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              
-            
-            
-              <Plus className="h-4 w-4" />
-              Add
-            
-          
-        
-        
-          
-            
-              
-                
-                  
-                    Name
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  
-                
-                
-                  
-                    Phone
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  
-                
-                
-                  
-                    Email
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  
-                
-                
-                  
-                    Address
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  
-                
-                
-                  
-                    Status
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  
-                
-                Actions
-              
-            
-            
-              {loading ? (
-                Array.from({ length: 5 }).map((_, index) => (
-                  
-                    
-                      <Skeleton className="h-4 w-[150px]" />
-                    
-                    
-                      <Skeleton className="h-4 w-[120px]" />
-                    
-                    
-                      <Skeleton className="h-4 w-[180px]" />
-                    
-                    
-                      <Skeleton className="h-4 w-[150px]" />
-                    
-                    
-                      <Skeleton className="h-4 w-[80px]" />
-                    
-                    
-                      <Skeleton className="h-8 w-[100px] ml-auto" />
-                    
-                  
-                ))
-              ) : sortedEngineers.length === 0 ? (
-                
-                  
-                    {searchQuery ? 
-                      
-                        
-                          <Search className="h-8 w-8 opacity-30" />
-                          
-                            No engineers found matching "{searchQuery}"
-                          
-                          Clear search
-                        
-                      
-                      : 
-                      
-                        
-                          <HardHat className="h-8 w-8 opacity-30" />
-                          
-                            No site engineers found
-                          
-                          
-                            
-                              <Plus className="mr-2 h-4 w-4" />
-                              Add your first site engineer
-                            
-                          
-                        
-                      
-                    }
-                  
-                
-              ) : (
-                sortedEngineers.map((engineer) => (
-                  
-                    
-                      {engineer.fullName}
-                    
-                    {engineer.phoneNumber}
-                    {engineer.email || '-'}
-                    {engineer.address || '-'}
-                    
-                      
-                        {engineer.isAvailable ? (
-                          
-                            
-                              <CheckCircle2 className="h-4 w-4 text-green-600" />
-                              
-                                Available
-                              
-                            
-                          
-                        ) : (
-                          
-                            
-                              <XCircle className="h-4 w-4 text-red-600" />
-                              
-                                Unavailable
-                              
-                            
-                          
-                        )}
-                      
-                    
-                    
-                      
-                        
-                          
-                            
-                              <ArrowUpDown className="h-3 w-3 mr-1" />
-                              Edit
-                            
-                          
-                          
-                            
-                              <ArrowUpDown className="h-3 w-3 mr-1" />
-                              Delete
-                            
-                          
-                        
-                      
-                    
-                  
-                ))
-              )}
-            
-          
-        
-      
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow key={`skeleton-${index}`}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[150px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[120px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[180px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[150px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[80px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-[100px] ml-auto" />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : sortedEngineers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  {searchQuery ? 
+                    <div className="flex flex-col items-center justify-center p-4">
+                      <Search className="h-8 w-8 opacity-30 mb-2" />
+                      <p className="text-sm text-muted-foreground mb-2">
+                        No engineers found matching "{searchQuery}"
+                      </p>
+                      <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>Clear search</Button>
+                    </div>
+                    : 
+                    <div className="flex flex-col items-center justify-center p-4">
+                      <HardHat className="h-8 w-8 opacity-30 mb-2" />
+                      <p className="text-sm text-muted-foreground mb-3">
+                        No site engineers found
+                      </p>
+                      <Button size="sm" onClick={() => setIsNewEngineerModalOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add your first site engineer
+                      </Button>
+                    </div>
+                  }
+                </TableCell>
+              </TableRow>
+            ) : (
+              sortedEngineers.map((engineer) => (
+                <TableRow key={engineer.id}>
+                  <TableCell>
+                    {engineer.fullName}
+                  </TableCell>
+                  <TableCell>{engineer.phoneNumber}</TableCell>
+                  <TableCell>{engineer.email || '-'}</TableCell>
+                  <TableCell>{engineer.address || '-'}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      {engineer.isAvailable ? (
+                        <div className="flex items-center">
+                          <CheckCircle2 className="h-4 w-4 text-green-600 mr-1.5" />
+                          <span className="text-green-600 text-sm">
+                            Available
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <XCircle className="h-4 w-4 text-red-600 mr-1.5" />
+                          <span className="text-red-600 text-sm">
+                            Unavailable
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditEngineer(engineer)}
+                      >
+                        <ArrowUpDown className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteEngineer(engineer.id)}
+                      >
+                        <ArrowUpDown className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
 
-      
-        isOpen={isNewEngineerModalOpen}
-        onOpenChange={setIsNewEngineerModalOpen}
+    <NewSiteEngineerModal
+      isOpen={isNewEngineerModalOpen}
+      onOpenChange={setIsNewEngineerModalOpen}
+      onEngineerCreated={fetchEngineers}
+    />
+
+    {isEditEngineerModalOpen && selectedEngineer && (
+      <NewSiteEngineerModal
+        isOpen={isEditEngineerModalOpen}
+        onOpenChange={setIsEditEngineerModalOpen}
         onEngineerCreated={fetchEngineers}
-      
-      {isEditEngineerModalOpen && selectedEngineer && (
-        <NewSiteEngineerModal
-          isOpen={isEditEngineerModalOpen}
-          onOpenChange={setIsEditEngineerModalOpen}
-          onEngineerCreated={fetchEngineers}
-        />
-      )}
-    
+      />
+    )}
   );
 }
