@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Worker } from '@/services/workerService';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,8 @@ export function WorkerMultiSelect({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
+            role="combobox"
+            aria-expanded={open}
             className="w-full justify-between"
           >
             {safeSelectedWorkers.length > 0 ? (
@@ -81,13 +84,14 @@ export function WorkerMultiSelect({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[300px] max-h-[300px] overflow-auto">
+        <DropdownMenuContent align="start" className="w-[300px] max-h-[300px] overflow-auto">
           {safeWorkers.map((worker) => {
             const isSelected = safeSelectedWorkers.some(w => w.id === worker.id);
             return (
               <DropdownMenuCheckboxItem
                 key={worker.id}
                 checked={isSelected}
+                onSelect={(e) => e.preventDefault()}
                 onCheckedChange={() => handleSelect(worker)}
                 className={cn(
                   "flex items-center py-2 px-3 cursor-pointer",
@@ -120,4 +124,4 @@ export function WorkerMultiSelect({
       </DropdownMenu>
     </div>
   );
-} 
+}
