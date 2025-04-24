@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, ArrowUpDown, Wrench, RotateCcw } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, Wrench, RotateCcw, Box, Tag } from 'lucide-react';
 import { EquipmentItem } from '@/types/equipment';
 import { mockEquipment } from '@/data/mockEquipment';
 
@@ -51,13 +52,19 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
   );
 
   return (
-    <Card className="shadow-md">
-      <CardContent className="pt-6">
+    <Card className="shadow-lg border-muted">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-2xl font-bold text-primary flex items-center gap-2">
+          <Box className="h-6 w-6" />
+          Available Equipment
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
         <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
           <div className="relative w-full md:w-1/2">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Search equipment..."
+              placeholder="Search equipment by name or category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -68,35 +75,39 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
               <Filter className="h-4 w-4" />
               Filter
             </Button>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Tag className="h-4 w-4" />
+              Categories
+            </Button>
           </div>
         </div>
 
-        <div className="overflow-auto rounded-md border">
+        <div className="overflow-auto rounded-xl border bg-card">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-muted/50 hover:bg-muted/50">
                 <TableHead 
-                  className="cursor-pointer"
+                  className="cursor-pointer font-semibold"
                   onClick={() => handleSort('name')}
                 >
-                  Name
+                  Equipment Name
                   <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer"
+                  className="cursor-pointer font-semibold"
                   onClick={() => handleSort('category')}
                 >
                   Category
                   <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer"
+                  className="cursor-pointer font-semibold"
                   onClick={() => handleSort('status')}
                 >
                   Status
                   <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                 </TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -108,18 +119,20 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                 </TableRow>
               ) : (
                 filteredEquipment.map((item) => (
-                  <TableRow key={item.id}>
+                  <TableRow key={item.id} className="hover:bg-muted/50 transition-colors">
                     <TableCell className="font-medium">
                       {item.name}
                       {item.featured && (
-                        <Badge variant="secondary" className="ml-2">Featured</Badge>
+                        <Badge variant="secondary" className="ml-2 bg-primary/10 text-primary hover:bg-primary/20">
+                          Featured
+                        </Badge>
                       )}
                     </TableCell>
                     <TableCell>{item.category}</TableCell>
                     <TableCell>
                       <Badge 
                         variant={item.status === 'Available' ? 'default' : 'destructive'}
-                        className={item.status === 'Available' ? 'bg-green-500' : ''}
+                        className={item.status === 'Available' ? 'bg-green-500 hover:bg-green-600' : ''}
                       >
                         {item.status}
                       </Badge>
@@ -131,27 +144,28 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleMakeAvailable(item.id)}
-                            className="gap-1"
+                            className="gap-1 hover:bg-green-50"
                           >
                             <Wrench className="h-4 w-4" />
-                            Available
+                            Mark Available
                           </Button>
                         ) : item.status === 'In Use' ? (
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => handleRestore(item.id)}
-                            className="gap-1"
+                            className="gap-1 hover:bg-blue-50"
                           >
                             <RotateCcw className="h-4 w-4" />
-                            Restore
+                            Return
                           </Button>
                         ) : (
                           <Button 
-                            variant="outline" 
+                            variant="default"
                             size="sm"
                             disabled={item.status !== 'Available'}
                             onClick={() => onSelectEquipment(item)}
+                            className="bg-primary hover:bg-primary/90"
                           >
                             Book Now
                           </Button>

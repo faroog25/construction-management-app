@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useSearchParams } from 'react-router-dom';
@@ -8,6 +9,7 @@ import EquipmentList from '@/components/equipment/EquipmentList';
 import BookingForm from '@/components/equipment/BookingForm';
 import BookingsList from '@/components/equipment/BookingsList';
 import { EquipmentItem, Booking } from '@/types/equipment';
+import { Box, Clipboard, CalendarDays } from 'lucide-react';
 
 const Equipment = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,17 +40,29 @@ const Equipment = () => {
       </Helmet>
       
       <Container className="py-8 mt-16">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Equipment Management</h1>
-          <p className="text-muted-foreground">
-            Browse available equipment, make bookings, and manage your equipment reservations.
+        <div className="mb-8 space-y-4">
+          <h1 className="text-4xl font-bold tracking-tight text-primary">Equipment Management</h1>
+          <p className="text-lg text-muted-foreground">
+            Browse available equipment, make bookings, and manage your equipment reservations efficiently.
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="equipment">Equipment List</TabsTrigger>
-            <TabsTrigger value="bookings">My Bookings</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
+          <TabsList className="inline-flex h-14 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground w-full sm:w-auto">
+            <TabsTrigger 
+              value="equipment" 
+              className="inline-flex items-center justify-center whitespace-nowrap px-6 py-3 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm hover:bg-accent/50"
+            >
+              <Box className="mr-2 h-5 w-5" />
+              Equipment List
+            </TabsTrigger>
+            <TabsTrigger 
+              value="bookings" 
+              className="inline-flex items-center justify-center whitespace-nowrap px-6 py-3 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm hover:bg-accent/50"
+            >
+              <CalendarDays className="mr-2 h-5 w-5" />
+              My Bookings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="equipment" className="space-y-6">
@@ -63,8 +77,8 @@ const Equipment = () => {
         <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Book Equipment</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-2xl font-bold">Book Equipment</DialogTitle>
+              <DialogDescription className="text-base">
                 Complete the form below to book the selected equipment for your project.
               </DialogDescription>
             </DialogHeader>
