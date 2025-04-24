@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -98,12 +97,13 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
-            {project.description && (
-              <div className="mb-6 pb-6 border-b">
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
-                <p className="text-base">{project.description || "No description provided"}</p>
-              </div>
-            )}
+            <div className="mb-6 pb-6 border-b">
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
+              <p className="text-base">
+                {project.description || 
+                  "This construction project involves the development and implementation of a comprehensive building plan. The project includes detailed architectural design, structural engineering, and construction management to ensure high-quality results. Our team is committed to delivering the project on time and within budget while maintaining the highest standards of safety and quality."}
+              </p>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
               <div className="flex items-start gap-3">
@@ -122,15 +122,22 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 </div>
               </div>
               
-              {project.siteEngineerId && (
-                <div className="flex items-start gap-3">
-                  <UserCircle className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Site Engineer</p>
-                    <p className="font-medium">Engineer ID: {project.siteEngineerId}</p>
-                  </div>
+              <div className="flex items-start gap-3">
+                <UserCircle className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Site Engineer</p>
+                  <p className="font-medium">
+                    {project.siteEngineerId ? 
+                      `Engineer #${project.siteEngineerId}` : 
+                      'Not assigned yet'}
+                  </p>
+                  {project.siteEngineerId && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Responsible for site supervision and quality control
+                    </p>
+                  )}
                 </div>
-              )}
+              </div>
               
               <div className="flex items-start gap-3">
                 <Calendar className="h-5 w-5 text-primary mt-0.5" />
@@ -147,14 +154,6 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                   <p className="font-medium">Not set</p>
                 </div>
               </div>
-
-              <div className="flex items-start gap-3">
-                <Briefcase className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Project Type</p>
-                  <p className="font-medium">Construction</p>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -169,7 +168,6 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <StatusIcon className="h-5 w-5" style={{ color: progressColor }} />
                 <span className="font-medium">{statusInfo.label}</span>
               </div>
-              <Badge className={statusInfo.className}>{progressValue}% Complete</Badge>
             </div>
             
             <div className="space-y-2">
