@@ -17,6 +17,7 @@ export interface WorkerResponse {
 
 /**
  * Fetches all workers from the API
+ * @throws {Error} When the API request fails or returns invalid data
  */
 export async function getAllWorkers(): Promise<Worker[]> {
   try {
@@ -30,21 +31,28 @@ export async function getAllWorkers(): Promise<Worker[]> {
         statusText: response.statusText,
         body: errorText
       });
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`فشل في جلب العمال. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
     }
     
-    const result = await response.json();
+    const result: WorkerResponse = await response.json();
     console.log('API Response:', result);
     
-    if (!result.data || !result.data.items) {
+    if (!result.success) {
+      throw new Error(result.message || 'فشل في جلب بيانات العمال');
+    }
+    
+    if (!result.data?.items) {
       console.error('Invalid API response structure:', result);
-      throw new Error('Invalid API response structure');
+      throw new Error('بيانات غير صالحة من الخادم');
     }
     
     return result.data.items;
   } catch (error) {
     console.error('Error fetching workers:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`فشل في جلب العمال: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء جلب العمال');
   }
 }
 

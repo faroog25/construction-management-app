@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface Project {
@@ -36,6 +35,41 @@ export interface ProjectResponse {
   data: {
     items: Project[];
   };
+}
+
+export async function getAllProjects(): Promise<Project[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Projects`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`فشل في جلب المشاريع. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
+    }
+    
+    const result: ProjectResponse = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'فشل في جلب بيانات المشاريع');
+    }
+    
+    if (!result.data?.items) {
+      console.error('Invalid API response structure:', result);
+      throw new Error('بيانات غير صالحة من الخادم');
+    }
+    
+    return result.data.items;
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في جلب المشاريع: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء جلب المشاريع');
+  }
 }
 
 export async function getProjects(page: number = 1, pageSize: number = 10): Promise<Project[]> {
@@ -90,22 +124,18 @@ export async function getProjectById(id: number): Promise<Project | undefined> {
   }
 }
 
-export async function createProject(project: {
-  projectName: string;
-  siteAddress: string;
-  clientName: string;
-  projectStatus: string;
-  description?: string;
-  startDate?: string;
-  expectedEndDate?: string;
-  actualEndDate?: string;
-  status?: number;
-  orderId?: number;
-  siteEngineerId?: number;
-  clientId?: number;
-  stageId?: number;
-}): Promise<Project> {
+export async function createProject(project: Omit<Project, 'id'>): Promise<Project> {
   try {
+    if (!project.name?.trim()) {
+      throw new Error('اسم المشروع مطلوب');
+    }
+    if (!project.description?.trim()) {
+      throw new Error('وصف المشروع مطلوب');
+    }
+    if (!project.startDate) {
+      throw new Error('تاريخ بدء المشروع مطلوب');
+    }
+
     const response = await fetch(`${API_BASE_URL}/Projects`, {
       method: 'POST',
       headers: {
@@ -116,14 +146,26 @@ export async function createProject(project: {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      throw new Error(errorData.message || `فشل في إنشاء المشروع. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
     }
 
-    const result = await response.json();
-    return result.data.items[0];
+    const result: ProjectResponse = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'فشل في إنشاء المشروع');
+    }
+    
+    if (!result.data) {
+      throw new Error('بيانات غير صالحة من الخادم');
+    }
+
+    return result.data;
   } catch (error) {
     console.error('Error creating project:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`فشل في إنشاء المشروع: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء إنشاء المشروع');
   }
 }
 
