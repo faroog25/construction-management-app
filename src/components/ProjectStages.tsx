@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   CircleDot, 
   CheckCircle, 
@@ -139,12 +140,21 @@ const formatDate = (dateString: string) => {
 
 const ProjectStages = ({ project }: ProjectStagesProps) => {
   const [expandedStages, setExpandedStages] = useState<number[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<number[]>([]);
   
   const toggleStage = (stageId: number) => {
     setExpandedStages(prev => 
       prev.includes(stageId) 
         ? prev.filter(id => id !== stageId) 
         : [...prev, stageId]
+    );
+  };
+  
+  const toggleTaskCompletion = (taskId: number) => {
+    setCompletedTasks(prev => 
+      prev.includes(taskId)
+        ? prev.filter(id => id !== taskId)
+        : [...prev, taskId]
     );
   };
   
@@ -347,17 +357,19 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                     {taskStatus.label}
                                   </Badge>
                                   
-                                  <div className="flex items-center gap-2 w-full md:w-32">
-                                    <Progress 
-                                      value={task.progress} 
-                                      className={cn(
-                                        "h-2",
-                                        task.progress === 100 ? "bg-muted [&>div]:bg-green-500" : 
-                                        task.progress > 0 ? "bg-muted [&>div]:bg-blue-500" : 
-                                        "bg-muted [&>div]:bg-gray-400"
-                                      )} 
+                                  <div className="flex items-center gap-2">
+                                    <Checkbox
+                                      id={`task-${task.id}`}
+                                      checked={completedTasks.includes(task.id)}
+                                      onCheckedChange={() => toggleTaskCompletion(task.id)}
+                                      className="h-4 w-4"
                                     />
-                                    <span className="text-xs font-medium">{task.progress}%</span>
+                                    <label
+                                      htmlFor={`task-${task.id}`}
+                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                      Completed
+                                    </label>
                                   </div>
                                   
                                   <div className="flex items-center gap-1">
