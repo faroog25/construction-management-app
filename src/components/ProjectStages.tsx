@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Project } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -294,7 +293,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                         <p className="text-sm font-medium">{formatDate(stage.startDate)}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">End Date</p>
+                        <p className="text-xs text-muted-foreground">Expected Date</p>
                         <p className="text-sm font-medium">{formatDate(stage.endDate)}</p>
                       </div>
                     </div>
@@ -388,7 +387,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                   <span>{formatDate(task.startDate)}</span>
                                 </div>
                                 <div className="flex items-center">
-                                  <span className="text-muted-foreground mr-2">End:</span>
+                                  <span className="text-muted-foreground mr-2">Expected:</span>
                                   <span>{formatDate(task.endDate)}</span>
                                 </div>
                               </div>
