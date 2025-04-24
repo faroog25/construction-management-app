@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Plus, 
   Search, 
-  FileSpreadsheet, 
   Filter, 
   Download, 
   User, 
