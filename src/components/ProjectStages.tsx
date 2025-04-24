@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
+import { Worker, getAllWorkers } from '@/services/workerService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { WorkerMultiSelect } from './WorkerMultiSelect';
 import { 
   CircleDot, 
   CheckCircle, 
@@ -49,9 +51,39 @@ const projectStages = [
     startDate: "2023-10-01",
     endDate: "2023-10-15",
     tasks: [
-      { id: 101, name: "Requirement Analysis", nameAr: "تحليل المتطلبات", progress: 100, status: 'completed', assignee: "Jane Doe", startDate: "2023-10-01", endDate: "2023-10-05" },
-      { id: 102, name: "Site Survey", nameAr: "مسح الموقع", progress: 100, status: 'completed', assignee: "Ahmed Hassan", startDate: "2023-10-06", endDate: "2023-10-10" },
-      { id: 103, name: "Initial Design", nameAr: "التصميم الأولي", progress: 100, status: 'completed', assignee: "Sarah Johnson", startDate: "2023-10-11", endDate: "2023-10-15" }
+      { 
+        id: 101, 
+        name: "Requirement Analysis", 
+        nameAr: "تحليل المتطلبات", 
+        progress: 100, 
+        status: 'completed', 
+        assignee: "Jane Doe", 
+        startDate: "2023-10-01", 
+        endDate: "2023-10-05",
+        assignedWorkers: [] 
+      },
+      { 
+        id: 102, 
+        name: "Site Survey", 
+        nameAr: "مسح الموقع", 
+        progress: 100, 
+        status: 'completed', 
+        assignee: "Ahmed Hassan", 
+        startDate: "2023-10-06", 
+        endDate: "2023-10-10",
+        assignedWorkers: [] 
+      },
+      { 
+        id: 103, 
+        name: "Initial Design", 
+        nameAr: "التصميم الأولي", 
+        progress: 100, 
+        status: 'completed', 
+        assignee: "Sarah Johnson", 
+        startDate: "2023-10-11", 
+        endDate: "2023-10-15",
+        assignedWorkers: [] 
+      }
     ]
   },
   {
@@ -65,10 +97,10 @@ const projectStages = [
     startDate: "2023-10-16",
     endDate: "2023-11-05",
     tasks: [
-      { id: 201, name: "Excavation", nameAr: "الحفر", progress: 100, status: 'completed', assignee: "Robert Chen", startDate: "2023-10-16", endDate: "2023-10-22" },
-      { id: 202, name: "Foundation Layout", nameAr: "تخطيط الأساس", progress: 100, status: 'completed', assignee: "Ali Mohammed", startDate: "2023-10-23", endDate: "2023-10-29" },
-      { id: 203, name: "Concrete Pouring", nameAr: "صب الخرسانة", progress: 100, status: 'completed', assignee: "David Wilson", startDate: "2023-10-30", endDate: "2023-11-02" },
-      { id: 204, name: "Curing", nameAr: "المعالجة", progress: 100, status: 'completed', assignee: "Liam Harris", startDate: "2023-11-03", endDate: "2023-11-05" }
+      { id: 201, name: "Excavation", nameAr: "الحفر", progress: 100, status: 'completed', assignee: "Robert Chen", startDate: "2023-10-16", endDate: "2023-10-22", assignedWorkers: [] },
+      { id: 202, name: "Foundation Layout", nameAr: "تخطيط الأساس", progress: 100, status: 'completed', assignee: "Ali Mohammed", startDate: "2023-10-23", endDate: "2023-10-29", assignedWorkers: [] },
+      { id: 203, name: "Concrete Pouring", nameAr: "صب الخرسانة", progress: 100, status: 'completed', assignee: "David Wilson", startDate: "2023-10-30", endDate: "2023-11-02", assignedWorkers: [] },
+      { id: 204, name: "Curing", nameAr: "المعالجة", progress: 100, status: 'completed', assignee: "Liam Harris", startDate: "2023-11-03", endDate: "2023-11-05", assignedWorkers: [] }
     ]
   },
   {
@@ -82,10 +114,10 @@ const projectStages = [
     startDate: "2023-11-06",
     endDate: "2023-12-15",
     tasks: [
-      { id: 301, name: "Framing", nameAr: "هيكلة", progress: 100, status: 'completed', assignee: "Sophia Martinez", startDate: "2023-11-06", endDate: "2023-11-20" },
-      { id: 302, name: "Wall Construction", nameAr: "بناء الجدران", progress: 100, status: 'completed', assignee: "Omar Khan", startDate: "2023-11-21", endDate: "2023-12-05" },
-      { id: 303, name: "Roofing", nameAr: "السقف", progress: 30, status: 'delayed', assignee: "Noah Williams", startDate: "2023-12-06", endDate: "2023-12-15" },
-      { id: 304, name: "Structural Inspection", nameAr: "فحص الهيكل", progress: 0, status: 'not-started', assignee: "Isabella Taylor", startDate: "2023-12-16", endDate: "2023-12-18" }
+      { id: 301, name: "Framing", nameAr: "هيكلة", progress: 100, status: 'completed', assignee: "Sophia Martinez", startDate: "2023-11-06", endDate: "2023-11-20", assignedWorkers: [] },
+      { id: 302, name: "Wall Construction", nameAr: "بناء الجدران", progress: 100, status: 'completed', assignee: "Omar Khan", startDate: "2023-11-21", endDate: "2023-12-05", assignedWorkers: [] },
+      { id: 303, name: "Roofing", nameAr: "السقف", progress: 30, status: 'delayed', assignee: "Noah Williams", startDate: "2023-12-06", endDate: "2023-12-15", assignedWorkers: [] },
+      { id: 304, name: "Structural Inspection", nameAr: "فحص الهيكل", progress: 0, status: 'not-started', assignee: "Isabella Taylor", startDate: "2023-12-16", endDate: "2023-12-18", assignedWorkers: [] }
     ]
   },
   {
@@ -99,11 +131,11 @@ const projectStages = [
     startDate: "2023-12-19",
     endDate: "2024-01-30",
     tasks: [
-      { id: 401, name: "Plumbing", nameAr: "السباكة", progress: 0, status: 'not-started', assignee: "Ethan Clark", startDate: "2023-12-19", endDate: "2023-12-30" },
-      { id: 402, name: "Electrical", nameAr: "الكهرباء", progress: 0, status: 'not-started', assignee: "Aisha Rahman", startDate: "2023-12-31", endDate: "2024-01-10" },
-      { id: 403, name: "Drywall", nameAr: "الجدران الجافة", progress: 0, status: 'not-started', assignee: "William Rodriguez", startDate: "2024-01-11", endDate: "2024-01-20" },
-      { id: 404, name: "Flooring", nameAr: "الأرضيات", progress: 0, status: 'not-started', assignee: "Olivia Lewis", startDate: "2024-01-21", endDate: "2024-01-25" },
-      { id: 405, name: "Painting", nameAr: "الدهان", progress: 0, status: 'not-started', assignee: "James Martin", startDate: "2024-01-26", endDate: "2024-01-30" }
+      { id: 401, name: "Plumbing", nameAr: "السباكة", progress: 0, status: 'not-started', assignee: "Ethan Clark", startDate: "2023-12-19", endDate: "2023-12-30", assignedWorkers: [] },
+      { id: 402, name: "Electrical", nameAr: "الكهرباء", progress: 0, status: 'not-started', assignee: "Aisha Rahman", startDate: "2023-12-31", endDate: "2024-01-10", assignedWorkers: [] },
+      { id: 403, name: "Drywall", nameAr: "الجدران الجافة", progress: 0, status: 'not-started', assignee: "William Rodriguez", startDate: "2024-01-11", endDate: "2024-01-20", assignedWorkers: [] },
+      { id: 404, name: "Flooring", nameAr: "الأرضيات", progress: 0, status: 'not-started', assignee: "Olivia Lewis", startDate: "2024-01-21", endDate: "2024-01-25", assignedWorkers: [] },
+      { id: 405, name: "Painting", nameAr: "الدهان", progress: 0, status: 'not-started', assignee: "James Martin", startDate: "2024-01-26", endDate: "2024-01-30", assignedWorkers: [] }
     ]
   },
   {
@@ -117,9 +149,9 @@ const projectStages = [
     startDate: "2024-02-01",
     endDate: "2024-02-20",
     tasks: [
-      { id: 501, name: "Facade", nameAr: "الواجهة", progress: 0, status: 'not-started', assignee: "Charlotte Walker", startDate: "2024-02-01", endDate: "2024-02-10" },
-      { id: 502, name: "Landscaping", nameAr: "تنسيق الحدائق", progress: 0, status: 'not-started', assignee: "Mohammad Ahmad", startDate: "2024-02-11", endDate: "2024-02-16" },
-      { id: 503, name: "Final Inspection", nameAr: "الفحص النهائي", progress: 0, status: 'not-started', assignee: "Alexander Thompson", startDate: "2024-02-17", endDate: "2024-02-20" }
+      { id: 501, name: "Facade", nameAr: "الواجهة", progress: 0, status: 'not-started', assignee: "Charlotte Walker", startDate: "2024-02-01", endDate: "2024-02-10", assignedWorkers: [] },
+      { id: 502, name: "Landscaping", nameAr: "تنسيق الحدائق", progress: 0, status: 'not-started', assignee: "Mohammad Ahmad", startDate: "2024-02-11", endDate: "2024-02-16", assignedWorkers: [] },
+      { id: 503, name: "Final Inspection", nameAr: "الفحص النهائي", progress: 0, status: 'not-started', assignee: "Alexander Thompson", startDate: "2024-02-17", endDate: "2024-02-20", assignedWorkers: [] }
     ]
   }
 ];
@@ -151,6 +183,32 @@ const calculateOverdueDays = (endDate: string) => {
 const ProjectStages = ({ project }: ProjectStagesProps) => {
   const [expandedStages, setExpandedStages] = useState<number[]>([]);
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchWorkers = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllWorkers();
+        if (Array.isArray(data)) {
+          setWorkers(data);
+        } else {
+          console.error('Invalid workers data:', data);
+          setWorkers([]);
+        }
+      } catch (err) {
+        console.error('Error fetching workers:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch workers');
+        setWorkers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkers();
+  }, []);
   
   const toggleStage = (stageId: number) => {
     setExpandedStages(prev => 
@@ -194,6 +252,20 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
   
   const handleViewTaskDetails = (taskId: number) => {
     toast.info(`View details for task ${taskId} will be implemented soon`);
+  };
+
+  const handleWorkerSelection = (taskId: number, selectedWorkers: Worker[]) => {
+    // Update the task's assigned workers
+    const updatedStages = projectStages.map(stage => ({
+      ...stage,
+      tasks: stage.tasks.map(task => 
+        task.id === taskId 
+          ? { ...task, assignedWorkers: selectedWorkers }
+          : task
+      )
+    }));
+    // TODO: Update the backend with the new worker assignments
+    console.log('Updated worker assignments:', updatedStages);
   };
 
   return (
@@ -343,6 +415,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                           const taskStatus = statusConfig[task.status as keyof typeof statusConfig];
                           const TaskStatusIcon = taskStatus.icon;
                           const overdueDays = calculateOverdueDays(task.endDate);
+                          const isCompleted = completedTasks.includes(task.id);
                           
                           return (
                             <div key={task.id} className="border rounded-md overflow-hidden">
@@ -363,10 +436,15 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                 </div>
                                 
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="h-6 px-2 text-xs">
-                                    <User className="h-3 w-3 mr-1" />
-                                    {task.assignee}
-                                  </Badge>
+                                  {!loading && (
+                                    <WorkerMultiSelect
+                                      workers={workers}
+                                      selectedWorkers={task.assignedWorkers || []}
+                                      onSelectionChange={(selectedWorkers) => handleWorkerSelection(task.id, selectedWorkers)}
+                                      placeholder="Assign workers..."
+                                      className="w-64"
+                                    />
+                                  )}
                                   
                                   {overdueDays > 0 && task.status !== 'completed' && (
                                     <Badge variant="destructive" className="h-6 px-2 text-xs">
@@ -377,7 +455,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                   <div className="flex items-center gap-2">
                                     <Checkbox
                                       id={`task-${task.id}`}
-                                      checked={completedTasks.includes(task.id)}
+                                      checked={isCompleted}
                                       onCheckedChange={() => toggleTaskCompletion(task.id)}
                                       className="h-4 w-4"
                                     />

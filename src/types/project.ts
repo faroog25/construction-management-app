@@ -1,3 +1,5 @@
+import { Worker } from '@/services/workerService';
+
 export interface Stage {
   id: string;
   name: string;
@@ -16,6 +18,7 @@ export interface Task {
   dueDate?: Date;
   stageId: string;
   assignedTo?: string;
+  assignedWorkers?: Worker[];
   createdAt: Date;
   updatedAt: Date;
 }
