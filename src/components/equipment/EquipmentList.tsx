@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, ArrowUpDown, Wrench } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, Wrench, RotateCcw } from 'lucide-react';
 import { EquipmentItem } from '@/types/equipment';
 import { mockEquipment } from '@/data/mockEquipment';
 
@@ -28,6 +28,12 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
   };
 
   const handleMakeAvailable = (id: string) => {
+    setEquipment(equipment.map(item => 
+      item.id === id ? { ...item, status: 'Available' } : item
+    ));
+  };
+
+  const handleRestore = (id: string) => {
     setEquipment(equipment.map(item => 
       item.id === id ? { ...item, status: 'Available' } : item
     ));
@@ -128,7 +134,17 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                             className="gap-1"
                           >
                             <Wrench className="h-4 w-4" />
-                            Make Available
+                            Available
+                          </Button>
+                        ) : item.status === 'In Use' ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleRestore(item.id)}
+                            className="gap-1"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                            Restore
                           </Button>
                         ) : (
                           <Button 
