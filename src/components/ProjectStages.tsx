@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
@@ -22,7 +23,9 @@ import {
   PlayCircle,
   PauseCircle,
   User,
-  Info
+  Info,
+  Calendar,
+  CalendarClock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -158,11 +161,11 @@ const projectStages = [
 
 // Status configuration
 const statusConfig = {
-  'completed': { label: 'Completed', className: 'bg-green-100 text-green-800', icon: CheckCircle },
-  'in-progress': { label: 'In Progress', className: 'bg-blue-100 text-blue-800', icon: PlayCircle },
-  'delayed': { label: 'Delayed', className: 'bg-red-100 text-red-800', icon: AlertCircle },
-  'not-started': { label: 'Not Started', className: 'bg-gray-100 text-gray-800', icon: Clock },
-  'paused': { label: 'Paused', className: 'bg-amber-100 text-amber-800', icon: PauseCircle },
+  'completed': { label: 'Completed', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle },
+  'in-progress': { label: 'In Progress', className: 'bg-blue-100 text-blue-800 border-blue-200', icon: PlayCircle },
+  'delayed': { label: 'Delayed', className: 'bg-red-100 text-red-800 border-red-200', icon: AlertCircle },
+  'not-started': { label: 'Not Started', className: 'bg-gray-100 text-gray-800 border-gray-200', icon: Clock },
+  'paused': { label: 'Paused', className: 'bg-amber-100 text-amber-800 border-amber-200', icon: PauseCircle },
 };
 
 // Format date function
@@ -270,53 +273,69 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Project Stages</h2>
-        <Button onClick={handleAddStage}>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Project Stages</h2>
+          <p className="text-gray-500 mt-1">Manage and track all stages and tasks</p>
+        </div>
+        <Button onClick={handleAddStage} className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-md transition-all duration-300">
           <Plus className="mr-2 h-4 w-4" />
           Add Stage
         </Button>
       </div>
       
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {projectStages.map((stage) => {
           const stageStatus = statusConfig[stage.status as keyof typeof statusConfig];
           const StageStatusIcon = stageStatus.icon;
           const isExpanded = expandedStages.includes(stage.id);
           
           return (
-            <Card key={stage.id} className="shadow-sm border overflow-hidden">
+            <Card 
+              key={stage.id} 
+              className={cn(
+                "shadow-sm border border-slate-200 overflow-hidden transition-all duration-300",
+                isExpanded && "ring-1 ring-violet-200"
+              )}
+            >
               <div 
                 className={cn(
-                  "flex flex-col md:flex-row md:items-center justify-between p-4 cursor-pointer transition-colors",
-                  isExpanded ? "bg-muted/20" : "hover:bg-muted/10"
+                  "flex flex-col md:flex-row md:items-center justify-between px-5 py-4 cursor-pointer transition-colors",
+                  isExpanded ? "bg-slate-50" : "hover:bg-slate-50"
                 )}
                 onClick={() => toggleStage(stage.id)}
               >
                 <div className="flex items-center gap-3 mb-2 md:mb-0">
-                  <StageStatusIcon 
-                    className={cn(
-                      "h-5 w-5",
-                      stage.status === 'completed' ? "text-green-500" : 
-                      stage.status === 'in-progress' ? "text-blue-500" :
-                      stage.status === 'delayed' ? "text-red-500" : "text-gray-400"
-                    )} 
-                  />
+                  <div className={cn(
+                    "p-2 rounded-full",
+                    stage.status === 'completed' ? "bg-green-50" : 
+                    stage.status === 'in-progress' ? "bg-blue-50" :
+                    stage.status === 'delayed' ? "bg-red-50" : "bg-gray-50"
+                  )}>
+                    <StageStatusIcon 
+                      className={cn(
+                        "h-5 w-5",
+                        stage.status === 'completed' ? "text-green-500" : 
+                        stage.status === 'in-progress' ? "text-blue-500" :
+                        stage.status === 'delayed' ? "text-red-500" : "text-gray-400"
+                      )} 
+                    />
+                  </div>
                   <div>
-                    <h3 className="font-medium text-base">{stage.name}</h3>
-                    <p className="text-sm text-muted-foreground">{stage.nameAr}</p>
+                    <h3 className="font-semibold text-base">{stage.name}</h3>
+                    <p className="text-sm text-gray-500">{stage.nameAr}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 md:gap-6">
                   <div className="hidden md:block">
-                    <Badge className={stageStatus.className}>
+                    <Badge className={cn("px-3 py-1 font-medium text-xs", stageStatus.className)}>
                       {stageStatus.label}
                     </Badge>
                   </div>
                   
                   <div className="flex flex-1 items-center gap-2 md:w-48">
-                    <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden">
+                    <div className="h-2 flex-1 bg-slate-100 rounded-full overflow-hidden">
                       <div 
                         className={cn(
                           "h-full transition-all duration-300 ease-out",
@@ -327,17 +346,17 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                         style={{ width: `${stage.progress}%` }}
                       ></div>
                     </div>
-                    <span className="text-xs font-medium w-8 text-right">{stage.progress}%</span>
+                    <span className="text-xs font-medium w-10 text-right">{stage.progress}%</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-slate-500" onClick={(e) => e.stopPropagation()}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditStage(stage.id); }}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit Stage
@@ -360,7 +379,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-8 w-8"
+                      className="h-8 w-8 text-slate-500"
                       onClick={(e) => { e.stopPropagation(); toggleStage(stage.id); }}
                     >
                       {isExpanded ? (
@@ -374,43 +393,61 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
               </div>
               
               {isExpanded && (
-                <div className="p-4 pt-1 border-t bg-white">
+                <div className="p-5 border-t bg-white">
                   <div className="py-3">
-                    <div className="flex flex-wrap gap-4 mb-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Assignee</p>
-                        <p className="flex items-center gap-1 text-sm font-medium">
-                          <User className="h-3.5 w-3.5" />
-                          {stage.assignee}
-                        </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-indigo-50 rounded-full">
+                          <User className="h-3.5 w-3.5 text-indigo-500" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Assignee</p>
+                          <p className="text-sm font-medium">{stage.assignee}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Start Date</p>
-                        <p className="text-sm font-medium">{formatDate(stage.startDate)}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-emerald-50 rounded-full">
+                          <Calendar className="h-3.5 w-3.5 text-emerald-500" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Start Date</p>
+                          <p className="text-sm font-medium">{formatDate(stage.startDate)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Expected Date</p>
-                        <p className="text-sm font-medium">{formatDate(stage.endDate)}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-amber-50 rounded-full">
+                          <CalendarClock className="h-3.5 w-3.5 text-amber-500" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Expected Date</p>
+                          <p className="text-sm font-medium">{formatDate(stage.endDate)}</p>
+                        </div>
                       </div>
                     </div>
                     
                     {stage.description && (
-                      <div className="mb-4">
-                        <p className="text-sm text-muted-foreground mb-1">Description</p>
-                        <p className="text-sm">{stage.description}</p>
+                      <div className="mb-6 p-4 bg-white border border-slate-100 rounded-lg">
+                        <p className="text-sm font-medium text-gray-700 mb-1">Description</p>
+                        <p className="text-sm text-gray-600">{stage.description}</p>
                       </div>
                     )}
                     
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium">Tasks ({stage.tasks.length})</h4>
-                        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}>
+                    <div className="mt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-medium text-gray-900 flex items-center">
+                          Tasks ({stage.tasks.length})
+                          <Badge className="mr-2 h-5 w-5 text-center ml-2 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                            {stage.tasks.length}
+                          </Badge>
+                        </h4>
+                        <Button size="sm" onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}
+                          className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-800">
                           <Plus className="mr-1 h-3.5 w-3.5" />
                           Add Task
                         </Button>
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {stage.tasks.map((task) => {
                           const taskStatus = statusConfig[task.status as keyof typeof statusConfig];
                           const TaskStatusIcon = taskStatus.icon;
@@ -418,54 +455,85 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                           const isCompleted = completedTasks.includes(task.id);
                           
                           return (
-                            <div key={task.id} className="border rounded-md overflow-hidden">
-                              <div className="flex flex-col md:flex-row md:items-center justify-between p-3 gap-3">
-                                <div className="flex items-center gap-3">
-                                  <TaskStatusIcon 
-                                    className={cn(
-                                      "h-4 w-4",
-                                      task.status === 'completed' ? "text-green-500" : 
-                                      task.status === 'in-progress' ? "text-blue-500" :
-                                      task.status === 'delayed' ? "text-red-500" : "text-gray-400"
-                                    )} 
-                                  />
-                                  <div>
-                                    <p className="font-medium">{task.name}</p>
-                                    <p className="text-xs text-muted-foreground">{task.nameAr}</p>
+                            <Card key={task.id} className={cn(
+                              "border rounded-lg overflow-hidden transition-all",
+                              isCompleted && "bg-slate-50 border-slate-200"
+                            )}>
+                              <div className="p-4">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                  <div className="flex items-start gap-3">
+                                    <div className={cn(
+                                      "p-1.5 rounded-full mt-0.5",
+                                      task.status === 'completed' ? "bg-green-50" : 
+                                      task.status === 'in-progress' ? "bg-blue-50" :
+                                      task.status === 'delayed' ? "bg-red-50" : "bg-gray-50"
+                                    )}>
+                                      <TaskStatusIcon 
+                                        className={cn(
+                                          "h-3.5 w-3.5",
+                                          task.status === 'completed' ? "text-green-500" : 
+                                          task.status === 'in-progress' ? "text-blue-500" :
+                                          task.status === 'delayed' ? "text-red-500" : "text-gray-400"
+                                        )} 
+                                      />
+                                    </div>
+                                    <div>
+                                      <div className="flex items-center">
+                                        <p className={cn(
+                                          "font-medium",
+                                          isCompleted && "line-through text-gray-500"
+                                        )}>{task.name}</p>
+                                        <Badge className={cn("ml-2", taskStatus.className)}>
+                                          {taskStatus.label}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-xs text-gray-500 mt-0.5">{task.nameAr}</p>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-3 w-full md:w-auto">
+                                    {!loading && (
+                                      <WorkerMultiSelect
+                                        workers={workers}
+                                        selectedWorkers={task.assignedWorkers || []}
+                                        onSelectionChange={(selectedWorkers) => handleWorkerSelection(task.id, selectedWorkers)}
+                                        placeholder="Assign workers..."
+                                        className="w-64"
+                                      />
+                                    )}
+                                    
+                                    {overdueDays > 0 && task.status !== 'completed' && (
+                                      <Badge variant="destructive" className="h-6 px-2 text-xs">
+                                        متأخر {overdueDays} يوم
+                                      </Badge>
+                                    )}
                                   </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-2">
-                                  {!loading && (
-                                    <WorkerMultiSelect
-                                      workers={workers}
-                                      selectedWorkers={task.assignedWorkers || []}
-                                      onSelectionChange={(selectedWorkers) => handleWorkerSelection(task.id, selectedWorkers)}
-                                      placeholder="Assign workers..."
-                                      className="w-64"
-                                    />
-                                  )}
-                                  
-                                  {overdueDays > 0 && task.status !== 'completed' && (
-                                    <Badge variant="destructive" className="h-6 px-2 text-xs">
-                                      متأخر {overdueDays} يوم
-                                    </Badge>
-                                  )}
+                                <div className="mt-3 flex justify-between items-center">
+                                  <div className="flex gap-6">
+                                    <div className="flex items-center gap-1.5">
+                                      <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                      <span className="text-xs text-gray-500">{formatDate(task.startDate)} - {formatDate(task.endDate)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <User className="h-3.5 w-3.5 text-gray-400" />
+                                      <span className="text-xs text-gray-500">{task.assignee}</span>
+                                    </div>
+                                  </div>
                                   
                                   <div className="flex items-center gap-2">
                                     <Checkbox
                                       id={`task-${task.id}`}
                                       checked={isCompleted}
                                       onCheckedChange={() => toggleTaskCompletion(task.id)}
-                                      className="h-4 w-4"
+                                      className="h-4 w-4 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
                                     />
-                                  </div>
-                                  
-                                  <div className="flex items-center gap-1">
+                                    
                                     <Button 
                                       variant="ghost" 
                                       size="icon" 
-                                      className="h-7 w-7" 
+                                      className="h-7 w-7 text-slate-500 hover:bg-slate-100" 
                                       onClick={() => handleViewTaskDetails(task.id)}
                                     >
                                       <Info className="h-3.5 w-3.5" />
@@ -473,7 +541,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                     <Button 
                                       variant="ghost" 
                                       size="icon" 
-                                      className="h-7 w-7" 
+                                      className="h-7 w-7 text-slate-500 hover:bg-slate-100" 
                                       onClick={() => handleEditTask(task.id)}
                                     >
                                       <Edit className="h-3.5 w-3.5" />
@@ -481,7 +549,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                     <Button 
                                       variant="ghost" 
                                       size="icon" 
-                                      className="h-7 w-7 text-red-500" 
+                                      className="h-7 w-7 text-red-500 hover:bg-red-50" 
                                       onClick={() => handleDeleteTask(task.id)}
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />
@@ -489,18 +557,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                   </div>
                                 </div>
                               </div>
-                              
-                              <div className="px-3 pb-3">
-                                <div className="flex items-center">
-                                  <span className="text-muted-foreground mr-2">Start:</span>
-                                  <span>{formatDate(task.startDate)}</span>
-                                </div>
-                                <div className="flex items-center">
-                                  <span className="text-muted-foreground mr-2">Expected:</span>
-                                  <span>{formatDate(task.endDate)}</span>
-                                </div>
-                              </div>
-                            </div>
+                            </Card>
                           );
                         })}
                       </div>
