@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -46,7 +45,7 @@ const Team = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Team</h1>
-            <p className="text-muted-foreground mt-1">Manage your team members and clients</p>
+            <p className="text-muted-foreground mt-1">Manage your workers and clients</p>
           </div>
           <div className="mt-4 sm:mt-0 flex gap-2">
             <Button variant="outline" onClick={handleExport}>
@@ -65,7 +64,7 @@ const Team = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search team members..." className="pl-10" />
+                <Input placeholder="Search workers..." className="pl-10" />
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={handleFilterToggle}>
@@ -144,7 +143,7 @@ const Team = () => {
           <TabsList className="bg-muted/50">
             <TabsTrigger value="team" className="flex items-center gap-2">
               <UserCog className="h-4 w-4" />
-              <span>Team Members</span>
+              <span>Workers</span>
               <Badge variant="secondary" className="ml-1">24</Badge>
             </TabsTrigger>
             <TabsTrigger value="engineers" className="flex items-center gap-2">

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Worker, getAllWorkers } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -43,7 +42,7 @@ export function TeamMembers() {
         setWorkers(validWorkers);
       } catch (err) {
         console.error('Error fetching workers:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch team members');
+        setError(err instanceof Error ? err.message : 'Failed to fetch workers');
       } finally {
         setLoading(false);
       }
@@ -72,13 +71,13 @@ export function TeamMembers() {
         <CardHeader className="flex flex-row items-center justify-between bg-muted/10 pb-2">
           <CardTitle className="flex items-center gap-2 text-xl">
             <UserCog className="h-5 w-5 text-primary" />
-            Work Team Members
+            Workers
           </CardTitle>
           <div className="flex items-center gap-2">
             <div className="relative w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="Search members..." 
+                placeholder="Search workers..." 
                 className="pl-9 h-9 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -117,16 +116,16 @@ export function TeamMembers() {
                     {searchQuery ? 
                       <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                         <Search className="h-8 w-8 opacity-30" />
-                        <p>No members found matching "{searchQuery}"</p>
+                        <p>No workers found matching "{searchQuery}"</p>
                         <Button variant="link" onClick={() => setSearchQuery('')}>Clear search</Button>
                       </div>
                       : 
                       <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                         <UserCog className="h-8 w-8 opacity-30" />
-                        <p>No team members found</p>
+                        <p>No workers found</p>
                         <Button variant="outline" size="sm">
                           <Plus className="mr-2 h-4 w-4" />
-                          Add your first team member
+                          Add your first worker
                         </Button>
                       </div>
                     }

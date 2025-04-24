@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Activity, Clock, Users, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -62,7 +61,7 @@ const DashboardStats = () => {
         icon={<Clock className="h-5 w-5 text-amber-500" />}
       />
       <StatCard
-        title="Team Members"
+        title="Workers"
         value={24}
         change={{ value: 8, isPositive: true }}
         icon={<Users className="h-5 w-5 text-indigo-500" />}
