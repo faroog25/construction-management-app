@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { format, parseISO } from 'date-fns';
-import { FileText, Calendar, Clock, DollarSign, Info } from 'lucide-react';
+import { FileText, Calendar, Clock, DollarSign, Info, Filter } from 'lucide-react';
 import { Booking } from '@/types/equipment';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface BookingsListProps {
   bookings: Booking[];
@@ -14,6 +15,7 @@ interface BookingsListProps {
 
 const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const handleViewDetails = (booking: Booking) => {
     setSelectedBooking(booking);
@@ -31,6 +33,13 @@ const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
     }
   };
 
+  const filteredBookings = bookings.filter(booking => {
+    if (statusFilter === 'all') return true;
+    if (statusFilter === 'reserved') return !booking.endDate;
+    if (statusFilter === 'returned') return booking.endDate;
+    return true;
+  });
+
   return (
     <>
       <Card className="shadow-md">
@@ -41,19 +50,29 @@ const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {bookings.length === 0 ? (
+          <div className="flex justify-end mb-4">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Bookings</SelectItem>
+                <SelectItem value="reserved">Reserved</SelectItem>
+                <SelectItem value="returned">Returned</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {filteredBookings.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Bookings Yet</h3>
-              <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                You don't have any equipment bookings yet. Go to the equipment list to book your first equipment.
+              <h3 className="text-lg font-medium mb-2">No Bookings Found</h3>
+              <p className="text-muted-foreground">
+                {statusFilter === 'all' 
+                  ? "You don't have any bookings yet." 
+                  : `No ${statusFilter} bookings found.`}
               </p>
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = '/equipment?tab=equipment'}
-              >
-                Browse Equipment
-              </Button>
             </div>
           ) : (
             <div className="overflow-auto rounded-md border">
@@ -62,35 +81,28 @@ const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
                   <TableRow>
                     <TableHead>Equipment</TableHead>
                     <TableHead>Project</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Total Cost</TableHead>
+                    <TableHead>Reservation Date</TableHead>
+                    <TableHead>Return Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bookings.map((booking) => (
+                  {filteredBookings.map((booking) => (
                     <TableRow key={booking.id}>
                       <TableCell className="font-medium">
                         {booking.equipmentName}
                         <div className="text-xs text-muted-foreground mt-1">{booking.category}</div>
                       </TableCell>
                       <TableCell>{booking.projectName}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{booking.duration} days</span>
-                          <span className="text-xs text-muted-foreground">
-                            {formatDate(booking.startDate)} - {formatDate(booking.endDate)}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>${booking.totalCost.toFixed(2)}</TableCell>
+                      <TableCell>{formatDate(booking.startDate)}</TableCell>
+                      <TableCell>{booking.endDate ? formatDate(booking.endDate) : "Not returned yet"}</TableCell>
                       <TableCell>
                         <Badge 
-                          variant={booking.status === 'Confirmed' ? 'default' : 'outline'}
-                          className={booking.status === 'Confirmed' ? 'bg-green-500' : ''}
+                          variant={booking.endDate ? 'default' : 'outline'}
+                          className={booking.endDate ? 'bg-green-500' : 'bg-blue-500'}
                         >
-                          {booking.status}
+                          {booking.endDate ? 'Returned' : 'Reserved'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -125,7 +137,7 @@ const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
               <div className="bg-muted/30 p-4 rounded-lg">
                 <h3 className="font-medium text-lg mb-3">{selectedBooking.equipmentName}</h3>
                 <p className="text-sm text-muted-foreground mb-2">Category: {selectedBooking.category}</p>
-                <p className="text-sm text-muted-foreground">Status: {selectedBooking.status}</p>
+                <p className="text-sm text-muted-foreground">Status: {selectedBooking.endDate ? 'Returned' : 'Reserved'}</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -140,14 +152,9 @@ const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
                   <Calendar className="h-4 w-4 text-primary mt-0.5" />
                   <div>
                     <p className="text-sm font-medium">End Date</p>
-                    <p className="text-sm text-muted-foreground">{formatDate(selectedBooking.endDate)}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Clock className="h-4 w-4 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">Duration</p>
-                    <p className="text-sm text-muted-foreground">{selectedBooking.duration} days</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedBooking.endDate ? formatDate(selectedBooking.endDate) : 'Not returned yet'}
+                    </p>
                   </div>
                 </div>
               </div>
