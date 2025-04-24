@@ -6,7 +6,7 @@ import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
-import { CheckCircle2, XCircle, Search, Plus, UserCog } from 'lucide-react';
+import { CheckCircle2, XCircle, Search, Plus, UserCog, ArrowUpDown } from 'lucide-react';
 import { Input } from './ui/input';
 
 export function TeamMembers() {
@@ -14,6 +14,8 @@ export function TeamMembers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortColumn, setSortColumn] = useState<string>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const fetchWorkers = async () => {
@@ -51,11 +53,36 @@ export function TeamMembers() {
     fetchWorkers();
   }, []);
 
+  const handleSort = (column: string) => {
+    if (column === sortColumn) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
   // Filter workers based on search query
   const filteredWorkers = workers.filter(worker => 
     worker.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     worker.specialty.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Sort filtered workers
+  const sortedWorkers = [...filteredWorkers].sort((a, b) => {
+    const direction = sortDirection === 'asc' ? 1 : -1;
+    
+    switch (sortColumn) {
+      case 'name':
+        return direction * a.fullName.localeCompare(b.fullName);
+      case 'specialty':
+        return direction * a.specialty.localeCompare(b.specialty);
+      case 'status':
+        return direction * (a.isAvailable === b.isAvailable ? 0 : a.isAvailable ? -1 : 1);
+      default:
+        return 0;
+    }
+  });
 
   if (error) {
     return (
@@ -93,9 +120,33 @@ export function TeamMembers() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className="font-medium">Name</TableHead>
-                <TableHead className="font-medium">Specialty</TableHead>
-                <TableHead className="font-medium">Status</TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="flex items-center">
+                    Name
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('specialty')}
+                >
+                  <div className="flex items-center">
+                    Specialty
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('status')}
+                >
+                  <div className="flex items-center">
+                    Status
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
                 <TableHead className="font-medium text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -110,7 +161,7 @@ export function TeamMembers() {
                     <TableCell className="text-right"><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : filteredWorkers.length === 0 ? (
+              ) : sortedWorkers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center h-32">
                     {searchQuery ? 
@@ -132,7 +183,7 @@ export function TeamMembers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredWorkers.map((worker) => (
+                sortedWorkers.map((worker) => (
                   <TableRow key={worker.id} className="group">
                     <TableCell className="font-medium">{worker.fullName}</TableCell>
                     <TableCell>{worker.specialty}</TableCell>

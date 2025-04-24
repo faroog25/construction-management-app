@@ -1,13 +1,12 @@
-
 import { useEffect, useState } from 'react';
-import { SiteEngineer, getSiteEngineers } from '../services/siteEngineerService';
+import { SiteEngineer, getAllEngineers } from '../services/engineerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
-import { CheckCircle2, XCircle, Search, Plus, UserCog, Pencil, Trash2 } from 'lucide-react';
+import { CheckCircle2, XCircle, Search, Plus, HardHat, ArrowUpDown } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { NewSiteEngineerModal } from './NewSiteEngineerModal';
@@ -19,6 +18,8 @@ export function SiteEngineers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortColumn, setSortColumn] = useState<string>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
   const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<SiteEngineer | null>(null);
@@ -29,17 +30,31 @@ export function SiteEngineers() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getSiteEngineers(currentPage, 10);
+      const data = await getAllEngineers();
 
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to fetch site engineers');
+      // Validate the data structure
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data structure received from API');
       }
 
-      setEngineers(response.data.items || []);
-      setTotalPages(response.data.totalPages || 1);
+      // Validate each engineer object
+      const validEngineers = data.filter(engineer => {
+        return (
+          engineer &&
+          typeof engineer === 'object' &&
+          'id' in engineer &&
+          'fullName' in engineer &&
+          'phoneNumber' in engineer &&
+          'email' in engineer &&
+          'address' in engineer &&
+          'isAvailable' in engineer
+        );
+      });
+
+      setEngineers(validEngineers);
     } catch (err) {
-      console.error('Error fetching site engineers:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch site engineers');
+      console.error('Error fetching engineers:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch engineers');
     } finally {
       setLoading(false);
     }
@@ -47,7 +62,43 @@ export function SiteEngineers() {
 
   useEffect(() => {
     fetchEngineers();
-  }, [currentPage]);
+  }, []);
+
+  const handleSort = (column: string) => {
+    if (column === sortColumn) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Filter engineers based on search query
+  const filteredEngineers = engineers.filter(engineer => 
+    engineer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    engineer.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    engineer.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Sort filtered engineers
+  const sortedEngineers = [...filteredEngineers].sort((a, b) => {
+    const direction = sortDirection === 'asc' ? 1 : -1;
+    
+    switch (sortColumn) {
+      case 'name':
+        return direction * a.fullName.localeCompare(b.fullName);
+      case 'phone':
+        return direction * a.phoneNumber.localeCompare(b.phoneNumber);
+      case 'email':
+        return direction * (a.email || '').localeCompare(b.email || '');
+      case 'address':
+        return direction * (a.address || '').localeCompare(b.address || '');
+      case 'status':
+        return direction * (a.isAvailable === b.isAvailable ? 0 : a.isAvailable ? -1 : 1);
+      default:
+        return 0;
+    }
+  });
 
   const handleDeleteEngineer = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this engineer?')) {
@@ -67,14 +118,6 @@ export function SiteEngineers() {
     setIsEditEngineerModalOpen(true);
   };
 
-  // Filter engineers based on search query
-  const filteredEngineers = engineers.filter(engineer => 
-    engineer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (engineer.email && engineer.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    engineer.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (engineer.address && engineer.address.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
   if (error) {
     return (
       <Alert variant="destructive">
@@ -88,7 +131,7 @@ export function SiteEngineers() {
       <Card className="border shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between bg-muted/10 pb-2">
           <CardTitle className="flex items-center gap-2 text-xl">
-            <UserCog className="h-5 w-5 text-primary" />
+            <HardHat className="h-5 w-5 text-primary" />
             Site Engineers
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -111,11 +154,51 @@ export function SiteEngineers() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className="font-medium">Name</TableHead>
-                <TableHead className="font-medium">Phone</TableHead>
-                <TableHead className="font-medium">Email</TableHead>
-                <TableHead className="font-medium">Address</TableHead>
-                <TableHead className="font-medium">Status</TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="flex items-center">
+                    Name
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('phone')}
+                >
+                  <div className="flex items-center">
+                    Phone
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('email')}
+                >
+                  <div className="flex items-center">
+                    Email
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('address')}
+                >
+                  <div className="flex items-center">
+                    Address
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('status')}
+                >
+                  <div className="flex items-center">
+                    Status
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
                 <TableHead className="font-medium text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -132,7 +215,7 @@ export function SiteEngineers() {
                     <TableCell className="text-right"><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : filteredEngineers.length === 0 ? (
+              ) : sortedEngineers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-32">
                     {searchQuery ? 
@@ -143,7 +226,7 @@ export function SiteEngineers() {
                       </div>
                       : 
                       <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                        <UserCog className="h-8 w-8 opacity-30" />
+                        <HardHat className="h-8 w-8 opacity-30" />
                         <p>No site engineers found</p>
                         <Button variant="outline" size="sm" onClick={() => setIsNewEngineerModalOpen(true)}>
                           <Plus className="mr-2 h-4 w-4" />
@@ -154,7 +237,7 @@ export function SiteEngineers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredEngineers.map((engineer) => (
+                sortedEngineers.map((engineer) => (
                   <TableRow key={engineer.id} className="group">
                     <TableCell className="font-medium">{engineer.fullName}</TableCell>
                     <TableCell>{engineer.phoneNumber}</TableCell>
@@ -182,7 +265,7 @@ export function SiteEngineers() {
                           size="xs" 
                           onClick={() => handleEditEngineer(engineer)}
                         >
-                          <Pencil className="h-3 w-3 mr-1" />
+                          <ArrowUpDown className="h-3 w-3 mr-1" />
                           Edit
                         </Button>
                         <Button 
@@ -190,7 +273,7 @@ export function SiteEngineers() {
                           size="xs"
                           onClick={() => handleDeleteEngineer(engineer.id)}
                         >
-                          <Trash2 className="h-3 w-3 mr-1" />
+                          <ArrowUpDown className="h-3 w-3 mr-1" />
                           Delete
                         </Button>
                       </div>

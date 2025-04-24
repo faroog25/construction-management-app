@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { getClients } from '../services/clientService';
 import { Client, ClientType } from '@/types/client';
@@ -8,7 +7,7 @@ import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
-import { Plus, Search, Building2, User, Users } from 'lucide-react';
+import { Plus, Search, Building2, User, Users, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { NewClientModal } from './NewClientModal';
 import { Input } from './ui/input';
@@ -30,6 +29,8 @@ export function ClientMembers() {
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortColumn, setSortColumn] = useState<string>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const fetchClients = async () => {
     try {
@@ -69,12 +70,39 @@ export function ClientMembers() {
     fetchClients();
   }, []);
 
+  const handleSort = (column: string) => {
+    if (column === sortColumn) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
   // Filter clients based on search query
   const filteredClients = clients.filter(client => 
     client.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Sort filtered clients
+  const sortedClients = [...filteredClients].sort((a, b) => {
+    const direction = sortDirection === 'asc' ? 1 : -1;
+    
+    switch (sortColumn) {
+      case 'name':
+        return direction * a.fullName.localeCompare(b.fullName);
+      case 'email':
+        return direction * (a.email || '').localeCompare(b.email || '');
+      case 'phone':
+        return direction * (a.phoneNumber || '').localeCompare(b.phoneNumber || '');
+      case 'type':
+        return direction * (a.clientType === b.clientType ? 0 : a.clientType === ClientType.Individual ? -1 : 1);
+      default:
+        return 0;
+    }
+  });
 
   if (error) {
     return (
@@ -112,10 +140,42 @@ export function ClientMembers() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className="font-medium">Name</TableHead>
-                <TableHead className="font-medium">Email</TableHead>
-                <TableHead className="font-medium">Phone</TableHead>
-                <TableHead className="font-medium">Type</TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="flex items-center">
+                    Name
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('email')}
+                >
+                  <div className="flex items-center">
+                    Email
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('phone')}
+                >
+                  <div className="flex items-center">
+                    Phone
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="font-medium cursor-pointer"
+                  onClick={() => handleSort('type')}
+                >
+                  <div className="flex items-center">
+                    Type
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
                 <TableHead className="font-medium text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -131,7 +191,7 @@ export function ClientMembers() {
                     <TableCell className="text-right"><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : filteredClients.length === 0 ? (
+              ) : sortedClients.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center h-32">
                     {searchQuery ? 
@@ -153,7 +213,7 @@ export function ClientMembers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredClients.map((client) => (
+                sortedClients.map((client) => (
                   <TableRow key={client.id} className="group">
                     <TableCell className="font-medium">{client.fullName}</TableCell>
                     <TableCell>{client.email}</TableCell>
