@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, ArrowUpDown } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, Wrench } from 'lucide-react';
 import { EquipmentItem } from '@/types/equipment';
 import { mockEquipment } from '@/data/mockEquipment';
 
@@ -14,7 +13,7 @@ interface EquipmentListProps {
 }
 
 const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
-  const [equipment] = useState<EquipmentItem[]>(mockEquipment);
+  const [equipment, setEquipment] = useState<EquipmentItem[]>(mockEquipment);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<keyof EquipmentItem>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -26,6 +25,12 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
       setSortField(field);
       setSortDirection('asc');
     }
+  };
+
+  const handleMakeAvailable = (id: string) => {
+    setEquipment(equipment.map(item => 
+      item.id === id ? { ...item, status: 'Available' } : item
+    ));
   };
 
   const sortedEquipment = [...equipment].sort((a, b) => {
@@ -80,13 +85,6 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                 </TableHead>
                 <TableHead 
                   className="cursor-pointer"
-                  onClick={() => handleSort('dailyRate')}
-                >
-                  Daily Rate
-                  <ArrowUpDown className="ml-2 h-4 w-4 inline" />
-                </TableHead>
-                <TableHead 
-                  className="cursor-pointer"
                   onClick={() => handleSort('status')}
                 >
                   Status
@@ -98,7 +96,7 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
             <TableBody>
               {filteredEquipment.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     No equipment found. Try adjusting your search.
                   </TableCell>
                 </TableRow>
@@ -112,7 +110,6 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                       )}
                     </TableCell>
                     <TableCell>{item.category}</TableCell>
-                    <TableCell>${item.dailyRate.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge 
                         variant={item.status === 'Available' ? 'default' : 'destructive'}
@@ -122,14 +119,28 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        disabled={item.status !== 'Available'}
-                        onClick={() => onSelectEquipment(item)}
-                      >
-                        Book Now
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        {item.status === 'Maintenance' ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleMakeAvailable(item.id)}
+                            className="gap-1"
+                          >
+                            <Wrench className="h-4 w-4" />
+                            Make Available
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            disabled={item.status !== 'Available'}
+                            onClick={() => onSelectEquipment(item)}
+                          >
+                            Book Now
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

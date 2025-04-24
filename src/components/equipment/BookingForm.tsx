@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -144,110 +143,91 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
                 <p>{selectedEquipment.category}</p>
               </div>
               <div>
-                <span className="text-muted-foreground text-sm">Daily Rate:</span>
-                <p>${selectedEquipment.dailyRate.toFixed(2)}</p>
-              </div>
-              <div>
                 <span className="text-muted-foreground text-sm">Status:</span>
                 <p className="text-green-600">{selectedEquipment.status}</p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="projectName">Project Name</Label>
-              <Input
-                id="projectName"
-                placeholder="Enter project name"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="start-date">Start Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP") : "Select date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={handleStartDateChange}
-                    disabled={(date) => date < today}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="duration">Duration (Days)</Label>
-              <Input
-                id="duration"
-                type="number"
-                min="1"
-                max="30"
-                value={duration}
-                onChange={handleDurationChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="end-date">End Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP") : "Select date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={handleEndDateChange}
-                    disabled={(date) => startDate ? date < startDate : date < today}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
-              <Textarea
-                id="notes"
-                placeholder="Any special requirements or notes for this booking"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="projectName">Project Name</Label>
+            <Input
+              id="projectName"
+              placeholder="Enter project name"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              required
+            />
           </div>
 
-          <div className="bg-muted p-4 rounded-md border mt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calculator className="h-5 w-5 text-primary" />
-                <span className="font-medium">Cost Calculation</span>
-              </div>
-              <span className="text-lg font-bold">${totalCost.toFixed(2)}</span>
-            </div>
-            <div className="text-sm text-muted-foreground mt-2">
-              ${selectedEquipment.dailyRate.toFixed(2)} × {duration} days
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="start-date">Start Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {startDate ? format(startDate, "PPP") : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={handleStartDateChange}
+                  disabled={(date) => date < today}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="duration">Duration (Days)</Label>
+            <Input
+              id="duration"
+              type="number"
+              min="1"
+              max="30"
+              value={duration}
+              onChange={handleDurationChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="end-date">End Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {endDate ? format(endDate, "PPP") : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={handleEndDateChange}
+                  disabled={(date) => startDate ? date < startDate : date < today}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes (Optional)</Label>
+            <Textarea
+              id="notes"
+              placeholder="Any special requirements or notes for this booking"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+            />
           </div>
         </form>
       </CardContent>

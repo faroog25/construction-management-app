@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -151,13 +150,6 @@ const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
                     <p className="text-sm text-muted-foreground">{selectedBooking.duration} days</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <DollarSign className="h-4 w-4 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">Daily Rate</p>
-                    <p className="text-sm text-muted-foreground">${selectedBooking.dailyRate.toFixed(2)}</p>
-                  </div>
-                </div>
               </div>
               
               <div className="flex items-start gap-2">
@@ -174,16 +166,6 @@ const BookingsList: React.FC<BookingsListProps> = ({ bookings }) => {
                   <p className="text-sm text-muted-foreground">{selectedBooking.notes}</p>
                 </div>
               )}
-              
-              <div className="bg-muted/50 p-4 rounded-md border">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Total Cost</span>
-                  <span className="text-lg font-bold">${selectedBooking.totalCost.toFixed(2)}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  ${selectedBooking.dailyRate.toFixed(2)} × {selectedBooking.duration} days
-                </p>
-              </div>
             </div>
             
             <DialogFooter>

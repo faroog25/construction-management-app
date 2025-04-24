@@ -1,10 +1,8 @@
-
 export interface EquipmentItem {
   id: string;
   name: string;
   category: string;
   description: string;
-  dailyRate: number;
   status: 'Available' | 'In Use' | 'Maintenance';
   imageUrl?: string;
   featured: boolean;
