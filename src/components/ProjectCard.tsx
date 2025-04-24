@@ -1,12 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Calendar, 
-  ArrowRight, 
-  Clock, 
   CheckCircle2, 
   AlertTriangle, 
   Clock3, 
@@ -22,8 +18,6 @@ interface ProjectCardProps {
   id: number;
   name: string;
   client_name: string;
-  expected_end_date: string;
-  start_date: string;
   progress: number;
   status: number;
   onViewDetails?: () => void;
@@ -42,8 +36,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   id,
   name,
   client_name,
-  expected_end_date,
-  start_date,
   progress,
   status,
   onViewDetails,
@@ -51,28 +43,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   style,
 }) => {
   const navigate = useNavigate();
-  
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Not set';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const calculateDaysRemaining = () => {
-    if (!expected_end_date) return { days: 0, isOverdue: false };
-    
-    const currentDate = new Date();
-    const dueDate = new Date(expected_end_date);
-    const timeDiff = dueDate.getTime() - currentDate.getTime();
-    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    
-    return {
-      days: Math.abs(daysDiff),
-      isOverdue: daysDiff < 0
-    };
-  };
-
-  const { days, isOverdue } = calculateDaysRemaining();
 
   const handleClick = () => {
     navigate(`/projects/${id}`);
@@ -95,7 +65,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     <Card 
       className={cn(
         "group flex flex-col overflow-hidden h-full transition-all duration-300 hover:shadow-xl border-2 border-opacity-40 hover:border-primary/30 relative",
-        isOverdue && status !== 2 ? "border-l-red-500 border-l-4" : "",
         className
       )} 
       style={style}
@@ -140,22 +109,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 className={`h-full ${progressColor} transition-all duration-700 ease-out`}
                 style={{ width: `${progress}%` }}
               ></div>
-            </div>
-          </div>
-          
-          <div className="space-y-3 bg-muted/30 p-3 rounded-lg">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4 mr-2 text-primary" />
-              <span>Started: {formatDate(start_date)}</span>
-            </div>
-            
-            <div className="flex items-center text-sm">
-              <Clock className="h-4 w-4 mr-2 text-primary" />
-              <span className={cn(
-                isOverdue && status !== 2 ? "text-red-600 font-medium" : "text-muted-foreground"
-              )}>
-                {isOverdue && status !== 2 ? `Overdue by ${days} days` : `Due: ${formatDate(expected_end_date)}`}
-              </span>
             </div>
           </div>
         </div>
