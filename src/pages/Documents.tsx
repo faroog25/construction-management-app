@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -172,7 +171,11 @@ const getStatusBadge = (status: Document['status']) => {
   }
 };
 
-const Documents = () => {
+interface DocumentsProps {
+  projectId?: number;
+}
+
+const Documents = ({ projectId }: DocumentsProps) => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState<string>('dateModified');
@@ -225,14 +228,15 @@ const Documents = () => {
     toast.info(`Editing document ${id}`);
   };
 
-  // Filter documents based on search query and selected filters
+  // Filter documents based on search query, selected filters, and projectId
   const filteredDocuments = DOCUMENTS.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          doc.project.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'all' || doc.status === filterStatus;
     const matchesType = filterType === 'all' || doc.type === filterType;
+    const matchesProject = !projectId || doc.project.toLowerCase().includes(projectId.toString());
     
-    return matchesSearch && matchesStatus && matchesType;
+    return matchesSearch && matchesStatus && matchesType && matchesProject;
   });
   
   // Sort filtered documents
@@ -266,28 +270,30 @@ const Documents = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="h-16"></div> {/* Navbar spacer */}
+      {!projectId && <div className="h-16"></div>} {/* Navbar spacer - only show when not in tab */}
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
-            <p className="text-muted-foreground mt-1">Manage and access project documentation</p>
+        {!projectId && (
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
+              <p className="text-muted-foreground mt-1">Manage and access project documentation</p>
+            </div>
+            <div className="mt-4 lg:mt-0 flex flex-wrap gap-3">
+              <Button className="rounded-lg" onClick={handleUpload}>
+                <Upload className="mr-2 h-4 w-4" />
+                Upload File
+              </Button>
+              <Button variant="outline" className="rounded-lg" onClick={handleNewFolder}>
+                <FolderPlus className="mr-2 h-4 w-4" />
+                New Folder
+              </Button>
+              <Button variant="outline" className="rounded-lg" onClick={handleNewDocument}>
+                <FilePlus className="mr-2 h-4 w-4" />
+                New Document
+              </Button>
+            </div>
           </div>
-          <div className="mt-4 lg:mt-0 flex flex-wrap gap-3">
-            <Button className="rounded-lg" onClick={handleUpload}>
-              <Upload className="mr-2 h-4 w-4" />
-              Upload File
-            </Button>
-            <Button variant="outline" className="rounded-lg" onClick={handleNewFolder}>
-              <FolderPlus className="mr-2 h-4 w-4" />
-              New Folder
-            </Button>
-            <Button variant="outline" className="rounded-lg" onClick={handleNewDocument}>
-              <FilePlus className="mr-2 h-4 w-4" />
-              New Document
-            </Button>
-          </div>
-        </div>
+        )}
         
         <Card className="mb-6">
           <CardContent className="p-4">

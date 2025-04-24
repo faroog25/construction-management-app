@@ -139,6 +139,15 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+// Add this function after the formatDate function
+const calculateOverdueDays = (endDate: string) => {
+  const today = new Date();
+  const end = new Date(endDate);
+  const diffTime = today.getTime() - end.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays > 0 ? diffDays : 0;
+};
+
 const ProjectStages = ({ project }: ProjectStagesProps) => {
   const [expandedStages, setExpandedStages] = useState<number[]>([]);
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
@@ -333,6 +342,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                         {stage.tasks.map((task) => {
                           const taskStatus = statusConfig[task.status as keyof typeof statusConfig];
                           const TaskStatusIcon = taskStatus.icon;
+                          const overdueDays = calculateOverdueDays(task.endDate);
                           
                           return (
                             <div key={task.id} className="border rounded-md overflow-hidden">
@@ -352,11 +362,17 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                   </div>
                                 </div>
                                 
-                                <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
+                                <div className="flex items-center gap-2">
                                   <Badge variant="outline" className="h-6 px-2 text-xs">
                                     <User className="h-3 w-3 mr-1" />
                                     {task.assignee}
                                   </Badge>
+                                  
+                                  {overdueDays > 0 && task.status !== 'completed' && (
+                                    <Badge variant="destructive" className="h-6 px-2 text-xs">
+                                      متأخر {overdueDays} يوم
+                                    </Badge>
+                                  )}
                                   
                                   <div className="flex items-center gap-2">
                                     <Checkbox
@@ -396,7 +412,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                 </div>
                               </div>
                               
-                              <div className="flex gap-6 px-3 py-1 bg-muted/10 text-xs">
+                              <div className="px-3 pb-3">
                                 <div className="flex items-center">
                                   <span className="text-muted-foreground mr-2">Start:</span>
                                   <span>{formatDate(task.startDate)}</span>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +7,7 @@ import ProjectDetailsInfo from '@/components/ProjectDetailsInfo';
 import ProjectStages from '@/components/ProjectStages';
 import GanttChart from '@/components/GanttChart';
 import ProjectTimeline from '@/components/ProjectTimeline';
+import Documents from '@/pages/Documents';
 import { 
   Loader2, 
   AlertCircle, 
@@ -19,7 +19,8 @@ import {
   Download,
   Printer,
   MoreHorizontal,
-  Plus
+  Plus,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -155,10 +156,11 @@ const ProjectDetails = () => {
         </div>
 
         <Tabs defaultValue="details" className="space-y-6">
-          <TabsList className="w-full max-w-md grid grid-cols-3 p-1 bg-muted/30">
+          <TabsList className="w-full max-w-md grid grid-cols-4 p-1 bg-muted/30">
             <TabsTrigger value="details">Project Details</TabsTrigger>
             <TabsTrigger value="stages">Stages & Tasks</TabsTrigger>
             <TabsTrigger value="gantt">Gantt Chart</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
           
           <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
@@ -172,6 +174,10 @@ const ProjectDetails = () => {
           
           <TabsContent value="gantt" className="space-y-6 animate-in fade-in-50">
             <GanttChart project={project} />
+          </TabsContent>
+
+          <TabsContent value="documents" className="space-y-6 animate-in fade-in-50">
+            <Documents projectId={project.id} />
           </TabsContent>
         </Tabs>
       </main>
