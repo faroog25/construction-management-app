@@ -10,11 +10,19 @@ import { CheckCircle2, XCircle, Search, Plus, HardHat, ArrowUpDown } from 'lucid
 import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { NewSiteEngineerModal } from './NewSiteEngineerModal';
-import { EditSiteEngineerModal } from './EditSiteEngineerModal';
 import { deleteSiteEngineer } from '../services/siteEngineerService';
 
+interface BaseEngineer {
+  id: number;
+  fullName: string;
+  phoneNumber: string;
+  email?: string;
+  address?: string;
+  isAvailable?: boolean;
+}
+
 export function SiteEngineers() {
-  const [engineers, setEngineers] = useState<SiteEngineer[]>([]);
+  const [engineers, setEngineers] = useState<BaseEngineer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,7 +30,7 @@ export function SiteEngineers() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
   const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
-  const [selectedEngineer, setSelectedEngineer] = useState<SiteEngineer | null>(null);
+  const [selectedEngineer, setSelectedEngineer] = useState<BaseEngineer | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -32,12 +40,10 @@ export function SiteEngineers() {
       setError(null);
       const data = await getAllEngineers();
 
-      // Validate the data structure
       if (!Array.isArray(data)) {
         throw new Error('Invalid data structure received from API');
       }
 
-      // Validate each engineer object
       const validEngineers = data.filter(engineer => {
         return (
           engineer &&
@@ -73,14 +79,12 @@ export function SiteEngineers() {
     }
   };
 
-  // Filter engineers based on search query
   const filteredEngineers = engineers.filter(engineer => 
     engineer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     engineer.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     engineer.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Sort filtered engineers
   const sortedEngineers = [...filteredEngineers].sort((a, b) => {
     const direction = sortDirection === 'asc' ? 1 : -1;
     
@@ -113,7 +117,7 @@ export function SiteEngineers() {
     }
   };
 
-  const handleEditEngineer = (engineer: SiteEngineer) => {
+  const handleEditEngineer = (engineer: BaseEngineer) => {
     setSelectedEngineer(engineer);
     setIsEditEngineerModalOpen(true);
   };
@@ -204,7 +208,6 @@ export function SiteEngineers() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                // Loading skeleton rows
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={index}>
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>

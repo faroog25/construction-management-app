@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Upload, Download, Trash2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { DocumentCard } from '@/components/documents/DocumentCard';
+import DocumentCard from '@/components/documents/DocumentCard';
 
 interface ProjectDocumentsProps {
   project: {
@@ -126,4 +127,4 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
   );
 };
 
-export default ProjectDocuments; 
+export default ProjectDocuments;

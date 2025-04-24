@@ -26,6 +26,15 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+  const calculateDailyRate = (equipment: EquipmentItem | null): number => {
+    if (!equipment) return 0;
+    
+    const baseRate = equipment.category === 'Heavy Equipment' ? 500 : 
+                     equipment.category === 'Tools' ? 50 : 
+                     equipment.category === 'Vehicles' ? 150 : 100;
+    return baseRate;
+  };
+
   useEffect(() => {
     if (startDate && endDate) {
       const days = differenceInDays(endDate, startDate) + 1;
@@ -73,6 +82,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
 
     setIsSubmitting(true);
 
+    const dailyRate = calculateDailyRate(selectedEquipment);
+    const totalCost = dailyRate * duration;
+
     const newBooking: Booking = {
       id: '',
       equipmentId: selectedEquipment.id,
@@ -85,6 +97,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
       notes,
       status: 'Confirmed',
       createdAt: new Date().toISOString(),
+      dailyRate,
+      totalCost
     };
 
     setTimeout(() => {

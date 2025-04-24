@@ -1,3 +1,4 @@
+
 import { Worker } from '@/services/workerService';
 
 export interface Stage {
@@ -24,16 +25,24 @@ export interface Task {
 }
 
 export interface Project {
-  id: string;
-  name: string;
+  id: string | number;
+  name?: string;
+  projectName?: string; // For backward compatibility
   description?: string;
-  status: 'active' | 'completed' | 'on_hold';
-  startDate: Date;
-  endDate?: Date;
-  stages: Stage[];
-  tasks: Task[];
-  createdAt: Date;
-  updatedAt: Date;
+  status: 'active' | 'completed' | 'on_hold' | number;
+  startDate?: Date | string;
+  endDate?: Date | string;
+  expectedEndDate?: string; // For backward compatibility
+  clientName?: string;
+  siteAddress?: string;
+  siteEngineerId?: number;
+  orderId?: number;
+  actualEndDate?: string;
+  stages?: Stage[];
+  tasks?: Task[];
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  clientId?: number;
 }
 
 export interface GanttTask {
@@ -54,4 +63,18 @@ export interface GanttTask {
   estimatedEnd?: number; // estimated end timestamp
   wbs?: string; // Work Breakdown Structure code
   indent?: number; // Indentation level for hierarchy
+}
+
+// This interface aligns with what ProjectCard expects
+export interface ProjectCardProps {
+  id: number;
+  name: string;
+  client_name: string;
+  expected_end_date?: string;
+  start_date?: string;
+  progress: number;
+  status: number;
+  onViewDetails?: () => void;
+  className?: string;
+  style?: React.CSSProperties;
 }

@@ -13,17 +13,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-
-interface ProjectCardProps {
-  id: number;
-  name: string;
-  client_name: string;
-  progress: number;
-  status: number;
-  onViewDetails?: () => void;
-  className?: string;
-  style?: React.CSSProperties;
-}
+import { ProjectCardProps } from '@/types/project';
 
 const statusConfig = {
   1: { label: 'Active', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2 },
@@ -36,6 +26,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   id,
   name,
   client_name,
+  expected_end_date,
+  start_date,
   progress,
   status,
   onViewDetails,
@@ -45,7 +37,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/projects/${id}`);
+    if (onViewDetails) {
+      onViewDetails();
+    } else {
+      navigate(`/projects/${id}`);
+    }
   };
 
   const statusInfo = statusConfig[status as keyof typeof statusConfig] || statusConfig[1];

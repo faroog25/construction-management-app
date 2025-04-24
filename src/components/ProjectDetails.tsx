@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Project as ProjectType, getStatusFromCode } from '@/services/projectService';
+import { Project } from '@/types/project';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -14,42 +14,44 @@ const statusConfig = {
   completed: { label: 'Completed', className: 'bg-blue-100 text-blue-800' },
   pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800' },
   delayed: { label: 'Delayed', className: 'bg-red-100 text-red-800' },
+  on_hold: { label: 'On Hold', className: 'bg-gray-100 text-gray-800' },
 };
 
-// Define a project interface specific to this component
 interface ProjectDetailsProps {
-  project: {
-    id: number;
-    projectName: string;
-    status?: number;
-    description?: string;
-    clientName?: string;
-    siteAddress?: string;
-    siteEngineerId?: number;
-    startDate?: string;
-    expectedEndDate?: string;
-    actualEndDate?: string;
-    orderId?: number;
-  };
+  project: Project;
 }
 
 const ProjectDetails = ({ project }: ProjectDetailsProps) => {
   // Helper function to format dates
-  const formatDate = (dateString: string | null) => {
+  const formatDate = (dateString: string | Date | null | undefined) => {
     if (!dateString) return 'Not set';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  // Using the shared utility function to get status type
-  const statusType = getStatusFromCode(project.status || 1);
-  const statusInfo = statusConfig[statusType];
+  // Get status type
+  const getStatusType = (status: 'active' | 'completed' | 'on_hold' | number | undefined) => {
+    if (typeof status === 'number') {
+      switch (status) {
+        case 1: return 'active';
+        case 2: return 'completed';
+        case 3: return 'pending';
+        case 4: return 'delayed';
+        default: return 'active';
+      }
+    }
+    return status || 'active';
+  };
+
+  const statusType = getStatusType(project.status);
+  const statusInfo = statusConfig[statusType as keyof typeof statusConfig];
+  const projectName = project.projectName || project.name || 'Untitled Project';
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{project.projectName}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{projectName}</h1>
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="outline" className={cn(statusInfo.className, "font-medium")}>
               {statusInfo.label}
@@ -92,7 +94,7 @@ const ProjectDetails = ({ project }: ProjectDetailsProps) => {
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Expected Completion</p>
-                <p className="font-medium">{formatDate(project.expectedEndDate || null)}</p>
+                <p className="font-medium">{formatDate(project.expectedEndDate || project.endDate || null)}</p>
               </div>
               {project.actualEndDate && (
                 <div className="space-y-1">
