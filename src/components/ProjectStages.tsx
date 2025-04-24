@@ -19,7 +19,8 @@ import {
   Trash2,
   PlayCircle,
   PauseCircle,
-  User
+  User,
+  Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -180,6 +181,10 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
   
   const handleDeleteTask = (taskId: number) => {
     toast.info(`Delete task ${taskId} will be implemented soon`);
+  };
+  
+  const handleViewTaskDetails = (taskId: number) => {
+    toast.info(`View details for task ${taskId} will be implemented soon`);
   };
 
   return (
@@ -353,10 +358,6 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                     {task.assignee}
                                   </Badge>
                                   
-                                  <Badge className={taskStatus.className + " h-6 text-xs"}>
-                                    {taskStatus.label}
-                                  </Badge>
-                                  
                                   <div className="flex items-center gap-2">
                                     <Checkbox
                                       id={`task-${task.id}`}
@@ -364,15 +365,17 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                       onCheckedChange={() => toggleTaskCompletion(task.id)}
                                       className="h-4 w-4"
                                     />
-                                    <label
-                                      htmlFor={`task-${task.id}`}
-                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                    >
-                                      Completed
-                                    </label>
                                   </div>
                                   
                                   <div className="flex items-center gap-1">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-7 w-7" 
+                                      onClick={() => handleViewTaskDetails(task.id)}
+                                    >
+                                      <Info className="h-3.5 w-3.5" />
+                                    </Button>
                                     <Button 
                                       variant="ghost" 
                                       size="icon" 
