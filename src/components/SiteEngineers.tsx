@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { SiteEngineer, getAllEngineers } from '../services/engineerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -10,6 +11,7 @@ import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { NewSiteEngineerModal } from './NewSiteEngineerModal';
 import { deleteSiteEngineer } from '../services/siteEngineerService';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 
 export interface BaseEngineer {
   id: number;
@@ -30,6 +32,10 @@ export function SiteEngineers() {
   const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
   const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<BaseEngineer | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const fetchEngineers = async () => {
     try {
@@ -82,6 +88,22 @@ export function SiteEngineers() {
         return 0;
     }
   });
+  
+  // Pagination logic
+  const totalPages = Math.ceil(sortedEngineers.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentEngineers = sortedEngineers.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Generate page numbers for pagination
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
 
   const handleDeleteEngineer = async (id: number) => {
     if (window.confirm('هل أنت متأكد من حذف هذا المهندس؟')) {
@@ -201,7 +223,7 @@ export function SiteEngineers() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : sortedEngineers.length === 0 ? (
+              ) : currentEngineers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
                     {searchQuery ? 
@@ -227,7 +249,7 @@ export function SiteEngineers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedEngineers.map((engineer) => (
+                currentEngineers.map((engineer) => (
                   <TableRow key={engineer.id}>
                     <TableCell>
                       {engineer.fullName}
@@ -281,6 +303,42 @@ export function SiteEngineers() {
               )}
             </TableBody>
           </Table>
+          
+          {!loading && filteredEngineers.length > 0 && (
+            <div className="py-4 px-2">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} 
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === 1} 
+                    />
+                  </PaginationItem>
+                  
+                  {pageNumbers.map(number => (
+                    <PaginationItem key={number}>
+                      <PaginationLink 
+                        isActive={number === currentPage}
+                        onClick={() => handlePageChange(number)}
+                        className="cursor-pointer"
+                      >
+                        {number}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === totalPages}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -295,7 +353,6 @@ export function SiteEngineers() {
           isOpen={isEditEngineerModalOpen}
           onOpenChange={setIsEditEngineerModalOpen}
           onEngineerCreated={fetchEngineers}
-          initialData={selectedEngineer}
         />
       )}
     </>

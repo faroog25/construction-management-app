@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { getClients } from '../services/clientService';
 import { Client, ClientType } from '@/types/client';
@@ -11,6 +12,7 @@ import { Plus, Search, Building2, User, Users, ArrowUpDown } from 'lucide-react'
 import { toast } from 'sonner';
 import { NewClientModal } from './NewClientModal';
 import { Input } from './ui/input';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 
 const getClientTypeLabel = (type: ClientType): string => {
   switch (type) {
@@ -31,6 +33,10 @@ export function ClientMembers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const fetchClients = async () => {
     try {
@@ -103,6 +109,22 @@ export function ClientMembers() {
         return 0;
     }
   });
+  
+  // Pagination logic
+  const totalPages = Math.ceil(sortedClients.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentClients = sortedClients.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Generate page numbers for pagination
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
 
   if (error) {
     return (
@@ -191,7 +213,7 @@ export function ClientMembers() {
                     <TableCell className="text-right"><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : sortedClients.length === 0 ? (
+              ) : currentClients.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center h-32">
                     {searchQuery ? 
@@ -213,7 +235,7 @@ export function ClientMembers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedClients.map((client) => (
+                currentClients.map((client) => (
                   <TableRow key={client.id} className="group">
                     <TableCell className="font-medium">{client.fullName}</TableCell>
                     <TableCell>{client.email}</TableCell>
@@ -241,6 +263,42 @@ export function ClientMembers() {
               )}
             </TableBody>
           </Table>
+
+          {!loading && filteredClients.length > 0 && (
+            <div className="py-4 px-2">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} 
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === 1} 
+                    />
+                  </PaginationItem>
+                  
+                  {pageNumbers.map(number => (
+                    <PaginationItem key={number}>
+                      <PaginationLink 
+                        isActive={number === currentPage}
+                        onClick={() => handlePageChange(number)}
+                        className="cursor-pointer"
+                      >
+                        {number}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === totalPages}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
 
