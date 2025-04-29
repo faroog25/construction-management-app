@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Worker, getAllWorkers } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -8,6 +9,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
 import { CheckCircle2, XCircle, Search, Plus, UserCog, ArrowUpDown } from 'lucide-react';
 import { Input } from './ui/input';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 
 export function TeamMembers() {
   const [workers, setWorkers] = useState<Worker[]>([]);
@@ -16,6 +18,10 @@ export function TeamMembers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   useEffect(() => {
     const fetchWorkers = async () => {
@@ -83,6 +89,22 @@ export function TeamMembers() {
         return 0;
     }
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(sortedWorkers.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentWorkers = sortedWorkers.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Generate page numbers for pagination
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
 
   if (error) {
     return (
@@ -161,7 +183,7 @@ export function TeamMembers() {
                     <TableCell className="text-right"><Skeleton className="h-8 w-[100px] ml-auto" /></TableCell>
                   </TableRow>
                 ))
-              ) : sortedWorkers.length === 0 ? (
+              ) : currentWorkers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center h-32">
                     {searchQuery ? 
@@ -183,7 +205,7 @@ export function TeamMembers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedWorkers.map((worker) => (
+                currentWorkers.map((worker) => (
                   <TableRow key={worker.id} className="group">
                     <TableCell className="font-medium">{worker.fullName}</TableCell>
                     <TableCell>{worker.specialty}</TableCell>
@@ -213,6 +235,42 @@ export function TeamMembers() {
               )}
             </TableBody>
           </Table>
+          
+          {!loading && filteredWorkers.length > 0 && (
+            <div className="py-4 px-2">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} 
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === 1} 
+                    />
+                  </PaginationItem>
+                  
+                  {pageNumbers.map(number => (
+                    <PaginationItem key={number}>
+                      <PaginationLink 
+                        isActive={number === currentPage}
+                        onClick={() => handlePageChange(number)}
+                        className="cursor-pointer"
+                      >
+                        {number}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      aria-disabled={currentPage === totalPages}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
     </ErrorBoundary>
