@@ -58,6 +58,52 @@
     @apply bg-background text-foreground min-h-screen font-sans;
   }
 
+  /* RTL support */
+  html.rtl {
+    direction: rtl;
+    text-align: right;
+  }
+
+  html:not(.rtl) {
+    direction: ltr;
+    text-align: left;
+  }
+
+  /* Adjust component spacing for RTL */
+  html.rtl .ml-1,
+  html.rtl .ml-2,
+  html.rtl .ml-3,
+  html.rtl .ml-4,
+  html.rtl .ml-auto {
+    margin-left: 0;
+    margin-right: 0.25rem;
+    margin-right: var(--ml-value, 0.25rem);
+  }
+
+  html.rtl .mr-1,
+  html.rtl .mr-2,
+  html.rtl .mr-3,
+  html.rtl .mr-4,
+  html.rtl .mr-auto {
+    margin-right: 0;
+    margin-left: 0.25rem;
+    margin-left: var(--mr-value, 0.25rem);
+  }
+
+  html.rtl .left-2,
+  html.rtl .left-2\.5 {
+    left: auto;
+    right: 0.5rem;
+    right: var(--left-value, 0.5rem);
+  }
+
+  html.rtl .right-2,
+  html.rtl .right-2\.5 {
+    right: auto;
+    left: 0.5rem;
+    left: var(--right-value, 0.5rem);
+  }
+
   /* The following are utility classes for premium design elements */
   
   .glass-panel {

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, Search, Code2, Truck } from 'lucide-react';
+import { Menu, Bell, Search, Code2, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -9,10 +9,13 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 const Navbar = () => {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { t, isRtl } = useLanguage();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -24,12 +27,12 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Projects', path: '/projects' },
-    { name: 'Documents', path: '/documents' },
-    { name: 'Team', path: '/team' },
-    { name: 'Equipment', path: '/equipment', icon: <Truck size={16} className="mr-1" /> },
-    { name: 'API Docs', path: '/api-docs', icon: <Code2 size={16} className="mr-1" /> }
+    { name: t('nav.dashboard'), path: '/' },
+    { name: t('nav.projects'), path: '/projects' },
+    { name: t('nav.documents'), path: '/documents' },
+    { name: t('nav.team'), path: '/team' },
+    { name: t('nav.equipment'), path: '/equipment', icon: <Truck size={16} className={isRtl ? "ml-1" : "mr-1"} /> },
+    { name: t('nav.api_docs'), path: '/api-docs', icon: <Code2 size={16} className={isRtl ? "ml-1" : "mr-1"} /> }
   ];
   
   return (
@@ -43,7 +46,7 @@ const Navbar = () => {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="font-bold text-primary-foreground text-xl">C</span>
             </div>
-            <span className="font-semibold text-xl hidden md:inline-block">ConstructPro</span>
+            <span className="font-semibold text-xl hidden md:inline-block">{t('app.name')}</span>
           </NavLink>
           
           <nav className="hidden md:flex gap-6">
@@ -70,7 +73,7 @@ const Navbar = () => {
             className="rounded-full"
           >
             <Search size={20} />
-            <span className="sr-only">Search</span>
+            <span className="sr-only">{t('table.search')}</span>
           </Button>
           
           <Button 
@@ -82,6 +85,8 @@ const Navbar = () => {
             <span className="sr-only">Notifications</span>
           </Button>
           
+          <LanguageSwitcher />
+          
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -90,7 +95,7 @@ const Navbar = () => {
                   <span className="sr-only">Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent className="w-[300px] sm:w-[400px]">
+              <SheetContent className="w-[300px] sm:w-[400px]" side={isRtl ? "right" : "left"}>
                 <nav className="flex flex-col gap-4 mt-8">
                   {navLinks.map((link) => (
                     <NavLink 
@@ -113,7 +118,7 @@ const Navbar = () => {
           </div>
           
           <div className="hidden md:block">
-            <Button className="rounded-full" size="sm">Get Started</Button>
+            <Button className="rounded-full" size="sm">{t('nav.get_started')}</Button>
           </div>
         </div>
       </div>

@@ -1,244 +1,238 @@
-import { API_BASE_URL } from '@/config/api';
+import { SiteEngineer } from '@/types/siteEngineer';
 
-// This file contains functions to interact with the site engineers database
+const apiUrl = '/api/site-engineers';
+const mockSiteEngineers: SiteEngineer[] = [
+  {
+    id: 1,
+    fullName: 'أحمد محمد علي',
+    phoneNumber: '+20 123 456 7890',
+    email: 'ahmed.ali@constructpro.com',
+    isAvailable: true,
+    specialization: 'Civil Engineering',
+    yearsOfExperience: 8,
+    projectsCompleted: 14,
+    rating: 4.8
+  },
+  {
+    id: 2,
+    fullName: 'Fatima Hassan',
+    phoneNumber: '+966 55 123 4567',
+    email: 'fatima.hassan@constructpro.com',
+    isAvailable: false,
+    specialization: 'Architecture',
+    yearsOfExperience: 6,
+    projectsCompleted: 10,
+    rating: 4.5
+  },
+  {
+    id: 3,
+    fullName: 'Khaled Ibrahim',
+    phoneNumber: '+971 50 987 6543',
+    email: 'khaled.ibrahim@constructpro.com',
+    isAvailable: true,
+    specialization: 'Electrical Engineering',
+    yearsOfExperience: 10,
+    projectsCompleted: 18,
+    rating: 4.9
+  },
+  {
+    id: 4,
+    fullName: 'Laila Ahmed',
+    phoneNumber: '+212 661 234 567',
+    email: 'laila.ahmed@constructpro.com',
+    isAvailable: false,
+    specialization: 'Mechanical Engineering',
+    yearsOfExperience: 7,
+    projectsCompleted: 12,
+    rating: 4.6
+  },
+  {
+    id: 5,
+    fullName: 'Omar Youssef',
+    phoneNumber: '+20 100 567 8901',
+    email: 'omar.youssef@constructpro.com',
+    isAvailable: true,
+    specialization: 'Civil Engineering',
+    yearsOfExperience: 9,
+    projectsCompleted: 16,
+    rating: 4.7
+  },
+  {
+    id: 6,
+    fullName: 'Aisha Salem',
+    phoneNumber: '+966 53 456 7890',
+    email: 'aisha.salem@constructpro.com',
+    isAvailable: true,
+    specialization: 'Architecture',
+    yearsOfExperience: 5,
+    projectsCompleted: 9,
+    rating: 4.4
+  },
+  {
+    id: 7,
+    fullName: 'Tariq Al-Mansoori',
+    phoneNumber: '+971 56 123 4567',
+    email: 'tariq.almansoori@constructpro.com',
+    isAvailable: false,
+    specialization: 'Electrical Engineering',
+    yearsOfExperience: 11,
+    projectsCompleted: 20,
+    rating: 5.0
+  },
+  {
+    id: 8,
+    fullName: 'Nadia Al-Fassi',
+    phoneNumber: '+212 678 901 234',
+    email: 'nadia.alfassi@constructpro.com',
+    isAvailable: true,
+    specialization: 'Mechanical Engineering',
+    yearsOfExperience: 6,
+    projectsCompleted: 11,
+    rating: 4.5
+  },
+  {
+    id: 9,
+    fullName: 'Hassan Al-Amri',
+    phoneNumber: '+968 99123456',
+    email: 'hassan.alamri@constructpro.com',
+    isAvailable: true,
+    specialization: 'Civil Engineering',
+    yearsOfExperience: 7,
+    projectsCompleted: 13,
+    rating: 4.7
+  },
+  {
+    id: 10,
+    fullName: 'Salma Al-Khalili',
+    phoneNumber: '+974 66123456',
+    email: 'salma.alkhalili@constructpro.com',
+    isAvailable: false,
+    specialization: 'Architecture',
+    yearsOfExperience: 8,
+    projectsCompleted: 15,
+    rating: 4.8
+  }
+];
 
-export interface SiteEngineer {
-  id: number;
-  fullName: string;
-  phoneNumber: string;
-  email: string | null;
-  address: string;
-  isAvailable: boolean;
-}
+export const getSiteEngineers = async (): Promise<SiteEngineer[]> => {
+  // Simulate API call
+  return new Promise((resolve) => {
+    setTimeout(() => resolve([...mockSiteEngineers]), 800);
+  });
+};
 
-export interface SiteEngineerResponse {
-  success: boolean;
+export const getSiteEngineerById = async (id: number): Promise<SiteEngineer | null> => {
+  // Simulate API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const engineer = mockSiteEngineers.find((e) => e.id === id) || null;
+      resolve(engineer);
+    }, 400);
+  });
+};
+
+type CreateSiteEngineerResponse = {
+  siteEngineer: SiteEngineer;
   message: string;
-  errors?: string[];
-  data: {
-    items: SiteEngineer[];
-    totalItems: number;
-    totalPages: number;
-    currentPage: number;
-    pageSize: number;
-    hasNextPage: boolean;
-    hasPreveiosPage: boolean;
-  };
-}
+};
 
 /**
- * Fetches site engineers from the API with proper handling for Arabic text
+ * Creates a new site engineer
  */
-export async function getSiteEngineers(page: number = 1, pageSize: number = 10): Promise<SiteEngineerResponse> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers?pageNumber=${page}&pageSize=${pageSize}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch site engineers: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching site engineers:', error);
-    throw error;
-  }
-}
+export const createSiteEngineer = async (
+  siteEngineer: Omit<SiteEngineer, "id">
+): Promise<CreateSiteEngineerResponse> => {
+  // Simulate API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Generate ID for new site engineer (in a real application, the backend would do this)
+      const newId = Math.max(...mockSiteEngineers.map((w) => w.id), 0) + 1;
 
-/**
- * Fetches a site engineer by ID with proper handling for Arabic text
- */
-export async function getSiteEngineerById(id: number): Promise<SiteEngineer | undefined> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8' // Support Arabic content
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const result = await response.json();
-    return result.data;
-  } catch (error) {
-    console.error('Error fetching site engineer by ID:', error);
-    throw error;
-  }
-}
+      // Create the new site engineer
+      const newSiteEngineer: SiteEngineer = {
+        id: newId,
+        ...siteEngineer
+      };
 
-/**
- * Creates a new site engineer with proper handling for Arabic text
- */
-export async function createSiteEngineer(engineer: Omit<SiteEngineer, 'id'>): Promise<SiteEngineer> {
-  try {
-    if (!engineer.firstName?.trim()) {
-      throw new Error('الاسم الأول مطلوب');
-    }
-    if (!engineer.lastName?.trim()) {
-      throw new Error('الاسم الأخير مطلوب');
-    }
-    if (!engineer.phoneNumber?.trim()) {
-      throw new Error('رقم الهاتف مطلوب');
-    }
+      // Add to mock array (in a real application, this would be saved to a database)
+      mockSiteEngineers.push(newSiteEngineer);
 
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(engineer),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `فشل في إنشاء المهندس. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
-    }
-
-    const result: SiteEngineerResponse = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.message || 'فشل في إنشاء المهندس');
-    }
-    
-    if (!result.data) {
-      throw new Error('بيانات غير صالحة من الخادم');
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error('Error creating site engineer:', error);
-    if (error instanceof Error) {
-      throw new Error(`فشل في إنشاء المهندس: ${error.message}`);
-    }
-    throw new Error('حدث خطأ غير متوقع أثناء إنشاء المهندس');
-  }
-}
-
-/**
- * Updates a site engineer with proper handling for Arabic text
- */
-export async function updateSiteEngineer(id: number, engineer: {
-  id: number;
-  firstName: string;
-  secondName?: string;
-  thirdName?: string;
-  lastName: string;
-  email?: string;
-  phoneNumber: string;
-  nationalNumber?: string;
-  address?: string;
-  hireDate?: string;
-}): Promise<SiteEngineer> {
-  try {
-    // Validate required fields
-    if (!engineer.firstName?.trim()) {
-      throw new Error('الاسم الأول مطلوب');
-    }
-    if (!engineer.lastName?.trim()) {
-      throw new Error('الاسم الأخير مطلوب');
-    }
-    if (!engineer.phoneNumber?.trim()) {
-      throw new Error('رقم الهاتف مطلوب');
-    }
-
-    // Clean up empty optional fields
-    const cleanEngineer = {
-      id: engineer.id,
-      firstName: engineer.firstName.trim(),
-      lastName: engineer.lastName.trim(),
-      phoneNumber: engineer.phoneNumber.trim(),
-      ...(engineer.secondName?.trim() ? { secondName: engineer.secondName.trim() } : {}),
-      ...(engineer.thirdName?.trim() ? { thirdName: engineer.thirdName.trim() } : {}),
-      ...(engineer.email?.trim() ? { email: engineer.email.trim() } : {}),
-      ...(engineer.nationalNumber?.trim() ? { nationalNumber: engineer.nationalNumber.trim() } : {}),
-      ...(engineer.address?.trim() ? { address: engineer.address.trim() } : {}),
-      ...(engineer.hireDate ? { hireDate: engineer.hireDate } : {})
-    };
-
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      },
-      body: JSON.stringify(cleanEngineer),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result.data;
-  } catch (error) {
-    console.error('Error updating site engineer:', error);
-    throw error;
-  }
-}
-
-/**
- * Deletes a site engineer
- */
-export async function deleteSiteEngineer(id: number): Promise<void> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8' // Support Arabic content
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error deleting site engineer:', error);
-    throw error;
-  }
-}
-
-export async function getAllSiteEngineers(): Promise<SiteEngineer[]> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers`);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText
+      resolve({
+        siteEngineer: newSiteEngineer,
+        message: 'Site engineer created successfully',
       });
-      throw new Error(`فشل في جلب المهندسين. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
-    }
-    
-    const result: SiteEngineerResponse = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.message || 'فشل في جلب بيانات المهندسين');
-    }
-    
-    if (!result.data?.items) {
-      console.error('Invalid API response structure:', result);
-      throw new Error('بيانات غير صالحة من الخادم');
-    }
-    
-    return result.data.items;
-  } catch (error) {
-    console.error('Error fetching site engineers:', error);
-    if (error instanceof Error) {
-      throw new Error(`فشل في جلب المهندسين: ${error.message}`);
-    }
-    throw new Error('حدث خطأ غير متوقع أثناء جلب المهندسين');
-  }
-} 
+    }, 500);
+  });
+};
+
+export const updateSiteEngineer = async (
+  id: number,
+  updates: Partial<SiteEngineer>
+): Promise<SiteEngineer> => {
+  // Simulate API call
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const index = mockSiteEngineers.findIndex((e) => e.id === id);
+      
+      if (index === -1) {
+        reject(new Error('Site engineer not found'));
+        return;
+      }
+      
+      const updatedSiteEngineer = { ...mockSiteEngineers[index], ...updates };
+      mockSiteEngineers[index] = updatedSiteEngineer;
+      
+      resolve(updatedSiteEngineer);
+    }, 500);
+  });
+};
+
+export const deleteSiteEngineer = async (id: number): Promise<{ success: boolean; message: string }> => {
+  // Simulate API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const index = mockSiteEngineers.findIndex((e) => e.id === id);
+      
+      if (index !== -1) {
+        mockSiteEngineers.splice(index, 1);
+        resolve({ success: true, message: 'Site engineer deleted successfully' });
+      } else {
+        resolve({ success: false, message: 'Site engineer not found' });
+      }
+    }, 500);
+  });
+};
+
+export const getPaginatedSiteEngineers = async (
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{
+  items: SiteEngineer[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  hasNextPage: boolean;
+  hasPreveiosPage: boolean;
+}> => {
+  // Simulate API call with pagination
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const totalItems = mockSiteEngineers.length;
+      const totalPages = Math.ceil(totalItems / pageSize);
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedItems = mockSiteEngineers.slice(startIndex, endIndex);
+
+      resolve({
+        items: paginatedItems,
+        totalItems,
+        totalPages,
+        currentPage: page,
+        pageSize,
+        hasNextPage: page < totalPages,
+        hasPreveiosPage: page > 1
+      });
+    }, 800);
+  });
+};
