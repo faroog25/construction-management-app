@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getClients } from '../services/clientService';
+import { getClients, deleteClient, updateClient } from '../services/clientService';
 import { Client, ClientType } from '@/types/client';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -7,12 +7,32 @@ import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
-import { Plus, Search, Building2, User, Users, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Building2, User, Users, ArrowUpDown, Trash2, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { NewClientModal } from './NewClientModal';
 import { Input } from './ui/input';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const getClientTypeLabel = (type: ClientType, t: (key: string) => string): string => {
   switch (type) {
@@ -34,6 +54,15 @@ export function ClientMembers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    id: '',
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    clientType: ClientType.Individual
+  });
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -86,12 +115,100 @@ export function ClientMembers() {
     }
   };
 
+  const handleDelete = async (client: Client) => {
+    setClientToDelete(client);
+  };
+
+  const confirmDelete = async () => {
+    if (!clientToDelete) return;
+
+    try {
+      await deleteClient(clientToDelete.id);
+      toast.success('Client deleted successfully');
+      // Remove the deleted client from the state
+      setClients(clients.filter(client => client.id !== clientToDelete.id));
+    } catch (error) {
+      toast.error('Failed to delete client');
+      console.error('Error deleting client:', error);
+    } finally {
+      setClientToDelete(null);
+    }
+  };
+
+  const handleEdit = (client: Client) => {
+    setClientToEdit(client);
+    setEditFormData({
+      id: client.id,
+      fullName: client.fullName,
+      email: client.email,
+      phoneNumber: client.phoneNumber,
+      clientType:client.clientType
+    });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!clientToEdit) return;
+
+    try {
+      // Validate form data
+      if (!editFormData.fullName || !editFormData.email || !editFormData.phoneNumber) {
+        toast.error(t('client.validation_error'));
+        return;
+      }
+
+      // Prepare the update data
+      const updateData = {
+        fullName: editFormData.fullName,
+        email: editFormData.email,
+        phoneNumber: editFormData.phoneNumber,
+        clientType: editFormData.clientType
+      };
+
+      console.log('Sending update data:', updateData);
+
+      const updatedClient = await updateClient(clientToEdit.id, updateData);
+      
+      // Update the clients list with the new data
+      setClients(prevClients => 
+        prevClients.map(client => 
+          client.id === clientToEdit.id ? { ...client, ...updatedClient } : client
+        )
+      );
+      
+      toast.success(t('client.update_success'));
+      setClientToEdit(null);
+    } catch (error) {
+      console.error('Error updating client:', error);
+      toast.error(t('client.update_error'));
+    }
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleTypeChange = (value: string) => {
+    console.log('Selected client type:', value);
+    setEditFormData(prev => ({
+      ...prev,
+      clientType: value as ClientType
+    }));
+  };
+
   // Filter clients based on search query
-  const filteredClients = clients.filter(client => 
-    client.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredClients = clients.filter(client => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      (client.fullName?.toLowerCase() || '').includes(searchLower) ||
+      (client.email?.toLowerCase() || '').includes(searchLower) ||
+      (client.phoneNumber?.toLowerCase() || '').includes(searchLower)
+    );
+  });
 
   // Sort filtered clients
   const sortedClients = [...filteredClients].sort((a, b) => {
@@ -99,11 +216,11 @@ export function ClientMembers() {
     
     switch (sortColumn) {
       case 'name':
-        return direction * a.fullName.localeCompare(b.fullName);
+        return direction * ((a.fullName || '').localeCompare(b.fullName || ''));
       case 'email':
-        return direction * (a.email || '').localeCompare(b.email || '');
+        return direction * ((a.email || '').localeCompare(b.email || ''));
       case 'phone':
-        return direction * (a.phoneNumber || '').localeCompare(b.phoneNumber || '');
+        return direction * ((a.phoneNumber || '').localeCompare(b.phoneNumber || ''));
       case 'type':
         return direction * (a.clientType === b.clientType ? 0 : a.clientType === ClientType.Individual ? -1 : 1);
       default:
@@ -244,20 +361,35 @@ export function ClientMembers() {
                     <TableCell>{client.phoneNumber}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
-                        {client.clientType === ClientType.Individual ? (
-                          <User className="h-4 w-4 text-blue-600" />
+                        {client.clientType === 'فرد' ? (
+                          <>
+                            <User className="h-4 w-4 text-blue-600" />
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {t('client.individual')}
+                            </span>
+                          </>
                         ) : (
-                          <Building2 className="h-4 w-4 text-purple-600" />
+                          <>
+                            <Building2 className="h-4 w-4 text-purple-600" />
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              {t('client.company')}
+                            </span>
+                          </>
                         )}
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {getClientTypeLabel(client.clientType, t)}
-                        </span>
                       </div>
                     </TableCell>
                     <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
                       <div className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
-                        <Button variant="outline" size="xs">{t('table.edit')}</Button>
-                        <Button variant="destructive" size="xs">{t('table.delete')}</Button>
+                        <Button variant="outline" size="xs" onClick={() => handleEdit(client)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="xs"
+                          onClick={() => handleDelete(client)}
+                        >
+                          {t('table.delete')}
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -303,12 +435,100 @@ export function ClientMembers() {
           )}
         </CardContent>
       </Card>
-
       <NewClientModal
         isOpen={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
         onClientCreated={fetchClients}
       />
+
+      <AlertDialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the client
+              {clientToDelete && ` "${clientToDelete.fullName}"`}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={!!clientToEdit} onOpenChange={() => setClientToEdit(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Client</DialogTitle>
+            <DialogDescription>
+              Make changes to the client information here. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                value={editFormData.fullName}
+                onChange={handleEditChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={editFormData.email}
+                onChange={handleEditChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                value={editFormData.phoneNumber}
+                onChange={handleEditChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clientType">Client Type</Label>
+              <Select
+                value={editFormData.clientType}
+                onValueChange={handleTypeChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select client type">
+                    {editFormData.clientType === ClientType.Individual ? t('client.individual') : t('client.company')}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ClientType.Individual}>
+                    {t('client.individual')}
+                  </SelectItem>
+                  <SelectItem value={ClientType.Company}>
+                    {t('client.company')}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setClientToEdit(null)}>
+                Cancel
+              </Button>
+              <Button type="submit">Save Changes</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </ErrorBoundary>
   );
 }
