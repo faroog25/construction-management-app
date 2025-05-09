@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { Client as ClientType, ClientType as ClientTypeEnum } from '@/types/client';
 
@@ -64,17 +63,70 @@ export async function createClient(client: Omit<ClientType, 'id'>): Promise<Clie
 }
 
 export async function updateClient(id: string, client: Partial<Omit<ClientType, 'id'>>): Promise<ClientType> {
-  // TODO: Implement actual API call
-  return {
-    id: id,
-    fullName: client.fullName || '',
-    email: client.email || '',
-    phoneNumber: client.phoneNumber || '',
-    clientType: client.clientType || ClientTypeEnum.Individual,
-  };
+  try {
+    // Log the incoming data
+    console.log('Updating client with data:', { id, client });
+
+    // Prepare the update data
+    const updateData = {
+      id: id,
+      fullName: client.fullName,
+      email: client.email,
+      phoneNumber: client.phoneNumber,
+      clientType: client.clientType
+    };
+
+    // Log the prepared data
+    console.log('Sending update request with data:', updateData);
+
+    const response = await fetch(`${API_BASE_URL}/clients`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updateData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Update failed:', errorData);
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Update response:', result);
+
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to update client');
+    }
+
+    // Ensure the response data has the correct types
+    const updatedClient = {
+      ...result.data,
+      id: id,
+      clientType: result.data.clientType
+    };
+
+    console.log('Returning updated client:', updatedClient);
+    return updatedClient;
+  } catch (error) {
+    console.error('Error updating client:', error);
+    throw error;
+  }
 }
 
 export async function deleteClient(id: string): Promise<void> {
   // TODO: Implement actual API call
-  console.log(`Client with ID ${id} deleted`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/clients/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    console.log(`Client with ID ${id} deleted`);
+  } catch (error) {
+    console.error('Error deleting client:', error);
+    throw error;
+  }
 }
