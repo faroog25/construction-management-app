@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle } from 'lucide-react';
+import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProjects, Project, getStatusFromCode, createProject } from '@/services/projectService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -53,7 +53,7 @@ const STATUS_MAP = {
   'active': 1,
   'completed': 2,
   'pending': 3,
-  'delayed': 4
+  'canceled': 4
 };
 
 const Projects = () => {
@@ -62,6 +62,8 @@ const Projects = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(8); // Number of projects per page
   const [newProject, setNewProject] = useState({
     projectName: '',
     siteAddress: '',
@@ -181,6 +183,16 @@ const Projects = () => {
       return 0;
     });
 
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProjects = filteredProjects.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const handleViewDetails = async (projectId: number) => {
     try {
       navigate(`/projects/${projectId}`);
@@ -259,7 +271,7 @@ const Projects = () => {
             <TabsTrigger value="active">Active</TabsTrigger>
             <TabsTrigger value="completed">Completed</TabsTrigger>
             <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="delayed">Delayed</TabsTrigger>
+            <TabsTrigger value="canceled">Canceled</TabsTrigger>
           </TabsList>
           
           {isLoading && (
@@ -284,7 +296,7 @@ const Projects = () => {
           {!isLoading && !isError && (
             <TabsContent value={activeTab} className="space-y-4">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filteredProjects.map((project, index) => (
+                {currentProjects.map((project, index) => (
                   <ProjectCard
                     key={project.id}
                     id={project.id}
@@ -303,6 +315,40 @@ const Projects = () => {
               {filteredProjects.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">No projects found</p>
+                </div>
+              )}
+
+              {/* Pagination Controls */}
+              {filteredProjects.length > 0 && (
+                <div className="flex items-center justify-center space-x-2 mt-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               )}
             </TabsContent>

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { getClients } from '../services/clientService';
 import { Client, ClientType } from '@/types/client';
@@ -161,11 +160,11 @@ export function ClientMembers() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
+          <Table dir={isRtl ? "rtl" : "ltr"}>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
                 <TableHead 
-                  className="font-medium cursor-pointer"
+                  className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center">
@@ -174,7 +173,7 @@ export function ClientMembers() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="font-medium cursor-pointer"
+                  className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
                   onClick={() => handleSort('email')}
                 >
                   <div className="flex items-center">
@@ -183,7 +182,7 @@ export function ClientMembers() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="font-medium cursor-pointer"
+                  className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
                   onClick={() => handleSort('phone')}
                 >
                   <div className="flex items-center">
@@ -192,7 +191,7 @@ export function ClientMembers() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="font-medium cursor-pointer"
+                  className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
                   onClick={() => handleSort('type')}
                 >
                   <div className="flex items-center">
@@ -200,19 +199,20 @@ export function ClientMembers() {
                     <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
                   </div>
                 </TableHead>
-                <TableHead className={`font-medium ${isRtl ? 'text-left' : 'text-right'}`}>{t('table.actions')}</TableHead>
+                <TableHead className={`font-medium ${isRtl ? 'text-right' : 'text-left'}`}>{t('table.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                // Loading skeleton rows
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={index}>
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-                    <TableCell className={isRtl ? "text-left" : "text-right"}><Skeleton className={`h-8 w-[100px] ${isRtl ? 'mr-auto' : 'ml-auto'}`} /></TableCell>
+                    <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                      <Skeleton className={`h-8 w-[100px] ${isRtl ? 'ml-auto' : 'mr-auto'}`} />
+                    </TableCell>
                   </TableRow>
                 ))
               ) : currentClients.length === 0 ? (
@@ -254,7 +254,7 @@ export function ClientMembers() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className={isRtl ? "text-left" : "text-right"}>
+                    <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
                       <div className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
                         <Button variant="outline" size="xs">{t('table.edit')}</Button>
                         <Button variant="destructive" size="xs">{t('table.delete')}</Button>
@@ -265,7 +265,7 @@ export function ClientMembers() {
               )}
             </TableBody>
           </Table>
-
+          
           {!loading && filteredClients.length > 0 && (
             <div className="py-4 px-2">
               <Pagination>
