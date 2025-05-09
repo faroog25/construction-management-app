@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import Team from '@/pages/Team';
 
 const Navbar = () => {
   const location = useLocation();
@@ -31,7 +32,7 @@ const Navbar = () => {
     { name: t('nav.projects'), path: '/projects' },
     { name: t('nav.documents'), path: '/documents' },
     { name: t('nav.team'), path: '/team' },
-    { name: t('nav.equipment'), path: '/equipment', icon: <Truck size={16} className={isRtl ? "ml-1" : "mr-1"} /> },
+    { name: t('nav.equipment'), path: '/equipment' },
     // { name: t('nav.api_docs'), path: '/api-docs', icon: <Code2 size={16} className={isRtl ? "ml-1" : "mr-1"} /> }
   ];
   
@@ -59,7 +60,7 @@ const Navbar = () => {
                   isActive && "active"
                 )}
               >
-                {link.icon}
+                {/* {link.icon} */}
                 {link.name}
               </NavLink>
             ))}
@@ -109,7 +110,7 @@ const Navbar = () => {
                           : "hover:bg-muted"
                       )}
                     >
-                      {link.icon}
+                      {/* {link.icon} */}
                       {link.name}
                     </NavLink>
                   ))}
@@ -118,9 +119,9 @@ const Navbar = () => {
             </Sheet>
           </div>
           
-          <div className="hidden md:block">
+          {/* <div className="hidden md:block">
             <Button className="rounded-full" size="sm">{t('nav.get_started')}</Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </header>

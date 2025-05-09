@@ -1,4 +1,3 @@
-
 const translations = {
   // General
   'app.name': 'ConstructPro',
@@ -54,6 +53,20 @@ const translations = {
   'search.no_clients': 'No client members found',
   'search.add_first_client': 'Add your first client',
   'search.clients': 'Search clients...',
+
+  login: {
+    welcome_back: "Welcome back",
+    enter_credentials: "Enter your credentials to access your account",
+    username: "Username",
+    username_placeholder: "Enter your username",
+    password: "Password",
+    password_placeholder: "Enter your password",
+    remember_me: "Remember me",
+    forgot_password: "Forgot password?",
+    sign_in: "Sign In",
+    no_account: "Don't have an account?",
+    sign_up: "Sign up",
+  },
 };
 
 export default translations;

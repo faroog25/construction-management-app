@@ -1,4 +1,3 @@
-
 const translations = {
   // General
   'app.name': 'كونستركت برو',
@@ -54,6 +53,20 @@ const translations = {
   'search.no_clients': 'لا يوجد عملاء',
   'search.add_first_client': 'أضف أول عميل',
   'search.clients': 'بحث عن العملاء...',
+
+  login: {
+    welcome_back: "مرحباً بعودتك",
+    enter_credentials: "أدخل بيانات الدخول للوصول إلى حسابك",
+    username: "اسم المستخدم",
+    username_placeholder: "أدخل اسم المستخدم",
+    password: "كلمة المرور",
+    password_placeholder: "أدخل كلمة المرور",
+    remember_me: "تذكرني",
+    forgot_password: "نسيت كلمة المرور؟",
+    sign_in: "تسجيل الدخول",
+    no_account: "ليس لديك حساب؟",
+    sign_up: "إنشاء حساب",
+  },
 };
 
 export default translations;
