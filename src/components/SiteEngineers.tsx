@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from 'react';
-import { SiteEngineer, getAllEngineers } from '../services/engineerService';
+import { SiteEngineer, getAllEngineers, deleteEngineer } from '../services/engineerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Skeleton } from './ui/skeleton';
@@ -10,7 +9,7 @@ import { CheckCircle2, XCircle, Search, Plus, HardHat, ArrowUpDown, Pencil, Tras
 import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { NewSiteEngineerModal } from './NewSiteEngineerModal';
-import { deleteSiteEngineer } from '../services/siteEngineerService';
+import { EditSiteEngineerModal } from './EditSiteEngineerModal';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 
 export interface BaseEngineer {
@@ -20,6 +19,7 @@ export interface BaseEngineer {
   email?: string;
   address?: string;
   isAvailable?: boolean;
+  nationalId?: string;
 }
 
 export function SiteEngineers() {
@@ -35,14 +35,18 @@ export function SiteEngineers() {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const fetchEngineers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getAllEngineers();
-      setEngineers(data);
+      const response = await getAllEngineers(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
+      setEngineers(response.items);
+      setTotalPages(response.totalPages);
+      setTotalItems(response.totalItems);
     } catch (err) {
       console.error('Error fetching engineers:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch engineers');
@@ -53,7 +57,7 @@ export function SiteEngineers() {
 
   useEffect(() => {
     fetchEngineers();
-  }, []);
+  }, [currentPage, searchQuery, sortColumn, sortDirection]);
 
   const handleSort = (column: string) => {
     if (column === sortColumn) {
@@ -62,41 +66,18 @@ export function SiteEngineers() {
       setSortColumn(column);
       setSortDirection('asc');
     }
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
-  const filteredEngineers = engineers.filter(engineer => 
-    engineer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    engineer.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    engineer.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const sortedEngineers = [...filteredEngineers].sort((a, b) => {
-    const direction = sortDirection === 'asc' ? 1 : -1;
-    
-    switch (sortColumn) {
-      case 'name':
-        return direction * a.fullName.localeCompare(b.fullName);
-      case 'phone':
-        return direction * a.phoneNumber.localeCompare(b.phoneNumber);
-      case 'email':
-        return direction * (a.email || '').localeCompare(b.email || '');
-      case 'address':
-        return direction * (a.address || '').localeCompare(b.address || '');
-      case 'status':
-        return direction * (a.isAvailable === b.isAvailable ? 0 : a.isAvailable ? -1 : 1);
-      default:
-        return 0;
-    }
-  });
-  
-  // Pagination logic
-  const totalPages = Math.ceil(sortedEngineers.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentEngineers = sortedEngineers.slice(indexOfFirstItem, indexOfLastItem);
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when search changes
+  };
 
   const handlePageChange = (pageNumber: number) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
+    console.log(currentPage)
   };
 
   // Generate page numbers for pagination
@@ -108,7 +89,7 @@ export function SiteEngineers() {
   const handleDeleteEngineer = async (id: number) => {
     if (window.confirm('هل أنت متأكد من حذف هذا المهندس؟')) {
       try {
-        await deleteSiteEngineer(id);
+        await deleteEngineer(id);
         toast.success('تم حذف المهندس بنجاح');
         fetchEngineers();
       } catch (error) {
@@ -147,7 +128,7 @@ export function SiteEngineers() {
                 placeholder="بحث عن مهندس..." 
                 className="pl-9 h-9 w-full"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
             
@@ -165,6 +146,12 @@ export function SiteEngineers() {
                 <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
                   <div className="flex items-center">
                     الاسم
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead onClick={() => handleSort('nationalId')} className="cursor-pointer">
+                  <div className="flex items-center">
+                    الرقم الوطني
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
@@ -223,7 +210,7 @@ export function SiteEngineers() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : currentEngineers.length === 0 ? (
+              ) : engineers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
                     {searchQuery ? 
@@ -249,11 +236,12 @@ export function SiteEngineers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                currentEngineers.map((engineer) => (
+                engineers.map((engineer) => (
                   <TableRow key={engineer.id}>
                     <TableCell>
                       {engineer.fullName}
                     </TableCell>
+                    <TableCell>{engineer.nationalId || '-'}</TableCell>
                     <TableCell>{engineer.phoneNumber}</TableCell>
                     <TableCell>{engineer.email || '-'}</TableCell>
                     <TableCell>{engineer.address || '-'}</TableCell>
@@ -304,13 +292,13 @@ export function SiteEngineers() {
             </TableBody>
           </Table>
           
-          {!loading && filteredEngineers.length > 0 && (
+          {!loading && engineers.length > 0 && (
             <div className="py-4 px-2">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious 
-                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} 
+                      onClick={() => handlePageChange(currentPage - 1)} 
                       className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       aria-disabled={currentPage === 1} 
                     />
@@ -330,7 +318,7 @@ export function SiteEngineers() {
                   
                   <PaginationItem>
                     <PaginationNext 
-                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      onClick={() => handlePageChange(currentPage + 1)}
                       className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       aria-disabled={currentPage === totalPages}
                     />
@@ -349,10 +337,11 @@ export function SiteEngineers() {
       />
 
       {isEditEngineerModalOpen && selectedEngineer && (
-        <NewSiteEngineerModal
+        <EditSiteEngineerModal
           isOpen={isEditEngineerModalOpen}
           onOpenChange={setIsEditEngineerModalOpen}
-          onEngineerCreated={fetchEngineers}
+          onEngineerUpdated={fetchEngineers}
+          engineer={selectedEngineer}
         />
       )}
     </>

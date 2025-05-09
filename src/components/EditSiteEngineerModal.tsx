@@ -11,7 +11,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { siteEngineerSchema, type SiteEngineerFormValues } from '@/lib/validations/siteEngineer';
-import { SiteEngineer, updateSiteEngineer } from '@/services/siteEngineerService';
+import { updateEngineer } from '@/services/engineerService';
 import { toast } from 'sonner';
 import {
   Form,
@@ -26,7 +26,14 @@ interface EditSiteEngineerModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onEngineerUpdated?: () => void;
-  engineer: SiteEngineer | null;
+  engineer: {
+    id: number;
+    fullName: string;
+    phoneNumber: string;
+    email?: string;
+    address?: string;
+    nationalId?: string;
+  };
 }
 
 export function EditSiteEngineerModal({ 
@@ -44,7 +51,6 @@ export function EditSiteEngineerModal({
       lastName: '',
       email: '',
       phoneNumber: '',
-      nationalNumber: '',
       address: '',
       hireDate: '',
     },
@@ -63,7 +69,6 @@ export function EditSiteEngineerModal({
         email: engineer.email || '',
         phoneNumber: engineer.phoneNumber || '',
         address: engineer.address || '',
-        nationalNumber: '',
         hireDate: '',
       });
     }
@@ -76,20 +81,22 @@ export function EditSiteEngineerModal({
     }
 
     try {
+      const fullName = [
+        data.firstName.trim(),
+        data.secondName?.trim(),
+        data.thirdName?.trim(),
+        data.lastName.trim()
+      ].filter(Boolean).join(' ');
+
       const updatedEngineer = {
         id: engineer.id,
-        firstName: data.firstName.trim(),
-        secondName: data.secondName?.trim(),
-        thirdName: data.thirdName?.trim(),
-        lastName: data.lastName.trim(),
-        email: data.email?.trim() || null,
+        fullName,
+        email: data.email?.trim() || undefined,
         phoneNumber: data.phoneNumber.trim(),
-        nationalNumber: data.nationalNumber?.trim() || null,
-        address: data.address?.trim() || null,
-        hireDate: data.hireDate || null,
+        address: data.address?.trim() || undefined,
       };
 
-      await updateSiteEngineer(engineer.id, updatedEngineer);
+      await updateEngineer(engineer.id, updatedEngineer);
       toast.success('تم التحديث بنجاح');
       onOpenChange(false);
       onEngineerUpdated?.();
@@ -164,9 +171,9 @@ export function EditSiteEngineerModal({
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الاسم الأخير</FormLabel>
+                  <FormLabel>اسم العائلة</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل الاسم الأخير" {...field} />
+                    <Input placeholder="أدخل اسم العائلة" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -203,20 +210,6 @@ export function EditSiteEngineerModal({
 
             <FormField
               control={form.control}
-              name="nationalNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الرقم الوطني</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل الرقم الوطني" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="address"
               render={({ field }) => (
                 <FormItem>
@@ -229,32 +222,18 @@ export function EditSiteEngineerModal({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="hireDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>تاريخ التعيين</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              إلغاء
-            </Button>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                إلغاء
+              </Button>
               <Button 
                 type="submit" 
                 disabled={!form.formState.isValid || form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting ? 'جاري التحديث...' : 'تحديث البيانات'}
-            </Button>
-          </DialogFooter>
-        </form>
+              </Button>
+            </DialogFooter>
+          </form>
         </Form>
       </DialogContent>
     </Dialog>

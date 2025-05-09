@@ -11,7 +11,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { siteEngineerSchema, type SiteEngineerFormValues } from '@/lib/validations/siteEngineer';
-import { createSiteEngineer } from '@/services/siteEngineerService';
+import { createEngineer } from '@/services/engineerService';
 import { toast } from 'sonner';
 import {
   Form,
@@ -59,7 +59,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
         hireDate: data.hireDate || null,
       };
 
-      await createSiteEngineer(engineer);
+      await createEngineer(engineer);
       toast.success('تمت الإضافة بنجاح');
       onOpenChange(false);
       onEngineerCreated?.();
