@@ -3,18 +3,14 @@ import { API_BASE_URL } from '@/config/api';
 export interface Project {
   id: number;
   projectName: string;
-  siteAddress: string;
-  clientName: string;
-  projectStatus: string;
   description?: string;
-  startDate?: string;
-  expectedEndDate?: string;
-  actualEndDate?: string;
-  status?: number;
-  orderId?: number;
-  siteEngineerId?: number;
-  clientId?: number;
-  stageId?: number;
+  siteAddress: string;
+  geographicalCoordinates: string;
+  siteEngineerId: number;
+  clientId: number;
+  startDate: string;
+  expectedEndDate: string;
+  status: number;
 }
 
 // Add the ProjectWithClient interface that was referenced but not defined
@@ -102,15 +98,15 @@ export async function getProjects(page: number = 1, pageSize: number = 10): Prom
   }
 }
 
-export async function getProjectsByStatus(statusCode: number): Promise<Project[]> {
-  try {
-    const projects = await getProjects();
-    return projects.filter(project => project.status === statusCode);
-  } catch (error) {
-    console.error('Error fetching projects by status:', error);
-    throw error;
-  }
-}
+// export async function getProjectsByStatus(statusCode: number): Promise<Project[]> {
+//   try {
+//     const projects = await getProjects();
+//     return projects.filter(project => project.status === statusCode);
+//   } catch (error) {
+//     console.error('Error fetching projects by status:', error);
+//     throw error;
+//   }
+// }
 
 export async function getProjectById(id: number): Promise<Project | undefined> {
   try {
@@ -140,6 +136,7 @@ export const createProject = async (projectData: Project) => {
   
   return response.json();
 };
+
 // Utility to convert status code to string
 export const getStatusFromCode = (statusCode: number): 'active' | 'completed' | 'pending' | 'delayed' => {
   switch (statusCode) {
@@ -153,5 +150,53 @@ export const getStatusFromCode = (statusCode: number): 'active' | 'completed' | 
       return 'delayed';
     default:
       return 'active';
+  }
+};
+
+export const getProjectsByStatus = async (statusCode: number): Promise<Project[]> => {
+  try {
+    const projects = await getProjects();
+    return projects.filter(project => project.status === statusCode);
+  } catch (error) {
+    console.error('Error fetching projects by status:', error);
+    throw error;
+  }
+};
+
+export interface Client {
+  id: number;
+  fullName: string;
+}
+
+export interface SiteEngineer {
+  id: number;
+  fullName: string;
+}
+
+export const getClients = async (): Promise<Client[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Clients`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch clients');
+    }
+    const result = await response.json();
+    return result.data || [];
+  } catch (error) {
+    console.error('Error fetching clients:', error);
+    throw error;
+  }
+};
+
+export const getSiteEngineers = async (): Promise<SiteEngineer[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/SiteEngineers`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch site engineers');
+    }
+    const result = await response.json();
+    return result.data || [];
+  } catch (error) {
+    console.error('Error fetching site engineers:', error);
+    throw error;
   }
 };

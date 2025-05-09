@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getProjects, Project, getStatusFromCode, createProject } from '@/services/projectService';
+import { getProjects, Project, getStatusFromCode, createProject, getClients, getSiteEngineers, Client, SiteEngineer } from '@/services/projectService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { 
@@ -23,20 +23,9 @@ import {
 } from '@/components/ui/select';
 import ProjectDetailsModal from '@/components/ProjectDetailsModal';
 import { useNavigate } from 'react-router-dom';
-
-interface Client {
-  id: number;
-  fullName: string;
-}
-
-const getClients = async (): Promise<Client[]> => {
-  return [
-    { id: 1, fullName: 'John Doe' },
-    { id: 2, fullName: 'Jane Smith' },
-    { id: 3, fullName: 'Michael Johnson' },
-    { id: 4, fullName: 'Sara Williams' },
-  ];
-};
+import { projectSchema, ProjectFormValues } from '@/lib/validations/project';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
 interface ProjectAdapter {
   id: number;
@@ -62,6 +51,7 @@ const Projects = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [selectedEngineerId, setSelectedEngineerId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(8); // Number of projects per page
   const [newProject, setNewProject] = useState({
@@ -80,6 +70,7 @@ const Projects = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const navigate = useNavigate();
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const queryClient = useQueryClient();
 
@@ -92,7 +83,12 @@ const Projects = () => {
 
   const { data: clients = [], isLoading: isLoadingClients } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => getClients(),
+    queryFn: getClients,
+  });
+
+  const { data: siteEngineers = [], isLoading: isLoadingEngineers } = useQuery({
+    queryKey: ['siteEngineers'],
+    queryFn: getSiteEngineers,
   });
 
   const createProjectMutation = useMutation({
@@ -117,6 +113,21 @@ const Projects = () => {
     },
   });
 
+  const form = useForm<ProjectFormValues>({
+    resolver: zodResolver(projectSchema),
+    defaultValues: {
+      projectName: '',
+      description: '',
+      siteAddress: '',
+      geographicalCoordinates: '',
+      siteEngineerId: 0,
+      clientId: 0,
+      startDate: '',
+      expectedEndDate: '',
+      status: 1
+    },
+  });
+
   useEffect(() => {
     if (selectedClientId) {
       const selectedClient = clients.find(client => client.id === selectedClientId);
@@ -132,26 +143,40 @@ const Projects = () => {
 
   const handleCreateProject = async () => {
     try {
-      // Prepare the data according to the API requirements
-      const projectData = {
-        projectName: newProject.projectName,
-        description: newProject.description,
-        siteAddress: newProject.siteAddress,
-        geographicalCoordinates: newProject.geographicalCoordinates,
-        siteEngineerId: newProject.siteEngineerId,
-        clientId: newProject.clientId,
-        startDate: newProject.startDate,
-        expectedEndDate: newProject.expectedEndDate
-      };
-      console.log(projectData);
 
-      await createProjectMutation.mutateAsync({
-        ...projectData,
-        id: 0, // Temporary ID that will be replaced by the server
-        clientName: newProject.clientName,
-        projectStatus: newProject.projectStatus
-      });
+      const formData = form.getValues();
+      const validationResult = projectSchema.safeParse(formData);
+      console.log(formData)
+      if (!validationResult.success) {
+        const errors: Record<string, string> = {};
+        validationResult.error.errors.forEach((err) => {
+          if (err.path) {
+            errors[err.path[0]] = err.message;
+          }
+        });
+        setFormErrors(errors);
+        return;
+      }
+
+      const projectData: Project = {
+        id: 0,
+        projectName: formData.projectName,
+        description: formData.description,
+        siteAddress: formData.siteAddress,
+        geographicalCoordinates: formData.geographicalCoordinates,
+        siteEngineerId: formData.siteEngineerId,
+        clientId: formData.clientId,
+        startDate: formData.startDate,
+        expectedEndDate: formData.expectedEndDate,
+        status: formData.status
+      };
+
+      await createProjectMutation.mutateAsync(projectData);
+      
       toast.success("Project created successfully");
+      setIsModalOpen(false);
+      form.reset();
+      setFormErrors({});
     } catch (error) {
       console.error('Error creating project:', error);
       toast.error("Failed to create project");
@@ -160,21 +185,20 @@ const Projects = () => {
 
   const filteredProjects: ProjectAdapter[] = projectsData
     .filter(project => 
-      activeTab === 'all' || getStatusFromCode(project.status || 1) === activeTab
+      activeTab === 'all' || getStatusFromCode(project.status) === activeTab
     )
     .filter(project => 
       project.projectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (project.clientName && project.clientName.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()))
     )
     .map(project => ({
       id: project.id,
       name: project.projectName,
-      client_name: project.clientName || 'Unknown Client',
-      expected_end_date: project.expectedEndDate || '',
-      start_date: project.startDate || '',
-      progress: project.orderId || 0,
-      status: project.status || 1
+      client_name: `Client ${project.clientId}`,
+      expected_end_date: project.expectedEndDate,
+      start_date: project.startDate,
+      progress: 0,
+      status: project.status
     }))
     .sort((a, b) => {
       if (sortOption === 'newest') return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
@@ -361,40 +385,66 @@ const Projects = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">New Project</h2>
                 <button
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    form.reset();
+                    setFormErrors({});
+                  }}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreateProject(); }}>
                 <div>
                   <label className="block text-sm font-medium mb-1">Project Name</label>
                   <Input
-                    value={newProject.projectName}
-                    onChange={(e) => setNewProject({ ...newProject, projectName: e.target.value })}
+                    {...form.register("projectName")}
                     placeholder="Enter project name"
+                  />
+                  {formErrors.projectName && (
+                    <p className="text-sm text-red-500 mt-1">{formErrors.projectName}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <textarea
+                    {...form.register("description")}
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                    placeholder="Enter project description"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Site Address</label>
                   <Input
-                    value={newProject.siteAddress}
-                    onChange={(e) => setNewProject({ ...newProject, siteAddress: e.target.value })}
+                    {...form.register("siteAddress")}
                     placeholder="Enter site address"
                   />
+                  {formErrors.siteAddress && (
+                    <p className="text-sm text-red-500 mt-1">{formErrors.siteAddress}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Geographical Coordinates</label>
                   <Input
-                    value={newProject.geographicalCoordinates}
-                    onChange={(e) => setNewProject({ ...newProject, geographicalCoordinates: e.target.value })}
+                    {...form.register("geographicalCoordinates")}
                     placeholder="Enter coordinates (e.g., 34.0522, -118.2437)"
                   />
+                  {formErrors.geographicalCoordinates && (
+                    <p className="text-sm text-red-500 mt-1">{formErrors.geographicalCoordinates}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Client</label>
-                  <Select onValueChange={(value) => setSelectedClientId(Number(value))}>
+                  <Select
+                    onValueChange={(value) => {
+                      const id = parseInt(value);
+                      setSelectedClientId(id);
+                      form.setValue("clientId", id);
+                    }}
+                    value={selectedClientId?.toString()}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a client" />
                     </SelectTrigger>
@@ -406,80 +456,86 @@ const Projects = () => {
                         </div>
                       ) : (
                         clients.map((client) => (
-                          <SelectItem key={client.id} value={String(client.id)}>
+                          <SelectItem key={client.id} value={client.id.toString()}>
                             {client.fullName}
                           </SelectItem>
                         ))
                       )}
                     </SelectContent>
                   </Select>
-                  {selectedClientId && (
-                    <div className="mt-1.5 text-sm flex items-center text-green-600">
-                      <Check className="h-3.5 w-3.5 mr-1" />
-                      <span>Client selected: {clients.find(c => c.id === selectedClientId)?.fullName}</span>
-                    </div>
+                  {formErrors.clientId && (
+                    <p className="text-sm text-red-500 mt-1">{formErrors.clientId}</p>
                   )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Site Engineer</label>
-                  <Input
-                    type="number"
-                    value={newProject.siteEngineerId || ''}
-                    onChange={(e) => setNewProject({ ...newProject, siteEngineerId: parseInt(e.target.value) || 0 })}
-                    placeholder="Enter site engineer ID"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Client Name
-                    <span className="text-xs text-muted-foreground ml-1">(Optional if client is selected above)</span>
-                  </label>
-                  <Input
-                    value={newProject.clientName}
-                    onChange={(e) => setNewProject({ ...newProject, clientName: e.target.value })}
-                    placeholder="Enter client name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
-                  <textarea
-                    value={newProject.description}
-                    onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                    placeholder="Enter project description"
-                  />
+                  <Select
+                    onValueChange={(value) => {
+                      const id = parseInt(value);
+                      setSelectedEngineerId(id);
+                      form.setValue("siteEngineerId", id);
+                    }}
+                    value={selectedEngineerId?.toString()}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a site engineer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {isLoadingEngineers ? (
+                        <div className="p-2 flex items-center">
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          <span>Loading site engineers...</span>
+                        </div>
+                      ) : (
+                        siteEngineers.map((engineer) => (
+                          <SelectItem key={engineer.id} value={engineer.id.toString()}>
+                            {engineer.fullName}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {formErrors.siteEngineerId && (
+                    <p className="text-sm text-red-500 mt-1">{formErrors.siteEngineerId}</p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Start Date</label>
                     <Input
                       type="date"
-                      value={newProject.startDate}
-                      onChange={(e) => setNewProject({ ...newProject, startDate: e.target.value })}
+                      {...form.register("startDate")}
                     />
+                    {formErrors.startDate && (
+                      <p className="text-sm text-red-500 mt-1">{formErrors.startDate}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Expected End Date</label>
                     <Input
                       type="date"
-                      value={newProject.expectedEndDate}
-                      onChange={(e) => setNewProject({ ...newProject, expectedEndDate: e.target.value })}
+                      {...form.register("expectedEndDate")}
                     />
+                    {formErrors.expectedEndDate && (
+                      <p className="text-sm text-red-500 mt-1">{formErrors.expectedEndDate}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button
                     variant="outline"
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      form.reset();
+                      setFormErrors({});
+                    }}
                     type="button"
                   >
                     Cancel
                   </Button>
                   <Button
-                    onClick={handleCreateProject}
+                    type="submit"
                     disabled={createProjectMutation.isPending}
-                    type="button"
                   >
                     {createProjectMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
