@@ -32,7 +32,7 @@ const Navbar = () => {
     { name: t('nav.documents'), path: '/documents' },
     { name: t('nav.team'), path: '/team' },
     { name: t('nav.equipment'), path: '/equipment', icon: <Truck size={16} className={isRtl ? "ml-1" : "mr-1"} /> },
-    { name: t('nav.api_docs'), path: '/api-docs', icon: <Code2 size={16} className={isRtl ? "ml-1" : "mr-1"} /> }
+    // { name: t('nav.api_docs'), path: '/api-docs', icon: <Code2 size={16} className={isRtl ? "ml-1" : "mr-1"} /> }
   ];
   
   return (
@@ -67,14 +67,14 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center gap-3">
-          <Button 
+          {/* <Button 
             variant="ghost" 
             size="icon" 
             className="rounded-full"
           >
             <Search size={20} />
             <span className="sr-only">{t('table.search')}</span>
-          </Button>
+          </Button> */}
           
           <Button 
             variant="ghost" 
