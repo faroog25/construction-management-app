@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Menu, Bell, Search, Code2, Truck } from 'lucide-react';
@@ -11,6 +10,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 const Navbar = () => {
   const location = useLocation();
@@ -85,6 +85,7 @@ const Navbar = () => {
             <span className="sr-only">Notifications</span>
           </Button>
           
+          <ThemeSwitcher />
           <LanguageSwitcher />
           
           <div className="md:hidden">
