@@ -1,15 +1,28 @@
 import { useEffect, useState } from 'react';
-import { Worker, getAllWorkers } from '../services/workerService';
+import { Worker, getAllWorkers, deleteWorker } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
-import { CheckCircle2, XCircle, Search, Plus, UserCog, ArrowUpDown } from 'lucide-react';
+import { CheckCircle2, XCircle, Search, Plus, UserCog, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
+import { NewWorkerModal } from './NewWorkerModal';
+import { EditWorkerModal } from './EditWorkerModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 export function TeamMembers() {
   const { t, isRtl } = useLanguage();
@@ -24,39 +37,43 @@ export function TeamMembers() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
-  useEffect(() => {
-    const fetchWorkers = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getAllWorkers();
+  const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
+  const [isNewWorkerModalOpen, setIsNewWorkerModalOpen] = useState(false);
+  const [workerToEdit, setWorkerToEdit] = useState<Worker | null>(null);
 
-        // Validate the data structure
-        if (!Array.isArray(data)) {
-          throw new Error('Invalid data structure received from API');
-        }
+  const fetchWorkers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getAllWorkers();
 
-        // Validate each worker object
-        const validWorkers = data.filter(worker => {
-          return (
-            worker &&
-            typeof worker === 'object' &&
-            'id' in worker &&
-            'fullName' in worker &&
-            'specialty' in worker &&
-            'isAvailable' in worker
-          );
-        });
-
-        setWorkers(validWorkers);
-      } catch (err) {
-        console.error('Error fetching workers:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch workers');
-      } finally {
-        setLoading(false);
+      // Validate the data structure
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data structure received from API');
       }
-    };
 
+      // Validate each worker object
+      const validWorkers = data.filter(worker => {
+        return (
+          worker &&
+          typeof worker === 'object' &&
+          'id' in worker &&
+          'fullName' in worker &&
+          'specialty' in worker &&
+          'isAvailable' in worker
+        );
+      });
+
+      setWorkers(validWorkers);
+    } catch (err) {
+      console.error('Error fetching workers:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch workers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchWorkers();
   }, []);
 
@@ -107,6 +124,31 @@ export function TeamMembers() {
     pageNumbers.push(i);
   }
 
+  const handleDeleteWorker = async (worker: Worker) => {
+    setWorkerToDelete(worker);
+  };
+
+  const confirmDelete = async () => {
+    if (!workerToDelete) return;
+
+    try {
+      setLoading(true);
+      await deleteWorker(workerToDelete.id);
+      toast.success('تم حذف العامل بنجاح');
+      await fetchWorkers(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting worker:', error);
+      toast.error(error instanceof Error ? error.message : 'فشل في حذف العامل');
+    } finally {
+      setLoading(false);
+      setWorkerToDelete(null);
+    }
+  };
+
+  const handleEditWorker = (worker: Worker) => {
+    setWorkerToEdit(worker);
+  };
+
   if (error) {
     return (
       <Alert variant="destructive">
@@ -133,7 +175,11 @@ export function TeamMembers() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button size="sm" className="gap-1">
+            <Button 
+              size="sm" 
+              className="gap-1" 
+              onClick={() => setIsNewWorkerModalOpen(true)}
+            >
               <Plus className="h-4 w-4" />
               {t('table.add')}
             </Button>
@@ -205,8 +251,21 @@ export function TeamMembers() {
                     </TableCell>
                     <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
                       <div className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
-                        <Button variant="outline" size="xs">{t('table.edit')}</Button>
-                        <Button variant="destructive" size="xs">{t('table.delete')}</Button>
+                        <Button 
+                          variant="outline" 
+                          size="xs"
+                          onClick={() => handleEditWorker(worker)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="xs"
+                          onClick={() => handleDeleteWorker(worker)}
+                          disabled={loading}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -252,6 +311,40 @@ export function TeamMembers() {
           )}
         </CardContent>
       </Card>
+
+      <NewWorkerModal
+        isOpen={isNewWorkerModalOpen}
+        onClose={() => setIsNewWorkerModalOpen(false)}
+        onWorkerCreated={fetchWorkers}
+      />
+
+      <EditWorkerModal
+        isOpen={!!workerToEdit}
+        onClose={() => setWorkerToEdit(null)}
+        onWorkerUpdated={fetchWorkers}
+        worker={workerToEdit}
+      />
+
+      <AlertDialog open={!!workerToDelete} onOpenChange={() => setWorkerToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف العامل {workerToDelete?.fullName}؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={loading}
+            >
+              {loading ? 'جاري الحذف...' : 'حذف'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ErrorBoundary>
   );
 }
