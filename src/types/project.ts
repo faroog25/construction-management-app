@@ -26,13 +26,13 @@ export interface Task {
 
 export interface Project {
   id: string | number;
-  name?: string;
-  projectName?: string; // For backward compatibility
+  projectName: string;
+  name?: string; // For backward compatibility
   description?: string;
   status: 'active' | 'completed' | 'on_hold' | number;
   startDate?: Date | string;
   endDate?: Date | string;
-  expectedEndDate?: string; // For backward compatibility
+  expectedEndDate?: string;
   clientName?: string;
   siteAddress?: string;
   siteEngineerId?: number;
@@ -43,6 +43,7 @@ export interface Project {
   createdAt: Date | string;
   updatedAt: Date | string;
   clientId?: number;
+  geographicalCoordinates?: string;
 }
 
 export interface GanttTask {

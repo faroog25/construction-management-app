@@ -124,51 +124,22 @@ export async function getProjectById(id: number): Promise<Project | undefined> {
   }
 }
 
-export async function createProject(project: Omit<Project, 'id'>): Promise<Project> {
-  try {
-    if (!project.name?.trim()) {
-      throw new Error('اسم المشروع مطلوب');
-    }
-    if (!project.description?.trim()) {
-      throw new Error('وصف المشروع مطلوب');
-    }
-    if (!project.startDate) {
-      throw new Error('تاريخ بدء المشروع مطلوب');
-    }
-
-    const response = await fetch(`${API_BASE_URL}/Projects`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(project),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `فشل في إنشاء المشروع. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
-    }
-
-    const result: ProjectResponse = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.message || 'فشل في إنشاء المشروع');
-    }
-    
-    if (!result.data) {
-      throw new Error('بيانات غير صالحة من الخادم');
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error('Error creating project:', error);
-    if (error instanceof Error) {
-      throw new Error(`فشل في إنشاء المشروع: ${error.message}`);
-    }
-    throw new Error('حدث خطأ غير متوقع أثناء إنشاء المشروع');
+// In your projectService.ts file
+export const createProject = async (projectData: Project) => {
+  const response = await fetch(`${API_BASE_URL}/Projects`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(projectData),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create project');
   }
-}
-
+  
+  return response.json();
+};
 // Utility to convert status code to string
 export const getStatusFromCode = (statusCode: number): 'active' | 'completed' | 'pending' | 'delayed' => {
   switch (statusCode) {

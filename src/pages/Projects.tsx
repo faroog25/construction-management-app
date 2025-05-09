@@ -71,7 +71,9 @@ const Projects = () => {
     startDate: '',
     expectedEndDate: '',
     status: 1,
-    clientId: 0
+    clientId: 0,
+    geographicalCoordinates: '',
+    siteEngineerId: 0
   });
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -105,7 +107,9 @@ const Projects = () => {
         startDate: '',
         expectedEndDate: '',
         status: 1,
-        clientId: 0
+        clientId: 0,
+        geographicalCoordinates: '',
+        siteEngineerId: 0
       });
       setSelectedClientId(null);
     },
@@ -126,9 +130,29 @@ const Projects = () => {
 
   const handleCreateProject = async () => {
     try {
-      await createProjectMutation.mutateAsync(newProject);
+      // Prepare the data according to the API requirements
+      const projectData = {
+        projectName: newProject.projectName,
+        description: newProject.description,
+        siteAddress: newProject.siteAddress,
+        geographicalCoordinates: newProject.geographicalCoordinates,
+        siteEngineerId: newProject.siteEngineerId,
+        clientId: newProject.clientId,
+        startDate: newProject.startDate,
+        expectedEndDate: newProject.expectedEndDate
+      };
+      console.log(projectData);
+
+      await createProjectMutation.mutateAsync({
+        ...projectData,
+        id: 0, // Temporary ID that will be replaced by the server
+        clientName: newProject.clientName,
+        projectStatus: newProject.projectStatus
+      });
+      toast.success("Project created successfully");
     } catch (error) {
       console.error('Error creating project:', error);
+      toast.error("Failed to create project");
     }
   };
 
@@ -315,6 +339,14 @@ const Projects = () => {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium mb-1">Geographical Coordinates</label>
+                  <Input
+                    value={newProject.geographicalCoordinates}
+                    onChange={(e) => setNewProject({ ...newProject, geographicalCoordinates: e.target.value })}
+                    placeholder="Enter coordinates (e.g., 34.0522, -118.2437)"
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium mb-1">Client</label>
                   <Select onValueChange={(value) => setSelectedClientId(Number(value))}>
                     <SelectTrigger className="w-full">
@@ -341,6 +373,15 @@ const Projects = () => {
                       <span>Client selected: {clients.find(c => c.id === selectedClientId)?.fullName}</span>
                     </div>
                   )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Site Engineer</label>
+                  <Input
+                    type="number"
+                    value={newProject.siteEngineerId || ''}
+                    onChange={(e) => setNewProject({ ...newProject, siteEngineerId: parseInt(e.target.value) || 0 })}
+                    placeholder="Enter site engineer ID"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">
@@ -409,7 +450,12 @@ const Projects = () => {
 
         {selectedProject && (
           <ProjectDetailsModal
-            project={selectedProject}
+            project={{
+              ...selectedProject,
+              status: selectedProject.status ?? 1,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }}
             isOpen={isDetailsModalOpen}
             onOpenChange={setIsDetailsModalOpen}
           />
