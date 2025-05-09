@@ -104,7 +104,7 @@ export async function updateClient(id: string, client: Partial<Omit<ClientType, 
     const updatedClient = {
       ...result.data,
       id: id,
-      clientType: result.data.clientType
+      clientType: result.clientType
     };
 
     console.log('Returning updated client:', updatedClient);
