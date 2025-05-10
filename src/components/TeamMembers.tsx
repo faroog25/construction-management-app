@@ -6,7 +6,7 @@ import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Button } from './ui/button';
-import { CheckCircle2, XCircle, Search, Plus, UserCog, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { CheckCircle2, XCircle, Search, Plus, UserCog, ArrowUpDown, Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { Input } from './ui/input';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -23,8 +23,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { useNavigate } from 'react-router-dom';
 
 export function TeamMembers() {
+  const navigate = useNavigate();
   const { t, isRtl } = useLanguage();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,17 +54,16 @@ export function TeamMembers() {
         throw new Error('Invalid data structure received from API');
       }
 
-      // Validate each worker object
-      const validWorkers = data.filter(worker => {
-        return (
-          worker &&
-          typeof worker === 'object' &&
-          'id' in worker &&
-          'fullName' in worker &&
-          'specialty' in worker &&
-          'isAvailable' in worker
-        );
-      });
+      // Validate each worker object and ensure all name fields exist
+      const validWorkers = data.map(worker => ({
+        ...worker,
+        firstName: worker.firstName || '',
+        secondName: worker.secondName || '',
+        thirdName: worker.thirdName || '',
+        lastName: worker.lastName || '',
+        specialty: worker.specialty || '',
+        isAvailable: worker.isAvailable ?? true
+      }));
 
       setWorkers(validWorkers);
     } catch (err) {
@@ -87,18 +88,27 @@ export function TeamMembers() {
   };
 
   // Filter workers based on search query
-  const filteredWorkers = workers.filter(worker => 
-    worker.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    worker.specialty.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredWorkers = workers.filter(worker => {
+    const fullName = [
+      worker.firstName,
+      worker.secondName,
+      worker.thirdName,
+      worker.lastName
+    ].filter(Boolean).join(' ');
+    
+    return fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           worker.specialty.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   // Sort filtered workers
   const sortedWorkers = [...filteredWorkers].sort((a, b) => {
     const direction = sortDirection === 'asc' ? 1 : -1;
+    const fullNameA = [a.firstName, a.secondName, a.thirdName, a.lastName].filter(Boolean).join(' ');
+    const fullNameB = [b.firstName, b.secondName, b.thirdName, b.lastName].filter(Boolean).join(' ');
     
     switch (sortColumn) {
       case 'name':
-        return direction * a.fullName.localeCompare(b.fullName);
+        return direction * fullNameA.localeCompare(fullNameB);
       case 'specialty':
         return direction * a.specialty.localeCompare(b.specialty);
       case 'status':
@@ -149,6 +159,10 @@ export function TeamMembers() {
     setWorkerToEdit(worker);
   };
 
+  const handleWorkerClick = (workerId: number) => {
+    navigate(`/team/workers/${workerId}`);
+  };
+
   if (error) {
     return (
       <Alert variant="destructive">
@@ -156,7 +170,7 @@ export function TeamMembers() {
       </Alert>
     );
   }
-
+console.log(workers);
   return (
     <ErrorBoundary>
       <Card className="border shadow-sm">
@@ -231,9 +245,15 @@ export function TeamMembers() {
                 </TableRow>
               ) : (
                 currentWorkers.map((worker) => (
-                  <TableRow key={worker.id} className="group">
-                    <TableCell className="font-medium">{worker.fullName}</TableCell>
-                    <TableCell>{worker.specialty}</TableCell>
+                  <TableRow 
+                    key={worker.id} 
+                    className="group cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleWorkerClick(worker.id)}
+                  >
+                    <TableCell className="font-medium">
+                      {worker?.fullName}
+                    </TableCell>
+                    <TableCell>{worker.specialty || '-'}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
                         {worker.isAvailable ? (
@@ -250,7 +270,10 @@ export function TeamMembers() {
                       </div>
                     </TableCell>
                     <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
-                      <div className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
+                      <div 
+                        className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}
+                        onClick={(e) => e.stopPropagation()} // Prevent row click when clicking buttons
+                      >
                         <Button 
                           variant="outline" 
                           size="xs"
@@ -330,7 +353,16 @@ export function TeamMembers() {
           <AlertDialogHeader>
             <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف العامل {workerToDelete?.fullName}؟ لا يمكن التراجع عن هذا الإجراء.
+              هل أنت متأكد من حذف العامل {workerToDelete ? 
+                [
+                  workerToDelete.firstName,
+                  workerToDelete.secondName,
+                  workerToDelete.thirdName,
+                  workerToDelete.lastName
+                ]
+                  .filter(name => name && name.trim() !== '')
+                  .join(' ') || 'غير معروف'
+                : ''}؟ لا يمكن التراجع عن هذا الإجراء.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
