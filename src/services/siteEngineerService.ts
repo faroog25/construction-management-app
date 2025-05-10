@@ -1,4 +1,5 @@
 import { SiteEngineer } from '@/types/siteEngineer';
+import { API_BASE_URL } from '@/config/api';
 
 const apiUrl = '/api/site-engineers';
 const mockSiteEngineers: SiteEngineer[] = [
@@ -121,15 +122,67 @@ export const getSiteEngineers = async (): Promise<SiteEngineer[]> => {
   });
 };
 
-export const getSiteEngineerById = async (id: number): Promise<SiteEngineer | null> => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const engineer = mockSiteEngineers.find((e) => e.id === id) || null;
-      resolve(engineer);
-    }, 400);
-  });
-};
+export interface SiteEngineerProject {
+  id: number;
+  name: string;
+}
+
+export interface SiteEngineerResponse {
+  success: boolean;
+  message: string;
+  errors: string[];
+  data: SiteEngineer;
+}
+
+export async function getSiteEngineerById(id: string): Promise<SiteEngineer> {
+  try {
+    console.log('Fetching site engineer with ID:', id);
+    const url = `${API_BASE_URL}/SiteEngineers/${id}`;
+    console.log('API URL:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+    
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: errorText
+      });
+      throw new Error(`فشل في جلب بيانات مهندس الموقع. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
+    }
+    
+    const result: SiteEngineerResponse = await response.json();
+    console.log('API Response:', result);
+    
+    if (!result.success) {
+      console.error('API returned error:', result.message);
+      throw new Error(result.message || 'فشل في جلب بيانات مهندس الموقع');
+    }
+    
+    if (!result.data) {
+      console.error('No data in API response');
+      throw new Error('لم يتم استلام بيانات من الخادم');
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error fetching site engineer by ID:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في جلب بيانات مهندس الموقع: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء جلب بيانات مهندس الموقع');
+  }
+}
 
 type CreateSiteEngineerResponse = {
   siteEngineer: SiteEngineer;

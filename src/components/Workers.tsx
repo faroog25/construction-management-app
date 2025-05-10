@@ -1,38 +1,29 @@
 import { useEffect, useState } from 'react';
-import { SiteEngineer, getAllEngineers, deleteEngineer } from '../services/engineerService';
+import { Worker, getAllWorkers, deleteWorker } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { Button } from './ui/button';
-import { CheckCircle2, XCircle, Search, Plus, HardHat, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { CheckCircle2, XCircle, Search, Plus, User, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
-import { NewSiteEngineerModal } from './NewSiteEngineerModal';
-import { EditSiteEngineerModal } from './EditSiteEngineerModal';
+import { NewWorkerModal } from './NewWorkerModal';
+import { EditWorkerModal } from './EditWorkerModal';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 import { useNavigate } from 'react-router-dom';
 
-export interface BaseEngineer {
-  id: number;
-  fullName: string;
-  phoneNumber: string;
-  email?: string;
-  address?: string;
-  isAvailable?: boolean;
-  nationalId?: string;
-}
-
-export function SiteEngineers() {
-  const [engineers, setEngineers] = useState<BaseEngineer[]>([]);
+export function Workers() {
+  const navigate = useNavigate();
+  const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortColumn, setSortColumn] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
-  const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
-  const [selectedEngineer, setSelectedEngineer] = useState<BaseEngineer | null>(null);
+  const [isNewWorkerModalOpen, setIsNewWorkerModalOpen] = useState(false);
+  const [isEditWorkerModalOpen, setIsEditWorkerModalOpen] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,27 +31,25 @@ export function SiteEngineers() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
-  const navigate = useNavigate();
-
-  const fetchEngineers = async () => {
+  const fetchWorkers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAllEngineers(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
-      setEngineers(response.items);
-      setTotalPages(response.totalPages);
-      setTotalItems(response.totalItems);
+      const response = await getAllWorkers();
+      setWorkers(response);
+      setTotalPages(Math.ceil(response.length / itemsPerPage));
+      setTotalItems(response.length);
     } catch (err) {
-      console.error('Error fetching engineers:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch engineers');
+      console.error('Error fetching workers:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch workers');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEngineers();
-  }, [currentPage, searchQuery, sortColumn, sortDirection]);
+    fetchWorkers();
+  }, []);
 
   const handleSort = (column: string) => {
     if (column === sortColumn) {
@@ -69,46 +58,39 @@ export function SiteEngineers() {
       setSortColumn(column);
       setSortDirection('asc');
     }
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when search changes
+    setCurrentPage(1);
   };
 
   const handlePageChange = (pageNumber: number) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
-    console.log(currentPage)
   };
 
-  // Generate page numbers for pagination
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
-
-  const handleDeleteEngineer = async (id: number) => {
-    if (window.confirm('هل أنت متأكد من حذف هذا المهندس؟')) {
+  const handleDeleteWorker = async (id: number) => {
+    if (window.confirm('هل أنت متأكد من حذف هذا العامل؟')) {
       try {
-        await deleteEngineer(id);
-        toast.success('تم حذف المهندس بنجاح');
-        fetchEngineers();
+        await deleteWorker(id);
+        toast.success('تم حذف العامل بنجاح');
+        fetchWorkers();
       } catch (error) {
-        console.error('Error deleting engineer:', error);
-        toast.error('فشل في حذف المهندس');
+        console.error('Error deleting worker:', error);
+        toast.error('فشل في حذف العامل');
       }
     }
   };
 
-  const handleEditEngineer = (engineer: BaseEngineer) => {
-    setSelectedEngineer(engineer);
-    setIsEditEngineerModalOpen(true);
+  const handleEditWorker = (worker: Worker) => {
+    setSelectedWorker(worker);
+    setIsEditWorkerModalOpen(true);
   };
 
-  const handleEngineerClick = (engineerId: number) => {
-    navigate(`/team/site-engineers/${engineerId}`);
+  const handleWorkerClick = (workerId: number) => {
+    navigate(`/team/workers/${workerId}`);
   };
 
   if (error) {
@@ -124,22 +106,22 @@ export function SiteEngineers() {
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
-            <HardHat className="h-5 w-5 text-primary" />
-            المهندسين
+            <User className="h-5 w-5 text-primary" />
+            العمال
           </CardTitle>
           
           <div className="flex gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="بحث عن مهندس..." 
+                placeholder="بحث عن عامل..." 
                 className="pl-9 h-9 w-full"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
             
-            <Button size="sm" onClick={() => setIsNewEngineerModalOpen(true)}>
+            <Button size="sm" onClick={() => setIsNewWorkerModalOpen(true)}>
               <Plus className="h-4 w-4 mr-1" />
               إضافة
             </Button>
@@ -156,7 +138,7 @@ export function SiteEngineers() {
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead onClick={() => handleSort('nationalId')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('nationalNumber')} className="cursor-pointer">
                   <div className="flex items-center">
                     الرقم الوطني
                     <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -177,6 +159,12 @@ export function SiteEngineers() {
                 <TableHead onClick={() => handleSort('address')} className="cursor-pointer">
                   <div className="flex items-center">
                     العنوان
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead onClick={() => handleSort('specialty')} className="cursor-pointer">
+                  <div className="flex items-center">
+                    التخصص
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
@@ -210,6 +198,12 @@ export function SiteEngineers() {
                       <Skeleton className="h-4 w-[80px]" />
                     </TableCell>
                     <TableCell>
+                      <Skeleton className="h-4 w-[80px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[80px]" />
+                    </TableCell>
+                    <TableCell>
                       <div className="flex space-x-2">
                         <Skeleton className="h-8 w-[60px]" />
                         <Skeleton className="h-8 w-[60px]" />
@@ -217,48 +211,49 @@ export function SiteEngineers() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : engineers.length === 0 ? (
+              ) : workers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     {searchQuery ? 
                       <div className="flex flex-col items-center justify-center p-4">
                         <Search className="h-8 w-8 opacity-30 mb-2" />
                         <p className="text-sm text-muted-foreground mb-2">
-                          لم يتم العثور على مهندسين مطابقين لـ "{searchQuery}"
+                          لم يتم العثور على عمال مطابقين لـ "{searchQuery}"
                         </p>
                         <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>مسح البحث</Button>
                       </div>
                       : 
                       <div className="flex flex-col items-center justify-center p-4">
-                        <HardHat className="h-8 w-8 opacity-30 mb-2" />
+                        <User className="h-8 w-8 opacity-30 mb-2" />
                         <p className="text-sm text-muted-foreground mb-3">
-                          لا يوجد مهندسين
+                          لا يوجد عمال
                         </p>
-                        <Button size="sm" onClick={() => setIsNewEngineerModalOpen(true)}>
+                        <Button size="sm" onClick={() => setIsNewWorkerModalOpen(true)}>
                           <Plus className="mr-2 h-4 w-4" />
-                          إضافة أول مهندس
+                          إضافة أول عامل
                         </Button>
                       </div>
                     }
                   </TableCell>
                 </TableRow>
               ) : (
-                engineers.map((engineer) => (
+                workers.map((worker) => (
                   <TableRow 
-                    key={engineer.id}
+                    key={worker.id}
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => handleEngineerClick(engineer.id)}
+                    onClick={() => handleWorkerClick(worker.id)}
                   >
                     <TableCell>
-                      {engineer.fullName}
+                      {`${worker.firstName} ${worker.secondName} ${worker.thirdName} ${worker.lastName}`}
                     </TableCell>
-                    <TableCell>{engineer.nationalId || '-'}</TableCell>
-                    <TableCell>{engineer.phoneNumber}</TableCell>
-                    <TableCell>{engineer.email || '-'}</TableCell>
-                    <TableCell>{engineer.address || '-'}</TableCell>
+                    <TableCell>{worker.nationalNumber || '-'}</TableCell>
+                    <TableCell>{worker.phoneNumber}</TableCell>
+                    <TableCell>{worker.email || '-'}</TableCell>
+                    <TableCell>{worker.address || '-'}</TableCell>
+                    <TableCell>{worker.specialty || '-'}</TableCell>
                     <TableCell>
                       <div className="flex items-center">
-                        {engineer.isAvailable ? (
+                        {worker.isAvailable ? (
                           <div className="flex items-center">
                             <CheckCircle2 className="h-4 w-4 text-green-600 mr-1.5" />
                             <span className="text-green-600 text-sm">
@@ -278,12 +273,12 @@ export function SiteEngineers() {
                     <TableCell>
                       <div 
                         className="flex space-x-2"
-                        onClick={(e) => e.stopPropagation()} // Prevent row click when clicking buttons
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEditEngineer(engineer)}
+                          onClick={() => handleEditWorker(worker)}
                           className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         >
                           <Pencil className="h-3 w-3 mr-1" />
@@ -292,7 +287,7 @@ export function SiteEngineers() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteEngineer(engineer.id)}
+                          onClick={() => handleDeleteWorker(worker.id)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
@@ -306,7 +301,7 @@ export function SiteEngineers() {
             </TableBody>
           </Table>
           
-          {!loading && engineers.length > 0 && (
+          {!loading && workers.length > 0 && (
             <div className="py-4 px-2">
               <Pagination>
                 <PaginationContent>
@@ -318,7 +313,7 @@ export function SiteEngineers() {
                     />
                   </PaginationItem>
                   
-                  {pageNumbers.map(number => (
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
                     <PaginationItem key={number}>
                       <PaginationLink 
                         isActive={number === currentPage}
@@ -344,20 +339,20 @@ export function SiteEngineers() {
         </CardContent>
       </Card>
 
-      <NewSiteEngineerModal
-        isOpen={isNewEngineerModalOpen}
-        onOpenChange={setIsNewEngineerModalOpen}
-        onEngineerCreated={fetchEngineers}
+      <NewWorkerModal
+        isOpen={isNewWorkerModalOpen}
+        onOpenChange={setIsNewWorkerModalOpen}
+        onWorkerCreated={fetchWorkers}
       />
 
-      {isEditEngineerModalOpen && selectedEngineer && (
-        <EditSiteEngineerModal
-          isOpen={isEditEngineerModalOpen}
-          onOpenChange={setIsEditEngineerModalOpen}
-          onEngineerUpdated={fetchEngineers}
-          engineer={selectedEngineer}
+      {isEditWorkerModalOpen && selectedWorker && (
+        <EditWorkerModal
+          isOpen={isEditWorkerModalOpen}
+          onOpenChange={setIsEditWorkerModalOpen}
+          onWorkerUpdated={fetchWorkers}
+          worker={selectedWorker}
         />
       )}
     </>
   );
-}
+} 

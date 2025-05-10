@@ -14,6 +14,9 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import ApiDocsPage from "./pages/ApiDocsPage";
+import ClientProfilePage from "./pages/ClientProfile";
+import { WorkerProfilePage } from "./pages/WorkerProfile";
+import  SiteEngineerProfilePage  from "./pages/SiteEngineerProfile" ;
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -61,6 +64,21 @@ const App = () => (
                 <Route path="/projects/:id" element={
                   <ProtectedRoute>
                     <ProjectDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="/team/clients/:id" element={
+                  <ProtectedRoute>
+                    <ClientProfilePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/team/workers/:id" element={
+                  <ProtectedRoute>
+                    <WorkerProfilePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/team/site-engineers/:id" element={
+                  <ProtectedRoute>
+                    <SiteEngineerProfilePage />
                   </ProtectedRoute>
                 } />
                 <Route path="/documents" element={

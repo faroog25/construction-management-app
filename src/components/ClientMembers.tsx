@@ -13,6 +13,7 @@ import { NewClientModal } from './NewClientModal';
 import { Input } from './ui/input';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,6 +48,7 @@ const getClientTypeLabel = (type: ClientType, t: (key: string) => string): strin
 
 export function ClientMembers() {
   const { t, isRtl } = useLanguage();
+  const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,33 +68,18 @@ export function ClientMembers() {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   const fetchClients = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getClients();
-
-      // Validate the data structure
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid data structure received from API');
-      }
-
-      // Validate each client object
-      const validClients = data.filter(client => {
-        return (
-          client &&
-          typeof client === 'object' &&
-          'id' in client &&
-          'fullName' in client &&
-          'email' in client &&
-          'phoneNumber' in client &&
-          'clientType' in client
-        );
-      });
-
-      setClients(validClients as Client[]);
+      const response = await getClients(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
+      setClients(response.items);
+      setTotalPages(response.totalPages);
+      setTotalItems(response.totalItems);
     } catch (err) {
       console.error('Error fetching clients:', err);
       setError(err instanceof Error ? err.message : t('search.no_clients'));
@@ -104,7 +91,7 @@ export function ClientMembers() {
 
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [currentPage, searchQuery, sortColumn, sortDirection]);
 
   const handleSort = (column: string) => {
     if (column === sortColumn) {
@@ -113,7 +100,24 @@ export function ClientMembers() {
       setSortColumn(column);
       setSortDirection('asc');
     }
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when search changes
+  };
+
+  const handlePageChange = (pageNumber: number) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+    setCurrentPage(pageNumber);
+  };
+
+  // Generate page numbers for pagination
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
 
   const handleDelete = async (client: Client) => {
     setClientToDelete(client);
@@ -200,49 +204,9 @@ export function ClientMembers() {
     }));
   };
 
-  // Filter clients based on search query
-  const filteredClients = clients.filter(client => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      (client.fullName?.toLowerCase() || '').includes(searchLower) ||
-      (client.email?.toLowerCase() || '').includes(searchLower) ||
-      (client.phoneNumber?.toLowerCase() || '').includes(searchLower)
-    );
-  });
-
-  // Sort filtered clients
-  const sortedClients = [...filteredClients].sort((a, b) => {
-    const direction = sortDirection === 'asc' ? 1 : -1;
-    
-    switch (sortColumn) {
-      case 'name':
-        return direction * ((a.fullName || '').localeCompare(b.fullName || ''));
-      case 'email':
-        return direction * ((a.email || '').localeCompare(b.email || ''));
-      case 'phone':
-        return direction * ((a.phoneNumber || '').localeCompare(b.phoneNumber || ''));
-      case 'type':
-        return direction * (a.clientType === b.clientType ? 0 : a.clientType === ClientType.Individual ? -1 : 1);
-      default:
-        return 0;
-    }
-  });
-  
-  // Pagination logic
-  const totalPages = Math.ceil(sortedClients.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentClients = sortedClients.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+  const handleClientClick = (clientId: string) => {
+    navigate(`/team/clients/${clientId}`);
   };
-
-  // Generate page numbers for pagination
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
 
   if (error) {
     return (
@@ -267,7 +231,7 @@ export function ClientMembers() {
                 placeholder={t('search.clients')}
                 className={`${isRtl ? 'pr-9' : 'pl-9'} h-9 w-full`}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
             <Button size="sm" className="gap-1" onClick={() => setIsAddModalOpen(true)}>
@@ -322,17 +286,20 @@ export function ClientMembers() {
             <TableBody>
               {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={`skeleton-${index}`}>
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                     <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
-                      <Skeleton className={`h-8 w-[100px] ${isRtl ? 'ml-auto' : 'mr-auto'}`} />
+                      <div className="flex space-x-2">
+                        <Skeleton className="h-8 w-[60px]" />
+                        <Skeleton className="h-8 w-[60px]" />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
-              ) : currentClients.length === 0 ? (
+              ) : clients.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center h-32">
                     {searchQuery ? 
@@ -354,9 +321,15 @@ export function ClientMembers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                currentClients.map((client) => (
-                  <TableRow key={client.id} className="group">
-                    <TableCell className="font-medium">{client.fullName}</TableCell>
+                clients.map((client) => (
+                  <TableRow 
+                    key={client.id} 
+                    className="group cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleClientClick(client.id)}
+                  >
+                    <TableCell className="font-medium">
+                      {client.fullName}
+                    </TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.phoneNumber}</TableCell>
                     <TableCell>
@@ -379,7 +352,10 @@ export function ClientMembers() {
                       </div>
                     </TableCell>
                     <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
-                      <div className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
+                      <div 
+                        className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}
+                        onClick={(e) => e.stopPropagation()} // Prevent row click when clicking buttons
+                      >
                         <Button variant="outline" size="xs" onClick={() => handleEdit(client)}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -398,13 +374,13 @@ export function ClientMembers() {
             </TableBody>
           </Table>
           
-          {!loading && filteredClients.length > 0 && (
+          {!loading && clients.length > 0 && (
             <div className="py-4 px-2">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious 
-                      onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)} 
+                      onClick={() => handlePageChange(currentPage - 1)} 
                       className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       aria-disabled={currentPage === 1} 
                     />
@@ -424,7 +400,7 @@ export function ClientMembers() {
                   
                   <PaginationItem>
                     <PaginationNext 
-                      onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                      onClick={() => handlePageChange(currentPage + 1)}
                       className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       aria-disabled={currentPage === totalPages}
                     />

@@ -19,9 +19,29 @@ export interface ClientResponse {
 // Re-export ClientType from types
 export { ClientType as ClientTypeEnum } from '@/types/client';
 
-export async function getClients(page: number = 1, pageSize: number = 10): Promise<ClientType[]> {
+export async function getClients(
+  page: number = 1,
+  pageSize: number = 10,
+  searchQuery: string = '',
+  sortColumn: string = 'name',
+  sortDirection: 'asc' | 'desc' = 'asc'
+): Promise<ClientResponse['data']> {
   try {
-    const response = await fetch(`${API_BASE_URL}/clients?page=${page}&pageSize=${pageSize}`);
+    const queryParams = new URLSearchParams({
+      pageNumber: page.toString(),
+      pageSize: pageSize.toString(),
+      search: searchQuery,
+      sortColumn,
+      sortDirection
+    });
+
+    const response = await fetch(`${API_BASE_URL}/Clients?${queryParams}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -33,11 +53,7 @@ export async function getClients(page: number = 1, pageSize: number = 10): Promi
       throw new Error(result.message || 'Failed to fetch clients');
     }
     
-    return result.data.items.map(client => ({
-      ...client,
-      // Convert id to string to match the ClientType interface
-      id: client.id.toString()
-    }));
+    return result.data;
   } catch (error) {
     console.error('Error fetching clients:', error);
     throw error;
@@ -46,11 +62,63 @@ export async function getClients(page: number = 1, pageSize: number = 10): Promi
 
 export async function getClientById(id: string): Promise<ClientType | undefined> {
   try {
-    const clients = await getClients();
-    return clients.find(client => client.id === id);
+    console.log('Fetching client with ID:', id);
+    const url = `${API_BASE_URL}/Clients/${id}`;
+    console.log('API URL:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: errorText
+      });
+      throw new Error(`فشل في جلب بيانات العميل. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
+    }
+    
+    const result = await response.json();
+    console.log('API Response:', result);
+    
+    if (!result.success) {
+      console.error('API returned error:', result.message);
+      throw new Error(result.message || 'فشل في جلب بيانات العميل');
+    }
+    
+    if (!result.data) {
+      console.error('No data in API response');
+      throw new Error('لم يتم استلام بيانات من الخادم');
+    }
+    
+    // Transform the response to match our ClientType interface
+    const transformedClient = {
+      id: result.data.id.toString(),
+      fullName: result.data.fullName,
+      email: result.data.email,
+      phoneNumber: result.data.phoneNumber,
+      clientType: result.data.clientType,
+      projects: result.data.projects
+    };
+    
+    console.log('Transformed client data:', transformedClient);
+    return transformedClient;
   } catch (error) {
     console.error('Error fetching client by ID:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(`فشل في جلب بيانات العميل: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء جلب بيانات العميل');
   }
 }
 

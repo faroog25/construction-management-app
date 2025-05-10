@@ -1,10 +1,24 @@
 import { API_BASE_URL } from '@/config/api';
 
+export interface WorkerTask {
+  id: number;
+  projectName: string;
+  name: string;
+}
+
 export interface Worker {
   id: number;
-  fullName: string;
+  firstName: string;
+  secondName: string;
+  thirdName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  nationalNumber: string;
+  address: string;
   specialty: string;
   isAvailable: boolean;
+  tasks: WorkerTask[];
 }
 
 export interface Specialty {
@@ -27,9 +41,8 @@ export interface CreateWorkerRequest {
 export interface WorkerResponse {
   success: boolean;
   message: string;
-  data: {
-    items: Worker[];
-  };
+  errors: string[];
+  data: Worker;
 }
 
 export interface CreateWorkerResponse {
@@ -178,21 +191,41 @@ export async function getSpecialties(): Promise<Specialty[]> {
 /**
  * Fetches a specific worker by ID
  */
-export async function getWorkerById(id: number): Promise<Worker> {
+export const getWorkerById = async (id: number): Promise<Worker> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/Workers/${id}`);
-    
+    console.log('Fetching worker with ID:', id);
+    const url = `${API_BASE_URL}/Workers/${id}`;
+    console.log('API URL:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Response status:', response.status);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
-    const result = await response.json();
+
+    const result: WorkerResponse = await response.json();
+    console.log('API Response:', result);
+
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch worker');
+    }
+
+    if (!result.data) {
+      throw new Error('No worker data received');
+    }
+
     return result.data;
   } catch (error) {
-    console.error(`Error fetching worker with ID ${id}:`, error);
+    console.error('Error fetching worker:', error);
     throw error;
   }
-}
+};
 
 /**
  * Fetches workers assigned to a specific project

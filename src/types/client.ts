@@ -15,4 +15,9 @@ export interface Client {
   name?: string;
   phone?: string;
   address?: string;
+  // Projects associated with the client
+  projects?: {
+    id: number;
+    name: string;
+  }[];
 }
