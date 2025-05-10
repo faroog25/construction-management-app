@@ -55,11 +55,34 @@ export async function getClientById(id: string): Promise<ClientType | undefined>
 }
 
 export async function createClient(client: Omit<ClientType, 'id'>): Promise<ClientType> {
-  // TODO: Implement actual API call
-  return {
-    id: Math.floor(Math.random() * 1000).toString(),
-    ...client,
-  };
+  try {
+    const response = await fetch(`${API_BASE_URL}/Clients`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(client),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to create client');
+    }
+
+    return {
+      ...result.data,
+        id: result.id,
+    };
+  } catch (error) {
+    console.error('Error creating client:', error);
+    throw error;
+  }
 }
 
 export async function updateClient(id: string, client: Partial<Omit<ClientType, 'id'>>): Promise<ClientType> {

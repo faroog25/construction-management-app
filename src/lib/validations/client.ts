@@ -13,7 +13,7 @@ export const clientSchema = z.object({
     .min(10, { message: "رقم الهاتف يجب أن يكون 10 أرقام على الأقل" })
     .max(15, { message: "رقم الهاتف يجب أن لا يتجاوز 15 رقم" })
     .regex(/^[0-9+]+$/, { message: "رقم الهاتف يجب أن يحتوي على أرقام فقط" }),
-  clientType: z.number()
+  clientType: z.string()
     .refine((val) => val === ClientType.Individual || val === ClientType.Company, {
       message: "نوع العميل غير صالح"
     })
