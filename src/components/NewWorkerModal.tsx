@@ -14,6 +14,18 @@ import {
   SelectValue,
 } from "./ui/select";
 
+interface FormErrors {
+  firstName?: string;
+  secondName?: string;
+  thirdName?: string;
+  lastName?: string;
+  nationalNumber?: string;
+  phoneNumber?: string;
+  email?: string;
+  address?: string;
+  specialtyId?: string;
+}
+
 interface NewWorkerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,6 +36,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
   const { t, isRtl } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [formData, setFormData] = useState<CreateWorkerRequest>({
     firstName: '',
     secondName: '',
@@ -52,8 +65,72 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
     }
   }, [isOpen]);
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Validate first name
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'الاسم الأول مطلوب';
+    }
+
+    // Validate second name
+    if (!formData.secondName.trim()) {
+      newErrors.secondName = 'الاسم الثاني مطلوب';
+    }
+
+    // Validate third name
+    if (!formData.thirdName.trim()) {
+      newErrors.thirdName = 'الاسم الثالث مطلوب';
+    }
+
+    // Validate last name
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'الاسم الأخير مطلوب';
+    }
+
+    // Validate national number
+    if (!formData.nationalNumber.trim()) {
+      newErrors.nationalNumber = 'الرقم الوطني مطلوب';
+    } else if (!/^\d{10}$/.test(formData.nationalNumber)) {
+      newErrors.nationalNumber = 'الرقم الوطني يجب أن يتكون من 10 أرقام';
+    }
+
+    // Validate phone number
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'رقم الهاتف مطلوب';
+    } else if (!/^07\d{8}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'رقم الهاتف يجب أن يبدأ بـ 07 ويتكون من 10 أرقام';
+    }
+
+    // Validate email
+    if (!formData.email.trim()) {
+      newErrors.email = 'البريد الإلكتروني مطلوب';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'البريد الإلكتروني غير صالح';
+    }
+
+    // Validate address
+    if (!formData.address.trim()) {
+      newErrors.address = 'العنوان مطلوب';
+    }
+
+    // Validate specialty
+    if (!formData.specialtyId) {
+      newErrors.specialtyId = 'التخصص مطلوب';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error('يرجى تصحيح الأخطاء في النموذج');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -72,6 +149,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
         address: '',
         specialtyId: 0
       });
+      setErrors({});
     } catch (error) {
       console.error('Error creating worker:', error);
       toast.error(error instanceof Error ? error.message : t('workers.add_error'));
@@ -83,6 +161,10 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   return (
@@ -101,9 +183,12 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              required
+              className={errors.firstName ? "border-red-500" : ""}
               dir={isRtl ? 'rtl' : 'ltr'}
             />
+            {errors.firstName && (
+              <p className="text-sm text-red-500">{errors.firstName}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -113,9 +198,12 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               name="secondName"
               value={formData.secondName}
               onChange={handleChange}
-              required
+              className={errors.secondName ? "border-red-500" : ""}
               dir={isRtl ? 'rtl' : 'ltr'}
             />
+            {errors.secondName && (
+              <p className="text-sm text-red-500">{errors.secondName}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -125,9 +213,12 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               name="thirdName"
               value={formData.thirdName}
               onChange={handleChange}
-              required
+              className={errors.thirdName ? "border-red-500" : ""}
               dir={isRtl ? 'rtl' : 'ltr'}
             />
+            {errors.thirdName && (
+              <p className="text-sm text-red-500">{errors.thirdName}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -137,9 +228,12 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              required
+              className={errors.lastName ? "border-red-500" : ""}
               dir={isRtl ? 'rtl' : 'ltr'}
             />
+            {errors.lastName && (
+              <p className="text-sm text-red-500">{errors.lastName}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -149,9 +243,12 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               name="nationalNumber"
               value={formData.nationalNumber}
               onChange={handleChange}
-              required
+              className={errors.nationalNumber ? "border-red-500" : ""}
               dir={isRtl ? 'rtl' : 'ltr'}
             />
+            {errors.nationalNumber && (
+              <p className="text-sm text-red-500">{errors.nationalNumber}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -161,9 +258,12 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
-              required
+              className={errors.phoneNumber ? "border-red-500" : ""}
               dir={isRtl ? 'rtl' : 'ltr'}
             />
+            {errors.phoneNumber && (
+              <p className="text-sm text-red-500">{errors.phoneNumber}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -174,9 +274,12 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               type="email"
               value={formData.email}
               onChange={handleChange}
-              required
+              className={errors.email ? "border-red-500" : ""}
               dir={isRtl ? 'rtl' : 'ltr'}
             />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -186,18 +289,26 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               name="address"
               value={formData.address}
               onChange={handleChange}
-              required
+              className={errors.address ? "border-red-500" : ""}
               dir={isRtl ? 'rtl' : 'ltr'}
             />
+            {errors.address && (
+              <p className="text-sm text-red-500">{errors.address}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="specialtyId">التخصص</Label>
             <Select
               value={formData.specialtyId.toString()}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, specialtyId: parseInt(value) }))}
+              onValueChange={(value) => {
+                setFormData(prev => ({ ...prev, specialtyId: parseInt(value) }));
+                if (errors.specialtyId) {
+                  setErrors(prev => ({ ...prev, specialtyId: undefined }));
+                }
+              }}
             >
-              <SelectTrigger>
+              <SelectTrigger className={errors.specialtyId ? "border-red-500" : ""}>
                 <SelectValue placeholder="اختر التخصص" />
               </SelectTrigger>
               <SelectContent>
@@ -208,6 +319,9 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
                 ))}
               </SelectContent>
             </Select>
+            {errors.specialtyId && (
+              <p className="text-sm text-red-500">{errors.specialtyId}</p>
+            )}
           </div>
 
           <DialogFooter>
