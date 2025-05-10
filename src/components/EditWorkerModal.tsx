@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { createWorker, CreateWorkerRequest, getSpecialties, Specialty } from '@/services/workerService';
+import { updateWorker, getSpecialties, Specialty, Worker, CreateWorkerRequest } from '@/services/workerService';
 import { toast } from 'sonner';
 import {
   Select,
@@ -14,13 +14,14 @@ import {
   SelectValue,
 } from "./ui/select";
 
-interface NewWorkerModalProps {
+interface EditWorkerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onWorkerCreated: () => void;
+  onWorkerUpdated: () => void;
+  worker: Worker | null;
 }
 
-export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerModalProps) {
+export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: EditWorkerModalProps) {
   const { t, isRtl } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
@@ -52,29 +53,37 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (worker) {
+      // Split the full name into its components
+      const nameParts = worker.fullName.split(' ');
+      setFormData({
+        firstName: nameParts[0] || '',
+        secondName: nameParts[1] || '',
+        thirdName: nameParts[2] || '',
+        lastName: nameParts[3] || '',
+        nationalNumber: '', // These fields need to be fetched from the API
+        phoneNumber: '',   // as they're not included in the Worker interface
+        email: '',         // You might need to update the Worker interface
+        address: '',       // to include these fields
+        specialtyId: 0     // This needs to be fetched from the API
+      });
+    }
+  }, [worker]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (!worker) return;
 
+    setLoading(true);
     try {
-      await createWorker(formData);
-      toast.success(t('workers.add_success'));
-      onWorkerCreated();
+      await updateWorker(worker.id, formData);
+      toast.success(t('workers.update_success'));
+      onWorkerUpdated();
       onClose();
-      setFormData({
-        firstName: '',
-        secondName: '',
-        thirdName: '',
-        lastName: '',
-        nationalNumber: '',
-        phoneNumber: '',
-        email: '',
-        address: '',
-        specialtyId: 0
-      });
     } catch (error) {
-      console.error('Error creating worker:', error);
-      toast.error(error instanceof Error ? error.message : t('workers.add_error'));
+      console.error('Error updating worker:', error);
+      toast.error(error instanceof Error ? error.message : t('workers.update_error'));
     } finally {
       setLoading(false);
     }
@@ -90,7 +99,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {t('workers.add_new')}
+            {t('workers.edit')}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -215,7 +224,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               إلغاء
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'جاري الحفظ...' : 'حفظ'}
+              {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
             </Button>
           </DialogFooter>
         </form>
