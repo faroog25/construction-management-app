@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import { projectSchema, ProjectFormValues } from '@/lib/validations/project';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { any } from 'zod';
 
 interface ProjectAdapter {
   id: number;
@@ -81,16 +82,19 @@ const Projects = () => {
     retry: 2
   });
 
-  const { data: clients = [], isLoading: isLoadingClients } = useQuery({
+  const { data: client, isLoading: isLoadingClients } = useQuery({
     queryKey: ['clients'],
     queryFn: getClients,
   });
 
-  const { data: siteEngineers = [], isLoading: isLoadingEngineers } = useQuery({
+  const clients = client?.items || [];
+
+  
+  const { data: siteEngineer = [], isLoading: isLoadingEngineers } = useQuery({
     queryKey: ['siteEngineers'],
     queryFn: getSiteEngineers,
   });
-
+  const siteEngineers = siteEngineer?.items || [];
   const createProjectMutation = useMutation({
     mutationFn: createProject,
     onSuccess: () => {
@@ -178,7 +182,7 @@ const Projects = () => {
       form.reset();
       setFormErrors({});
     } catch (error) {
-      console.error('Error creating project:', error);
+      // console.error('Error creating project:', error);
       toast.error("Failed to create project");
     }
   };
@@ -221,10 +225,13 @@ const Projects = () => {
     try {
       navigate(`/projects/${projectId}`);
     } catch (error) {
-      console.error('Error navigating to project details:', error);
+      // console.error('Error navigating to project details:', error);
       toast.error('Failed to navigate to project details');
     }
   };
+
+  // console.log(clients,'clients')
+  // console.log(siteEngineers,'siteEngineers')
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -448,7 +455,7 @@ const Projects = () => {
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a client" />
                     </SelectTrigger>
-                    <SelectContent>
+                     <SelectContent>
                       {isLoadingClients ? (
                         <div className="p-2 flex items-center">
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -461,11 +468,11 @@ const Projects = () => {
                           </SelectItem>
                         ))
                       )}
-                    </SelectContent>
+                    </SelectContent> 
                   </Select>
-                  {formErrors.clientId && (
+                   {formErrors.clientId && (
                     <p className="text-sm text-red-500 mt-1">{formErrors.clientId}</p>
-                  )}
+                  )} 
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Site Engineer</label>
