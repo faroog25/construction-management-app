@@ -188,7 +188,7 @@ function getStatusCodeFromString(status: string | undefined): number {
   }
 }
 
-export async function createProject = async (projectData: Project) => {
+export async function createProject(projectData: Project): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/Projects`, {
     method: 'POST',
     headers: {
