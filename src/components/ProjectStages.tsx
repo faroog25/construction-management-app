@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { WorkerMultiSelect } from './WorkerMultiSelect';
 import StageFormModal from './StageFormModal';
+import TaskDetailsModal from './TaskDetailsModal';
 import { 
   CircleDot, 
   CheckCircle, 
@@ -94,6 +95,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
   const [error, setError] = useState<string | null>(null);
   const [isAddStageModalOpen, setIsAddStageModalOpen] = useState(false);
   const [isCreatingStage, setIsCreatingStage] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [isTaskDetailsModalOpen, setIsTaskDetailsModalOpen] = useState(false);
   
   // Fetch workers and stages
   useEffect(() => {
@@ -294,7 +297,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
   };
   
   const handleViewTaskDetails = (taskId: number) => {
-    toast.info(`View details for task ${taskId} will be implemented soon`);
+    setSelectedTaskId(taskId);
+    setIsTaskDetailsModalOpen(true);
   };
 
   const handleWorkerSelection = (taskId: number, selectedWorkers: Worker[]) => {
@@ -356,6 +360,13 @@ const ProjectStages = ({ project }: { project: Project }) => {
         onSubmit={handleAddStageSubmit}
         isLoading={isCreatingStage}
         projectId={Number(project.id)}
+      />
+      
+      {/* Task Details Modal */}
+      <TaskDetailsModal
+        isOpen={isTaskDetailsModalOpen}
+        onClose={() => setIsTaskDetailsModalOpen(false)}
+        taskId={selectedTaskId}
       />
       
       {projectStages.length === 0 ? (
