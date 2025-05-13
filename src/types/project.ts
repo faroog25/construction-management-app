@@ -1,5 +1,7 @@
 
 import { Worker } from '@/services/workerService';
+import { ApiTask } from '@/services/taskService';
+import { ApiStage } from '@/services/stageService';
 
 export interface Stage {
   id: string;
@@ -38,8 +40,8 @@ export interface Project {
   siteEngineerId?: number;
   orderId?: number;
   actualEndDate?: string;
-  stages?: Stage[];
-  tasks?: Task[];
+  stages?: ApiStage[];
+  tasks?: ApiTask[];
   createdAt: Date | string;
   updatedAt: Date | string;
   clientId?: number;

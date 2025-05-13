@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
 import { ApiStage, getProjectStages } from '@/services/stageService';
+import { ApiTask, getStageTasks } from '@/services/taskService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -41,69 +43,6 @@ interface ProjectStagesProps {
   project: Project;
 }
 
-// Mock data for tasks - we'll keep the tasks mock data for now
-const mockTasks = {
-  1: [
-    { 
-      id: 101, 
-      name: "Requirement Analysis", 
-      nameAr: "تحليل المتطلبات", 
-      progress: 100, 
-      status: 'completed', 
-      assignee: "Jane Doe", 
-      startDate: "2023-10-01", 
-      endDate: "2023-10-05",
-      assignedWorkers: [] 
-    },
-    { 
-      id: 102, 
-      name: "Site Survey", 
-      nameAr: "مسح الموقع", 
-      progress: 100, 
-      status: 'completed', 
-      assignee: "Ahmed Hassan", 
-      startDate: "2023-10-06", 
-      endDate: "2023-10-10",
-      assignedWorkers: [] 
-    },
-    { 
-      id: 103, 
-      name: "Initial Design", 
-      nameAr: "التصميم الأولي", 
-      progress: 100, 
-      status: 'completed', 
-      assignee: "Sarah Johnson", 
-      startDate: "2023-10-11", 
-      endDate: "2023-10-15",
-      assignedWorkers: [] 
-    }
-  ],
-  2: [
-    { id: 201, name: "Excavation", nameAr: "الحفر", progress: 100, status: 'completed', assignee: "Robert Chen", startDate: "2023-10-16", endDate: "2023-10-22", assignedWorkers: [] },
-    { id: 202, name: "Foundation Layout", nameAr: "تخطيط الأساس", progress: 100, status: 'completed', assignee: "Ali Mohammed", startDate: "2023-10-23", endDate: "2023-10-29", assignedWorkers: [] },
-    { id: 203, name: "Concrete Pouring", nameAr: "صب الخرسانة", progress: 100, status: 'completed', assignee: "David Wilson", startDate: "2023-10-30", endDate: "2023-11-02", assignedWorkers: [] },
-    { id: 204, name: "Curing", nameAr: "المعالجة", progress: 100, status: 'completed', assignee: "Liam Harris", startDate: "2023-11-03", endDate: "2023-11-05", assignedWorkers: [] }
-  ],
-  3: [
-    { id: 301, name: "Framing", nameAr: "هيكلة", progress: 100, status: 'completed', assignee: "Sophia Martinez", startDate: "2023-11-06", endDate: "2023-11-20", assignedWorkers: [] },
-    { id: 302, name: "Wall Construction", nameAr: "بناء الجدران", progress: 100, status: 'completed', assignee: "Omar Khan", startDate: "2023-11-21", endDate: "2023-12-05", assignedWorkers: [] },
-    { id: 303, name: "Roofing", nameAr: "السقف", progress: 30, status: 'delayed', assignee: "Noah Williams", startDate: "2023-12-06", endDate: "2023-12-15", assignedWorkers: [] },
-    { id: 304, name: "Structural Inspection", nameAr: "فحص الهيكل", progress: 0, status: 'not-started', assignee: "Isabella Taylor", startDate: "2023-12-16", endDate: "2023-12-18", assignedWorkers: [] }
-  ],
-  4: [
-    { id: 401, name: "Plumbing", nameAr: "السباكة", progress: 0, status: 'not-started', assignee: "Ethan Clark", startDate: "2023-12-19", endDate: "2023-12-30", assignedWorkers: [] },
-    { id: 402, name: "Electrical", nameAr: "الكهرباء", progress: 0, status: 'not-started', assignee: "Aisha Rahman", startDate: "2023-12-31", endDate: "2024-01-10", assignedWorkers: [] },
-    { id: 403, name: "Drywall", nameAr: "الجدران الجافة", progress: 0, status: 'not-started', assignee: "William Rodriguez", startDate: "2024-01-11", endDate: "2024-01-20", assignedWorkers: [] },
-    { id: 404, name: "Flooring", nameAr: "الأرضيات", progress: 0, status: 'not-started', assignee: "Olivia Lewis", startDate: "2024-01-21", endDate: "2024-01-25", assignedWorkers: [] },
-    { id: 405, name: "Painting", nameAr: "الدهان", progress: 0, status: 'not-started', assignee: "James Martin", startDate: "2024-01-26", endDate: "2024-01-30", assignedWorkers: [] }
-  ],
-  5: [
-    { id: 501, name: "Facade", nameAr: "الواجهة", progress: 0, status: 'not-started', assignee: "Charlotte Walker", startDate: "2024-02-01", endDate: "2024-02-10", assignedWorkers: [] },
-    { id: 502, name: "Landscaping", nameAr: "تنسيق الحدائق", progress: 0, status: 'not-started', assignee: "Mohammad Ahmad", startDate: "2024-02-11", endDate: "2024-02-16", assignedWorkers: [] },
-    { id: 503, name: "Final Inspection", nameAr: "الفحص النهائي", progress: 0, status: 'not-started', assignee: "Alexander Thompson", startDate: "2024-02-17", endDate: "2024-02-20", assignedWorkers: [] }
-  ]
-};
-
 // Status configuration
 const statusConfig = {
   'completed': { label: 'Completed', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle },
@@ -128,13 +67,22 @@ const calculateOverdueDays = (endDate: string) => {
   return diffDays > 0 ? diffDays : 0;
 };
 
+// Interface for tasks with UI-specific properties
+interface UITask extends ApiTask {
+  status: string;
+  progress: number;
+  assignee?: string;
+  nameAr?: string;
+  assignedWorkers: Worker[];
+}
+
 // Enhanced stage interface to include progress and status
 interface EnhancedStage extends ApiStage {
   progress: number;
   status: string;
   nameAr?: string;
   assignee?: string;
-  tasks: any[];
+  tasks: UITask[];
 }
 
 const ProjectStages = ({ project }: ProjectStagesProps) => {
@@ -164,33 +112,86 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
         if (project && project.id) {
           const stagesData = await getProjectStages(project.id);
           
-          // Transform API stages to enhanced stages with progress and mock status
-          const enhancedStages = stagesData.map(stage => {
-            // Get mock tasks for the stage - in a real scenario, you'd fetch tasks for each stage
-            const stageTasks = mockTasks[stage.id as keyof typeof mockTasks] || [];
-            
-            // Calculate mock progress based on task completion
-            const stageProgress = stageTasks.length > 0 
-              ? stageTasks.reduce((sum, task) => sum + task.progress, 0) / stageTasks.length 
-              : 0;
-            
-            // Determine mock status based on progress
-            let stageStatus = 'not-started';
-            if (stageProgress === 100) {
-              stageStatus = 'completed';
-            } else if (stageProgress > 0) {
-              stageStatus = 'in-progress';
+          // Create enhanced stages array to store stages with their tasks
+          const enhancedStages: EnhancedStage[] = [];
+          
+          // Process each stage
+          for (const stage of stagesData) {
+            try {
+              // Fetch tasks for this stage
+              const stageTasks = await getStageTasks(stage.id);
+              
+              // Calculate stage progress based on task completion
+              const stageProgress = stageTasks.length > 0
+                ? Math.round((stageTasks.filter(task => task.isCompleted).length / stageTasks.length) * 100)
+                : 0;
+              
+              // Determine status based on progress
+              let stageStatus = 'not-started';
+              if (stageProgress === 100) {
+                stageStatus = 'completed';
+              } else if (stageProgress > 0) {
+                stageStatus = 'in-progress';
+              }
+              
+              // Map API tasks to UI format with status and other UI properties
+              const uiTasks: UITask[] = stageTasks.map(task => {
+                // Determine task status based on isCompleted and dates
+                let status = 'not-started';
+                if (task.isCompleted) {
+                  status = 'completed';
+                } else {
+                  const now = new Date();
+                  const startDate = new Date(task.startDate);
+                  const endDate = new Date(task.endDate);
+                  
+                  if (now > endDate) {
+                    status = 'delayed';
+                  } else if (now >= startDate) {
+                    status = 'in-progress';
+                  }
+                }
+                
+                // Set completedTasks state for checked tasks
+                if (task.isCompleted) {
+                  setCompletedTasks(prev => 
+                    prev.includes(task.id) ? prev : [...prev, task.id]
+                  );
+                }
+                
+                return {
+                  ...task,
+                  status,
+                  progress: task.isCompleted ? 100 : 0,
+                  assignee: "Assigned Worker", // Placeholder assignee
+                  nameAr: `${task.name} (Arabic)`, // Placeholder for Arabic name
+                  assignedWorkers: [] // Placeholder for assigned workers
+                };
+              });
+              
+              // Add enhanced stage to array
+              enhancedStages.push({
+                ...stage,
+                progress: stageProgress,
+                status: stageStatus,
+                nameAr: `${stage.name} (Arabic)`, // Placeholder for Arabic name
+                assignee: "Project Manager", // Placeholder assignee
+                tasks: uiTasks
+              });
+            } catch (err) {
+              console.error(`Error fetching tasks for stage ${stage.id}:`, err);
+              
+              // Add stage with empty tasks list in case of error
+              enhancedStages.push({
+                ...stage,
+                progress: 0,
+                status: 'not-started',
+                nameAr: `${stage.name} (Arabic)`,
+                assignee: "Project Manager",
+                tasks: []
+              });
             }
-            
-            return {
-              ...stage,
-              progress: stageProgress,
-              status: stageStatus,
-              nameAr: `${stage.name} (Arabic)`, // Placeholder for Arabic name
-              assignee: "Project Manager", // Placeholder assignee
-              tasks: stageTasks
-            };
-          });
+          }
           
           setApiStages(enhancedStages);
         }
@@ -482,7 +483,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                         {stage.tasks && stage.tasks.length > 0 ? (
                           <div className="space-y-4">
                             {stage.tasks.map((task) => {
-                              const taskStatus = statusConfig[task.status as keyof typeof statusConfig];
+                              const taskStatus = statusConfig[task.status as keyof typeof statusConfig] || statusConfig['not-started'];
                               const TaskStatusIcon = taskStatus.icon;
                               const overdueDays = calculateOverdueDays(task.endDate);
                               const isCompleted = completedTasks.includes(task.id);
@@ -520,7 +521,7 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                               {taskStatus.label}
                                             </Badge>
                                           </div>
-                                          <p className="text-xs text-gray-500 mt-0.5">{task.nameAr}</p>
+                                          <p className="text-xs text-gray-500 mt-0.5">{task.description || 'No description'}</p>
                                         </div>
                                       </div>
                                       
@@ -547,11 +548,13 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
                                       <div className="flex gap-6">
                                         <div className="flex items-center gap-1.5">
                                           <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                                          <span className="text-xs text-gray-500">{formatDate(task.startDate)} - {formatDate(task.endDate)}</span>
+                                          <span className="text-xs text-gray-500">
+                                            {formatDate(task.startDate)} - {formatDate(task.endDate)}
+                                          </span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
                                           <User className="h-3.5 w-3.5 text-gray-400" />
-                                          <span className="text-xs text-gray-500">{task.assignee}</span>
+                                          <span className="text-xs text-gray-500">{task.assignee || 'Unassigned'}</span>
                                         </div>
                                       </div>
                                       
