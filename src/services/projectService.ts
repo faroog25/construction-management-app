@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@/config/api';
+import { Project, ProjectApiResponse } from '@/types/project';
 
 export interface Project {
   id: number;
@@ -108,20 +109,86 @@ export async function getProjects(page: number = 1, pageSize: number = 10): Prom
 //   }
 // }
 
-export async function getProjectById(id: number): Promise<Project | undefined> {
+export async function getProjectById(id: number): Promise<Project> {
   try {
-    // For now, we'll just use the getProjects and filter by ID
-    // In a real application, you'd have a dedicated API endpoint
-    const projects = await getProjects();
-    return projects.find(project => project.id === id);
+    console.log('Fetching project details from:', `${API_BASE_URL}/Projects/${id}`);
+    const response = await fetch(`${API_BASE_URL}/Projects/${id}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response for project details:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: ProjectApiResponse = await response.json();
+    console.log('API Response for project details:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch project details');
+    }
+    
+    if (!result.data) {
+      console.error('Invalid API response structure for project details:', result);
+      throw new Error('Invalid API response structure');
+    }
+    
+    // Map API response to our Project interface
+    const projectDetails: Project = {
+      id: result.data.id,
+      projectName: result.data.projectName,
+      description: result.data.description,
+      siteAddress: result.data.siteAddress,
+      geographicalCoordinates: result.data.geographicalCoordinates,
+      clientName: result.data.clientName,
+      siteEngineerName: result.data.siteEngineerName,
+      startDate: result.data.startDate,
+      expectedEndDate: result.data.expectedEndDate,
+      projectStatus: result.data.projectStatus,
+      status: getStatusCodeFromString(result.data.projectStatus),
+      cancellationReason: result.data.cancellationReason,
+      cancellationDate: result.data.cancellationDate,
+      completionDate: result.data.completionDate,
+      handoverDate: result.data.handoverDate,
+      // Add other fields as needed
+      siteEngineerId: 0, // Default value
+      clientId: 0, // Default value
+    };
+    
+    return projectDetails;
   } catch (error) {
     console.error('Error fetching project by ID:', error);
     throw error;
   }
 }
 
-// In your projectService.ts file
-export const createProject = async (projectData: Project) => {
+// Helper function to convert status string to status code
+function getStatusCodeFromString(status: string | undefined): number {
+  if (!status) return 1; // Default to active (1)
+  
+  // Map Arabic status strings to status codes
+  switch (status.trim().toLowerCase()) {
+    case 'قيد التنفيذ':
+      return 1; // active
+    case 'مكتمل':
+    case 'تم الانتهاء':
+      return 2; // completed
+    case 'لم يبدأ':
+    case 'معلق':
+      return 3; // pending
+    case 'متأخر':
+      return 4; // delayed
+    case 'ملغي':
+      return 5; // cancelled
+    default:
+      return 1; // Default to active
+  }
+}
+
+export async function createProject = async (projectData: Project) => {
   const response = await fetch(`${API_BASE_URL}/Projects`, {
     method: 'POST',
     headers: {

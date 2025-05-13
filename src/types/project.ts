@@ -1,4 +1,3 @@
-
 import { Worker } from '@/services/workerService';
 import { ApiTask } from '@/services/taskService';
 import { ApiStage } from '@/services/stageService';
@@ -26,6 +25,28 @@ export interface Task {
   updatedAt: Date;
 }
 
+export interface ProjectApiResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: {
+    id: number;
+    projectName: string;
+    description: string;
+    siteAddress: string;
+    geographicalCoordinates: string;
+    projectStatus: string;
+    siteEngineerName: string;
+    clientName: string;
+    startDate: string;
+    expectedEndDate: string;
+    cancellationReason?: string;
+    cancellationDate?: string;
+    completionDate?: string;
+    handoverDate?: string;
+  };
+}
+
 export interface Project {
   id: string | number;
   projectName: string;
@@ -38,6 +59,7 @@ export interface Project {
   clientName?: string;
   siteAddress?: string;
   siteEngineerId?: number;
+  siteEngineerName?: string;
   orderId?: number;
   actualEndDate?: string;
   stages?: ApiStage[];
@@ -46,6 +68,11 @@ export interface Project {
   updatedAt: Date | string;
   clientId?: number;
   geographicalCoordinates?: string;
+  projectStatus?: string;
+  cancellationReason?: string;
+  cancellationDate?: string;
+  completionDate?: string;
+  handoverDate?: string;
 }
 
 export interface GanttTask {

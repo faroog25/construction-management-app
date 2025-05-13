@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -18,7 +19,11 @@ import {
   Timer,
   DollarSign,
   Briefcase,
-  FileText
+  FileText,
+  Calendar as CalendarIcon,
+  XCircle,
+  CheckCircle,
+  AlertOctagon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -29,6 +34,7 @@ const statusConfig = {
   completed: { label: 'Completed', className: 'bg-blue-100 text-blue-800', icon: CheckCircle2 },
   pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800', icon: Clock3 },
   delayed: { label: 'Delayed', className: 'bg-red-100 text-red-800', icon: AlertTriangle },
+  cancelled: { label: 'Cancelled', className: 'bg-gray-100 text-gray-800', icon: XCircle },
 };
 
 interface ProjectDetailsInfoProps {
@@ -61,8 +67,8 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
   const { days, isOverdue } = calculateDaysRemaining();
 
   // Using the shared utility function to get status type
-  const statusType = getStatusFromCode(project.status || 1);
-  const statusInfo = statusConfig[statusType];
+  const statusType = getStatusFromCode(typeof project.status === 'number' ? project.status : 1);
+  const statusInfo = statusConfig[statusType as keyof typeof statusConfig] || statusConfig.active;
   const StatusIcon = statusInfo.icon;
 
   // Define progress thresholds and colors
@@ -127,11 +133,11 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <div>
                   <p className="text-sm text-muted-foreground">Site Engineer</p>
                   <p className="font-medium">
-                    {project.siteEngineerId ? 
+                    {project.siteEngineerName || (project.siteEngineerId ? 
                       `Engineer #${project.siteEngineerId}` : 
-                      'Not assigned yet'}
+                      'Not assigned yet')}
                   </p>
-                  {project.siteEngineerId && (
+                  {(project.siteEngineerId || project.siteEngineerName) && (
                     <p className="text-xs text-muted-foreground mt-1">
                       Responsible for site supervision and quality control
                     </p>
@@ -143,17 +149,52 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <Calendar className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <p className="text-sm text-muted-foreground">Started On</p>
-                  <p className="font-medium">{formatDate(project.startDate)}</p>
+                  <p className="font-medium">{formatDate(project.startDate?.toString())}</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <DollarSign className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Budget</p>
-                  <p className="font-medium">Not set</p>
+              {project.geographicalCoordinates && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Geographical Coordinates</p>
+                    <p className="font-medium">{project.geographicalCoordinates}</p>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {project.completionDate && (
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Completion Date</p>
+                    <p className="font-medium">{formatDate(project.completionDate)}</p>
+                  </div>
+                </div>
+              )}
+              
+              {project.handoverDate && (
+                <div className="flex items-start gap-3">
+                  <Briefcase className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Handover Date</p>
+                    <p className="font-medium">{formatDate(project.handoverDate)}</p>
+                  </div>
+                </div>
+              )}
+              
+              {project.cancellationDate && (
+                <div className="flex items-start gap-3">
+                  <AlertOctagon className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Cancellation Date</p>
+                    <p className="font-medium">{formatDate(project.cancellationDate)}</p>
+                    {project.cancellationReason && (
+                      <p className="text-sm text-muted-foreground mt-1">Reason: {project.cancellationReason}</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -166,7 +207,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <StatusIcon className="h-5 w-5" style={{ color: progressColor }} />
-                <span className="font-medium">{statusInfo.label}</span>
+                <span className="font-medium">{project.projectStatus || statusInfo.label}</span>
               </div>
             </div>
             
@@ -186,7 +227,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
             <div className="space-y-4 pt-2">
               <div className="flex justify-between items-center pb-2 border-b">
                 <span className="text-sm text-muted-foreground">Expected Completion</span>
-                <span className="font-medium">{formatDate(project.expectedEndDate)}</span>
+                <span className="font-medium">{formatDate(project.expectedEndDate?.toString())}</span>
               </div>
               
               {isOverdue ? (
@@ -210,7 +251,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
               {project.actualEndDate && (
                 <div className="flex justify-between items-center pt-2 border-t">
                   <span className="text-sm text-muted-foreground">Actual Completion</span>
-                  <span className="font-medium">{formatDate(project.actualEndDate)}</span>
+                  <span className="font-medium">{formatDate(project.actualEndDate?.toString())}</span>
                 </div>
               )}
             </div>
