@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
-import { ApiStage, getProjectStages } from '@/services/stageService';
+import { ApiStage, getProjectStages, createStage, CreateStageRequest } from '@/services/stageService';
 import { ApiTask, getStageTasks } from '@/services/taskService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { WorkerMultiSelect } from './WorkerMultiSelect';
+import StageFormModal from './StageFormModal';
 import { 
   CircleDot, 
   CheckCircle, 
@@ -85,13 +85,15 @@ interface EnhancedStage extends ApiStage {
   tasks: UITask[];
 }
 
-const ProjectStages = ({ project }: ProjectStagesProps) => {
+const ProjectStages = ({ project }: { project: Project }) => {
   const [apiStages, setApiStages] = useState<EnhancedStage[]>([]);
   const [expandedStages, setExpandedStages] = useState<number[]>([]);
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAddStageModalOpen, setIsAddStageModalOpen] = useState(false);
+  const [isCreatingStage, setIsCreatingStage] = useState(false);
   
   // Fetch workers and stages
   useEffect(() => {
@@ -223,7 +225,52 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
   };
   
   const handleAddStage = () => {
-    toast.info('Add stage functionality will be implemented soon');
+    setIsAddStageModalOpen(true);
+  };
+  
+  const handleAddStageSubmit = async (formData: { name: string; description: string; startDate: string; endDate: string }) => {
+    if (!project.id) {
+      toast.error("Project ID is missing");
+      return;
+    }
+    
+    setIsCreatingStage(true);
+    
+    try {
+      const stageData: CreateStageRequest = {
+        ...formData,
+        projectId: Number(project.id)
+      };
+      
+      const result = await createStage(stageData);
+      
+      if (result.success) {
+        toast.success(result.message || "Stage created successfully");
+        setIsAddStageModalOpen(false);
+        
+        // Refresh the stages list
+        const stagesData = await getProjectStages(project.id);
+        
+        // Update state with new stages (simplified for brevity)
+        const newStages = stagesData.map(stage => ({
+          ...stage,
+          progress: 0,
+          status: 'not-started',
+          nameAr: `${stage.name} (Arabic)`,
+          assignee: "Project Manager",
+          tasks: []
+        }));
+        
+        setApiStages(newStages);
+      } else {
+        toast.error(result.message || "Failed to create stage");
+      }
+    } catch (error) {
+      console.error('Error creating stage:', error);
+      toast.error(error instanceof Error ? error.message : "Failed to create stage");
+    } finally {
+      setIsCreatingStage(false);
+    }
   };
   
   const handleAddTask = (stageId: number) => {
@@ -301,6 +348,15 @@ const ProjectStages = ({ project }: ProjectStagesProps) => {
           Add Stage
         </Button>
       </div>
+      
+      {/* Stage Form Modal */}
+      <StageFormModal 
+        isOpen={isAddStageModalOpen} 
+        onClose={() => setIsAddStageModalOpen(false)}
+        onSubmit={handleAddStageSubmit}
+        isLoading={isCreatingStage}
+        projectId={Number(project.id)}
+      />
       
       {projectStages.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 bg-slate-50 rounded-lg border border-dashed border-slate-200">
