@@ -28,7 +28,9 @@ import {
   User,
   Info,
   Calendar,
-  CalendarClock
+  CalendarClock,
+  ListTodo,
+  SquareKanban
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -343,11 +345,17 @@ const ProjectStages = ({ project }: { project: Project }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Project Stages</h2>
-          <p className="text-gray-500 mt-1">Manage and track all stages and tasks</p>
+        <div className="flex items-center">
+          <SquareKanban className="h-7 w-7 text-indigo-600 mr-3" />
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Project Stages</h2>
+            <p className="text-gray-500 mt-1">Manage and track all stages and tasks</p>
+          </div>
         </div>
-        <Button onClick={handleAddStage} className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-md transition-all duration-300">
+        <Button 
+          onClick={handleAddStage} 
+          className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-md transition-all duration-300"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add Stage
         </Button>
@@ -394,30 +402,30 @@ const ProjectStages = ({ project }: { project: Project }) => {
               <Card 
                 key={stage.id} 
                 className={cn(
-                  "shadow-sm border border-slate-200 overflow-hidden transition-all duration-300",
-                  isExpanded && "ring-1 ring-violet-200"
+                  "shadow-lg border-0 overflow-hidden transition-all duration-300 bg-gradient-to-br from-slate-50 to-white",
+                  isExpanded && "ring-1 ring-indigo-200"
                 )}
               >
                 <div 
                   className={cn(
                     "flex flex-col md:flex-row md:items-center justify-between px-5 py-4 cursor-pointer transition-colors",
-                    isExpanded ? "bg-slate-50" : "hover:bg-slate-50"
+                    isExpanded ? "bg-indigo-50/50 border-b border-indigo-100" : "hover:bg-indigo-50/30"
                   )}
                   onClick={() => toggleStage(stage.id)}
                 >
                   <div className="flex items-center gap-3 mb-2 md:mb-0">
                     <div className={cn(
-                      "p-2 rounded-full",
-                      stage.status === 'completed' ? "bg-green-50" : 
-                      stage.status === 'in-progress' ? "bg-blue-50" :
-                      stage.status === 'delayed' ? "bg-red-50" : "bg-gray-50"
+                      "p-2 rounded-lg",
+                      stage.status === 'completed' ? "bg-emerald-100" : 
+                      stage.status === 'in-progress' ? "bg-blue-100" :
+                      stage.status === 'delayed' ? "bg-red-100" : "bg-slate-100"
                     )}>
-                      <StageStatusIcon 
+                      <SquareKanban 
                         className={cn(
                           "h-5 w-5",
-                          stage.status === 'completed' ? "text-green-500" : 
-                          stage.status === 'in-progress' ? "text-blue-500" :
-                          stage.status === 'delayed' ? "text-red-500" : "text-gray-400"
+                          stage.status === 'completed' ? "text-emerald-600" : 
+                          stage.status === 'in-progress' ? "text-blue-600" :
+                          stage.status === 'delayed' ? "text-red-600" : "text-slate-600"
                         )} 
                       />
                     </div>
@@ -429,19 +437,23 @@ const ProjectStages = ({ project }: { project: Project }) => {
                   
                   <div className="flex items-center gap-3 md:gap-6">
                     <div className="hidden md:block">
-                      <Badge className={cn("px-3 py-1 font-medium text-xs", stageStatus.className)}>
+                      <Badge className={cn(
+                        "px-3 py-1 font-medium text-xs", 
+                        stageStatus.className,
+                        "rounded-md shadow-sm"
+                      )}>
                         {stageStatus.label}
                       </Badge>
                     </div>
                     
                     <div className="flex flex-1 items-center gap-2 md:w-48">
-                      <div className="h-2 flex-1 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-2.5 flex-1 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                         <div 
                           className={cn(
                             "h-full transition-all duration-300 ease-out",
-                            stage.progress === 100 ? "bg-green-500" : 
-                            stage.progress > 50 ? "bg-blue-500" : 
-                            stage.progress > 0 ? "bg-amber-500" : "bg-gray-300"
+                            stage.progress === 100 ? "bg-gradient-to-r from-emerald-400 to-emerald-500" : 
+                            stage.progress > 50 ? "bg-gradient-to-r from-blue-400 to-blue-500" : 
+                            stage.progress > 0 ? "bg-gradient-to-r from-amber-400 to-amber-500" : "bg-gray-300"
                           )}
                           style={{ width: `${stage.progress}%` }}
                         ></div>
@@ -493,9 +505,9 @@ const ProjectStages = ({ project }: { project: Project }) => {
                 </div>
                 
                 {isExpanded && (
-                  <div className="p-5 border-t bg-white">
+                  <div className="p-5 bg-white">
                     <div className="py-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-50 p-4 rounded-lg">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-indigo-50 rounded-full">
                             <User className="h-3.5 w-3.5 text-indigo-500" />
@@ -535,13 +547,14 @@ const ProjectStages = ({ project }: { project: Project }) => {
                       <div className="mt-6">
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="font-medium text-gray-900 flex items-center">
-                            Tasks ({stage.tasks ? stage.tasks.length : 0})
-                            <Badge className="mr-2 h-5 w-5 text-center ml-2 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                            <ListTodo className="h-5 w-5 text-violet-600 mr-2" />
+                            Tasks
+                            <Badge className="ml-2 h-5 px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-medium">
                               {stage.tasks ? stage.tasks.length : 0}
                             </Badge>
                           </h4>
                           <Button size="sm" onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}
-                            className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-800">
+                            className="bg-violet-100 text-violet-700 hover:bg-violet-200 hover:text-violet-800">
                             <Plus className="mr-1 h-3.5 w-3.5" />
                             Add Task
                           </Button>
@@ -557,22 +570,22 @@ const ProjectStages = ({ project }: { project: Project }) => {
                               
                               return (
                                 <Card key={task.id} className={cn(
-                                  "border rounded-lg overflow-hidden transition-all",
-                                  isCompleted && "bg-slate-50 border-slate-200"
+                                  "border rounded-lg overflow-hidden transition-all hover:shadow-md",
+                                  isCompleted ? "bg-slate-50/70 border-slate-200" : "bg-gradient-to-r from-white to-slate-50/50 border-slate-200"
                                 )}>
                                   <div className="p-4">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                                       <div className="flex items-start gap-3">
                                         <div className={cn(
-                                          "p-1.5 rounded-full mt-0.5",
-                                          task.status === 'completed' ? "bg-green-50" : 
+                                          "p-1.5 rounded-md",
+                                          task.status === 'completed' ? "bg-emerald-50" : 
                                           task.status === 'in-progress' ? "bg-blue-50" :
                                           task.status === 'delayed' ? "bg-red-50" : "bg-gray-50"
                                         )}>
-                                          <TaskStatusIcon 
+                                          <ListTodo 
                                             className={cn(
                                               "h-3.5 w-3.5",
-                                              task.status === 'completed' ? "text-green-500" : 
+                                              task.status === 'completed' ? "text-emerald-500" : 
                                               task.status === 'in-progress' ? "text-blue-500" :
                                               task.status === 'delayed' ? "text-red-500" : "text-gray-400"
                                             )} 
@@ -584,7 +597,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                               "font-medium",
                                               isCompleted && "line-through text-gray-500"
                                             )}>{task.name}</p>
-                                            <Badge className={cn("ml-2", taskStatus.className)}>
+                                            <Badge className={cn("ml-2 rounded-md", taskStatus.className)}>
                                               {taskStatus.label}
                                             </Badge>
                                           </div>
@@ -614,13 +627,13 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                     <div className="mt-3 flex justify-between items-center">
                                       <div className="flex gap-6">
                                         <div className="flex items-center gap-1.5">
-                                          <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                          <Calendar className="h-3.5 w-3.5 text-violet-400" />
                                           <span className="text-xs text-gray-500">
                                             {formatDate(task.startDate)} - {formatDate(task.endDate)}
                                           </span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                          <User className="h-3.5 w-3.5 text-gray-400" />
+                                          <User className="h-3.5 w-3.5 text-violet-400" />
                                           <span className="text-xs text-gray-500">{task.assignee || 'Unassigned'}</span>
                                         </div>
                                       </div>
@@ -630,13 +643,13 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                           id={`task-${task.id}`}
                                           checked={isCompleted}
                                           onCheckedChange={() => toggleTaskCompletion(task.id)}
-                                          className="h-4 w-4 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
+                                          className="h-4 w-4 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
                                         />
                                         
                                         <Button 
                                           variant="ghost" 
                                           size="icon" 
-                                          className="h-7 w-7 text-slate-500 hover:bg-slate-100" 
+                                          className="h-7 w-7 text-slate-500 hover:bg-violet-50 hover:text-violet-700" 
                                           onClick={() => handleViewTaskDetails(task.id)}
                                         >
                                           <Info className="h-3.5 w-3.5" />
@@ -644,7 +657,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                         <Button 
                                           variant="ghost" 
                                           size="icon" 
-                                          className="h-7 w-7 text-slate-500 hover:bg-slate-100" 
+                                          className="h-7 w-7 text-slate-500 hover:bg-violet-50 hover:text-violet-700" 
                                           onClick={() => handleEditTask(task.id)}
                                         >
                                           <Edit className="h-3.5 w-3.5" />
