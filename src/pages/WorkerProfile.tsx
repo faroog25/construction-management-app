@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getWorkerById } from '../services/workerService';
@@ -9,7 +8,6 @@ import { CheckCircle2, XCircle, User, Mail, Phone, MapPin, Briefcase, Calendar, 
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Button } from '../components/ui/button';
-import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -176,7 +174,7 @@ export function WorkerProfilePage() {
                 <div className="space-y-2">
                   <div className="flex items-center text-muted-foreground">
                     <Mail className="h-4 w-4 mr-2" />
-                    <span>البريد الإلكتروني:</span>
+                    <span>البريد ا��إلكتروني:</span>
                   </div>
                   <p className="text-sm font-medium">{worker.email || '-'}</p>
                 </div>
