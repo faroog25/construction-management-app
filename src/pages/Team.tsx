@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeamMembers } from '@/components/TeamMembers';
@@ -28,24 +27,26 @@ const Team = () => {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="bg-muted/50 p-1 rounded-xl">
-            <TabsTrigger value="team" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <UserCog className="h-4 w-4" />
-              <span>{t('team.workers')}</span>
-              <Badge variant="secondary" className="ml-1">24</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="engineers" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <HardHat className="h-4 w-4" />
-              <span>{t('team.engineers')}</span>
-              <Badge variant="secondary" className="ml-1">18</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="clients" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Briefcase className="h-4 w-4" />
-              <span>{t('team.clients')}</span>
-              <Badge variant="secondary" className="ml-1">16</Badge>
-            </TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="bg-white rounded-xl shadow-md p-2">
+            <TabsList className="grid grid-cols-3 gap-2">
+              <TabsTrigger value="team" className="flex items-center gap-2 data-[state=active]:bg-blue-500">
+                <UserCog className="h-5 w-5" />
+                <span className="hidden sm:inline">{t('team.workers')}</span>
+                <Badge variant="outline" className="ml-1 bg-blue-50 text-blue-700 border border-blue-200">24</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="engineers" className="flex items-center gap-2 data-[state=active]:bg-amber-500">
+                <HardHat className="h-5 w-5" />
+                <span className="hidden sm:inline">{t('team.engineers')}</span>
+                <Badge variant="outline" className="ml-1 bg-amber-50 text-amber-700 border border-amber-200">18</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="clients" className="flex items-center gap-2 data-[state=active]:bg-rose-500">
+                <Briefcase className="h-5 w-5" />
+                <span className="hidden sm:inline">{t('team.clients')}</span>
+                <Badge variant="outline" className="ml-1 bg-rose-50 text-rose-700 border border-rose-200">16</Badge>
+              </TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="team" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -119,7 +120,7 @@ const Team = () => {
               </Card>
             </div>
             
-            <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-t-blue-500">
+            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-t-blue-500">
               <TeamMembers />
             </div>
             
@@ -206,7 +207,7 @@ const Team = () => {
                 </CardContent>
               </Card>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-t-amber-500">
+            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-t-amber-500">
               <SiteEngineers />
             </div>
             
@@ -293,7 +294,7 @@ const Team = () => {
                 </CardContent>
               </Card>
             </div>
-            <div className="bg-white rounded-lg shadow-md p-4 border-t-4 border-t-rose-500">
+            <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-t-rose-500">
               <ClientMembers />
             </div>
             
