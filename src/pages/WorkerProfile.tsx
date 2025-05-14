@@ -1,4 +1,5 @@
-import { useParams, useNavigate } from 'react-router-dom';
+
+import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getWorkerById } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -12,6 +13,7 @@ import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export function WorkerProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -29,41 +31,44 @@ export function WorkerProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleGoBack}
-          className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          العودة إلى الفريق
-        </Button>
-        
-        <div className="flex items-center gap-4 mb-8">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-[200px]" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-[150px]" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Skeleton className="h-4 w-[300px]" />
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[280px]" />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-[150px]" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Skeleton className="h-4 w-[300px]" />
-              <Skeleton className="h-4 w-[250px]" />
-            </CardContent>
-          </Card>
+      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGoBack}
+            className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            العودة إلى الفريق
+          </Button>
+          
+          <div className="flex items-center gap-4 mb-8">
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-8 w-[200px]" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-[150px]" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-4 w-[300px]" />
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[280px]" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-[150px]" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-4 w-[300px]" />
+                <Skeleton className="h-4 w-[250px]" />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
@@ -72,22 +77,25 @@ export function WorkerProfilePage() {
   if (error) {
     toast.error("حدث خطأ أثناء تحميل بيانات العامل");
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleGoBack}
-          className="flex items-center gap-1 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          العودة إلى الفريق
-        </Button>
-        
-        <Alert variant="destructive">
-          <AlertDescription>
-            {error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل بيانات العامل'}
-          </AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="w-full max-w-6xl mx-auto px-4 py-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGoBack}
+            className="flex items-center gap-1 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            العودة إلى الفريق
+          </Button>
+          
+          <Alert variant="destructive">
+            <AlertDescription>
+              {error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل بيانات العامل'}
+            </AlertDescription>
+          </Alert>
+        </div>
       </div>
     );
   }
@@ -95,20 +103,23 @@ export function WorkerProfilePage() {
   if (!worker) {
     toast.error("لم يتم العثور على العامل");
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleGoBack}
-          className="flex items-center gap-1 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          العودة إلى الفريق
-        </Button>
-        
-        <Alert>
-          <AlertDescription>لم يتم العثور على العامل</AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="w-full max-w-6xl mx-auto px-4 py-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGoBack}
+            className="flex items-center gap-1 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            العودة إلى الفريق
+          </Button>
+          
+          <Alert>
+            <AlertDescription>لم يتم العثور على العامل</AlertDescription>
+          </Alert>
+        </div>
       </div>
     );
   }
@@ -118,6 +129,7 @@ export function WorkerProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+      <div className="h-16"></div> {/* Spacer for navbar */}
       <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-6">
         {/* Header with back button */}
         <Button
@@ -174,7 +186,7 @@ export function WorkerProfilePage() {
                 <div className="space-y-2">
                   <div className="flex items-center text-muted-foreground">
                     <Mail className="h-4 w-4 mr-2" />
-                    <span>البريد ا��إلكتروني:</span>
+                    <span>البريد الإلكتروني:</span>
                   </div>
                   <p className="text-sm font-medium">{worker.email || '-'}</p>
                 </div>

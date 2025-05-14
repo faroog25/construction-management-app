@@ -35,8 +35,9 @@ const ClientProfilePage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background py-8">
-        <div className="w-full max-w-6xl mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="w-full max-w-6xl mx-auto px-4 py-8">
           <Button
             variant="ghost"
             size="sm"
@@ -59,8 +60,9 @@ const ClientProfilePage = () => {
   if (error || !client) {
     toast.error(error instanceof Error ? error.message : t('error.loading_client'));
     return (
-      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background py-8">
-        <div className="w-full max-w-6xl mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="w-full max-w-6xl mx-auto px-4 py-8">
           <Button
             variant="ghost"
             size="sm"
@@ -92,6 +94,7 @@ const ClientProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+      <div className="h-16"></div> {/* Spacer for navbar */}
       <div className="w-full max-w-6xl mx-auto px-4 py-8">
         {/* Back Button */}
         <Button

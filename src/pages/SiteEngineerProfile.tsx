@@ -31,30 +31,33 @@ export default function SiteEngineerProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleGoBack}
-          className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('back_to_team')}
-        </Button>
-        
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-8 w-[200px]" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Skeleton className="h-24" />
-                <Skeleton className="h-24" />
-              </div>
-              <Skeleton className="h-32" />
-            </CardContent>
-          </Card>
+      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="w-full max-w-6xl mx-auto px-4 py-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGoBack}
+            className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t('back_to_team')}
+          </Button>
+          
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-8 w-[200px]" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Skeleton className="h-24" />
+                  <Skeleton className="h-24" />
+                </div>
+                <Skeleton className="h-32" />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
@@ -63,22 +66,25 @@ export default function SiteEngineerProfilePage() {
   if (error) {
     toast.error(error instanceof Error ? error.message : t('error.unknown'));
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleGoBack}
-          className="flex items-center gap-1 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('back_to_team')}
-        </Button>
-        
-        <Alert variant="destructive">
-          <AlertDescription>
-            {error instanceof Error ? error.message : t('error.unknown')}
-          </AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="w-full max-w-6xl mx-auto px-4 py-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGoBack}
+            className="flex items-center gap-1 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t('back_to_team')}
+          </Button>
+          
+          <Alert variant="destructive">
+            <AlertDescription>
+              {error instanceof Error ? error.message : t('error.unknown')}
+            </AlertDescription>
+          </Alert>
+        </div>
       </div>
     );
   }
@@ -86,20 +92,23 @@ export default function SiteEngineerProfilePage() {
   if (!engineer) {
     toast.error(t('error.not_found'));
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleGoBack}
-          className="flex items-center gap-1 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t('back_to_team')}
-        </Button>
-        
-        <Alert>
-          <AlertDescription>{t('error.not_found')}</AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="w-full max-w-6xl mx-auto px-4 py-8">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGoBack}
+            className="flex items-center gap-1 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t('back_to_team')}
+          </Button>
+          
+          <Alert>
+            <AlertDescription>{t('error.not_found')}</AlertDescription>
+          </Alert>
+        </div>
       </div>
     );
   }
@@ -111,6 +120,7 @@ export default function SiteEngineerProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+      <div className="h-16"></div> {/* Spacer for navbar */}
       <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-6">
         {/* Back button */}
         <Button
