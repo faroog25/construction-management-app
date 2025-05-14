@@ -9,6 +9,8 @@ import { UserCog, HardHat, Briefcase, TrendingUp, TrendingDown, Users } from 'lu
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const Team = () => {
   const [activeTab, setActiveTab] = useState('team');
@@ -22,6 +24,17 @@ const Team = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('team.title')}</h1>
             <p className="text-muted-foreground mt-1">{t('team.subtitle')}</p>
+          </div>
+          <div className="flex gap-2 mt-4 sm:mt-0">
+            <Button variant="outline" asChild>
+              <Link to="/team/workers">صفحة العمال</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/team/engineers">صفحة المهندسين</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/team/clients">صفحة العملاء</Link>
+            </Button>
           </div>
         </div>
 

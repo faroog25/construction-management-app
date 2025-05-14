@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,6 +10,9 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Documents from "./pages/Documents";
 import Team from "./pages/Team";
+import Workers from "./pages/Workers"; // صفحة العمال الجديدة
+import SiteEngineersPage from "./pages/SiteEngineers"; // صفحة المهندسين الجديدة
+import ClientsPage from "./pages/Clients"; // صفحة العملاء الجديدة
 import Equipment from "./pages/Equipment";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -66,6 +70,26 @@ const App = () => (
                     <ProjectDetails />
                   </ProtectedRoute>
                 } />
+                <Route path="/team" element={
+                  <ProtectedRoute>
+                    <Team />
+                  </ProtectedRoute>
+                } />
+                <Route path="/team/workers" element={
+                  <ProtectedRoute>
+                    <Workers />
+                  </ProtectedRoute>
+                } />
+                <Route path="/team/engineers" element={
+                  <ProtectedRoute>
+                    <SiteEngineersPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/team/clients" element={
+                  <ProtectedRoute>
+                    <ClientsPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/team/clients/:id" element={
                   <ProtectedRoute>
                     <ClientProfilePage />
@@ -84,11 +108,6 @@ const App = () => (
                 <Route path="/documents" element={
                   <ProtectedRoute>
                     <Documents />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team" element={
-                  <ProtectedRoute>
-                    <Team />
                   </ProtectedRoute>
                 } />
                 <Route path="/equipment" element={
