@@ -1,14 +1,20 @@
 
-import { Toast, ToastActionElement, ToastProps } from "@/components/ui/toast"
+import * as React from "react"
+import type {
+  ToastActionElement,
+  ToastProps,
+} from "@/components/ui/toast"
 
 const TOAST_LIMIT = 5
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 5000
 
-type ToasterToast = Toast & {
+type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  open: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const actionTypes = {
@@ -132,7 +138,7 @@ function dispatch(action: Action) {
   })
 }
 
-interface Toast extends Omit<ToasterToast, "id"> {}
+type Toast = Omit<ToasterToast, "id">
 
 function toast({ ...props }: Toast) {
   const id = genId()
@@ -164,24 +170,42 @@ function toast({ ...props }: Toast) {
 }
 
 function useToast() {
+  const [state, setState] = React.useState<State>(memoryState)
+
+  React.useEffect(() => {
+    listeners.push(setState)
+    return () => {
+      const index = listeners.indexOf(setState)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }, [state])
+
   return {
+    toasts: state.toasts,
     toast,
     dismiss: (toastId?: string) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
-    success: (message: string) => toast({ variant: "default", description: message }),
+    success: (message: string) => toast({ variant: "success", description: message }),
     error: (message: string) => toast({ variant: "destructive", description: message }),
     warning: (message: string) => toast({ variant: "warning", description: message }),
     info: (message: string) => toast({ variant: "info", description: message }),
   }
 }
 
-toast.dismiss = (toastId?: string) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId })
+toast.dismiss = (toastId?: string) =>
+  dispatch({ type: actionTypes.DISMISS_TOAST, toastId })
 
-toast.success = (message: string) => toast({ variant: "default", description: message })
+toast.success = (message: string) => 
+  toast({ variant: "success", description: message })
 
-toast.error = (message: string) => toast({ variant: "destructive", description: message })
+toast.error = (message: string) => 
+  toast({ variant: "destructive", description: message })
 
-toast.warning = (message: string) => toast({ variant: "warning", description: message })
+toast.warning = (message: string) => 
+  toast({ variant: "warning", description: message })
 
-toast.info = (message: string) => toast({ variant: "info", description: message })
+toast.info = (message: string) => 
+  toast({ variant: "info", description: message })
 
 export { useToast, toast }
