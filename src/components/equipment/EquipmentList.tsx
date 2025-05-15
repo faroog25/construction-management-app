@@ -13,9 +13,10 @@ import EquipmentDetailsDialog from './EquipmentDetailsDialog';
 
 interface EquipmentListProps {
   onSelectEquipment: (equipment: EquipmentItem) => void;
+  onRefresh?: () => void;
 }
 
-const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
+const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefresh }) => {
   const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<keyof EquipmentItem>('name');
@@ -38,37 +39,37 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
   const { toast } = useToast();
 
   // Fetch equipment data from API
-  useEffect(() => {
-    const fetchEquipment = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const response = await getEquipment(currentPage, pageSize);
-        
-        // Map API equipment to our internal format
-        const mappedEquipment = response.data.items.map(mapApiEquipmentToEquipmentItem);
-        
-        // Update state with API data
-        setEquipment(mappedEquipment);
-        setTotalPages(response.data.totalPages);
-        setTotalItems(response.data.totalItems);
-        setCurrentPage(response.data.currentPage);
-        setHasNextPage(response.data.hasNextPage);
-        setHasPrevPage(response.data.hasPreveiosPage);
-      } catch (error) {
-        console.error('Failed to fetch equipment:', error);
-        setError('Failed to load equipment data. Please try again later.');
-        toast({
-          title: 'Error',
-          description: 'Failed to load equipment data',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchEquipment = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await getEquipment(currentPage, pageSize);
+      
+      // Map API equipment to our internal format
+      const mappedEquipment = response.data.items.map(mapApiEquipmentToEquipmentItem);
+      
+      // Update state with API data
+      setEquipment(mappedEquipment);
+      setTotalPages(response.data.totalPages);
+      setTotalItems(response.data.totalItems);
+      setCurrentPage(response.data.currentPage);
+      setHasNextPage(response.data.hasNextPage);
+      setHasPrevPage(response.data.hasPreveiosPage);
+    } catch (error) {
+      console.error('Failed to fetch equipment:', error);
+      setError('Failed to load equipment data. Please try again later.');
+      toast({
+        title: 'Error',
+        description: 'Failed to load equipment data',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchEquipment();
   }, [currentPage, pageSize, toast]);
 
@@ -97,6 +98,24 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
     setEquipment(equipment.map(item => 
       item.id === id ? { ...item, status: 'Available' } : item
     ));
+  };
+
+  // Handle equipment deletion
+  const handleEquipmentDeleted = () => {
+    // Refresh equipment list
+    fetchEquipment();
+    
+    // Call parent refresh if provided
+    if (onRefresh) {
+      onRefresh();
+    }
+    
+    // Notify user
+    toast({
+      title: "Equipment List Updated",
+      description: "The equipment list has been refreshed after deletion.",
+      variant: "default",
+    });
   };
 
   // Show equipment details dialog
@@ -361,6 +380,7 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
         equipmentId={selectedEquipmentId}
         isOpen={isDetailsDialogOpen}
         onClose={() => setIsDetailsDialogOpen(false)}
+        onEquipmentDeleted={handleEquipmentDeleted}
       />
     </Card>
   );

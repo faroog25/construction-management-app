@@ -54,6 +54,12 @@ export interface EquipmentDetailResponse {
   };
 }
 
+export interface DeleteEquipmentResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+}
+
 /**
  * Fetches equipment list with pagination
  * @param pageNumber The current page number
@@ -187,6 +193,54 @@ export async function getEquipmentById(id: number): Promise<EquipmentDetailRespo
     return result;
   } catch (error) {
     console.error('Error fetching equipment details:', error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes an equipment item by ID
+ * @param id The equipment ID to delete
+ * @returns API response confirming deletion
+ */
+export async function deleteEquipment(id: number): Promise<DeleteEquipmentResponse> {
+  try {
+    console.log(`Deleting equipment with ID: ${id}`);
+    
+    const response = await fetch(`${API_BASE_URL}/Equipment/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    // Handle both JSON response and empty response
+    const contentType = response.headers.get('content-type');
+    let result: DeleteEquipmentResponse;
+    
+    if (contentType && contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      // If the API returns no content on successful delete
+      result = {
+        success: true,
+        message: 'Equipment deleted successfully'
+      };
+    }
+    
+    console.log('API Response - Delete Equipment:', result);
+    return result;
+  } catch (error) {
+    console.error('Error deleting equipment:', error);
     throw error;
   }
 }

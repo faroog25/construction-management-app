@@ -56,6 +56,11 @@ const Equipment = () => {
     });
   };
 
+  const handleEquipmentRefresh = () => {
+    // Refresh equipment list by updating the key
+    setRefreshKey(prevKey => prevKey + 1);
+  };
+
   return (
     <>
       <Helmet>
@@ -103,6 +108,7 @@ const Equipment = () => {
           <TabsContent value="equipment" className="space-y-6">
             <EquipmentList 
               onSelectEquipment={handleSelectEquipment} 
+              onRefresh={handleEquipmentRefresh}
               key={refreshKey} // This forces a re-render when refreshKey changes
             />
           </TabsContent>
