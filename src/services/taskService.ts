@@ -211,7 +211,7 @@ export async function completeTask(taskId: number): Promise<CompleteTaskResponse
   try {
     console.log('Completing task:', taskId);
     const response = await fetch(`${API_BASE_URL}/Tasks/CompleteTask/${taskId}`, {
-      method: 'POST',
+      method: 'Put',
       headers: {
         'Content-Type': 'application/json',
       }
