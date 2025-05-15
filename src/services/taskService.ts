@@ -54,6 +54,19 @@ export interface CreateTaskRequest {
   endDate: string;
 }
 
+export interface EditTaskRequest {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface EditTaskResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data?: any;
+}
+
 export interface CreateTaskResponse {
   success: boolean;
   message: string;
@@ -164,6 +177,42 @@ export async function createTask(taskData: CreateTaskRequest): Promise<CreateTas
     return result;
   } catch (error) {
     console.error('Error creating task:', error);
+    throw error;
+  }
+}
+
+/**
+ * Edits an existing task with updated name and description
+ * @param taskData The task data to update including id, name, and description
+ * @returns API response with success status and message
+ */
+export async function editTask(taskData: EditTaskRequest): Promise<EditTaskResponse> {
+  try {
+    console.log('Editing task with data:', taskData);
+    const response = await fetch(`${API_BASE_URL}/Tasks`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(taskData),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response for task editing:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('API Response - Edit Task:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('Error editing task:', error);
     throw error;
   }
 }
