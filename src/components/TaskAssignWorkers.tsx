@@ -82,6 +82,28 @@ export function TaskAssignWorkers({ taskId, onWorkersAssigned }: TaskAssignWorke
 
   const isLoading = isLoadingWorkers || isLoadingAssignedWorkers;
 
+  // Helper function to get worker name safely
+  const getWorkerName = (worker: Worker): string => {
+    // Try to use fullName if available
+    if ('fullName' in worker && worker.fullName) {
+      return worker.fullName;
+    }
+    
+    // If we have individual name parts, construct the full name
+    if ('firstName' in worker && worker.firstName) {
+      const nameParts = [
+        worker.firstName,
+        worker.secondName,
+        worker.thirdName,
+        worker.lastName
+      ].filter(Boolean);
+      return nameParts.join(' ');
+    }
+    
+    // Last resort fallback
+    return `Worker #${worker.id}`;
+  };
+
   return (
     <div className="space-y-4">
       <WorkerMultiSelect
@@ -105,12 +127,12 @@ export function TaskAssignWorkers({ taskId, onWorkersAssigned }: TaskAssignWorke
                 variant="secondary"
                 className="flex items-center gap-1 py-1 px-2"
               >
-                {worker.fullName}
+                {getWorkerName(worker)}
                 <button
                   onClick={() => handleRemoveWorker(worker.id)}
                   className="ml-1 text-muted-foreground hover:text-foreground transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
                   disabled={isAssigning}
-                  aria-label={`إزالة ${worker.fullName}`}
+                  aria-label={`إزالة ${getWorkerName(worker)}`}
                 >
                   <X className="h-3 w-3" />
                 </button>

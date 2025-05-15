@@ -402,3 +402,41 @@ export async function deleteTask(taskId: number): Promise<DeleteTaskResponse> {
     throw error;
   }
 }
+
+/**
+ * Fetches workers assigned to a specific task
+ * @param taskId The task ID to get assigned workers for
+ * @returns API response with worker data
+ */
+export async function getWorkersForTask(taskId: number): Promise<Worker[]> {
+  try {
+    console.log('Fetching workers for task:', taskId);
+    const response = await fetch(`${API_BASE_URL}/TaskAssignments/ByTask/${taskId}`);
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log('No workers assigned to this task yet');
+        return [];
+      }
+      const errorText = await response.text();
+      console.error('API Error Response for task workers:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log('API Response - Task Workers:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch workers for task');
+    }
+    
+    return result.data || [];
+  } catch (error) {
+    console.error('Error fetching workers for task:', error);
+    return [];
+  }
+}
