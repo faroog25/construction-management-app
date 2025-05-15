@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,8 @@ import {
   Users,
   Building,
   ChevronRight,
-  BarChart2
+  BarChart2,
+  User
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -30,6 +32,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   start_date,
   progress,
   status,
+  site_engineer_name,
   onViewDetails,
   className,
   style,
@@ -86,12 +89,21 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           {name}
         </h3>
         
-        <div className="flex items-center gap-2 mb-5 text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg">
-          <Building className="h-4 w-4" />
-          <p className="text-sm font-medium">{client_name}</p>
+        <div className="space-y-2">
+          {/* Client information */}
+          <div className="flex items-center gap-2 text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg">
+            <Building className="h-4 w-4" />
+            <p className="text-sm font-medium">{client_name || 'No client assigned'}</p>
+          </div>
+          
+          {/* Site Engineer information */}
+          <div className="flex items-center gap-2 text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg">
+            <User className="h-4 w-4" />
+            <p className="text-sm font-medium">{site_engineer_name || 'No site engineer assigned'}</p>
+          </div>
         </div>
         
-        <div className="space-y-5">
+        <div className="mt-5">
           <div className="bg-muted/30 p-3 rounded-lg">
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">

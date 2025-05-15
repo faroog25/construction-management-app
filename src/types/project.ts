@@ -1,3 +1,4 @@
+
 import { Worker } from '@/services/workerService';
 import { ApiTask } from '@/services/taskService';
 import { ApiStage } from '@/services/stageService';
@@ -104,6 +105,7 @@ export interface ProjectCardProps {
   start_date?: string;
   progress: number;
   status: number;
+  site_engineer_name?: string;
   onViewDetails?: () => void;
   className?: string;
   style?: React.CSSProperties;

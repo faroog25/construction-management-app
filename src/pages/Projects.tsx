@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Search, Filter, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProjects, Project, getStatusFromCode, createProject, getClients, getSiteEngineers, Client, SiteEngineer } from '@/services/projectService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -36,6 +36,7 @@ interface ProjectAdapter {
   start_date: string;
   progress: number;
   status: number;
+  site_engineer_name?: string;
 }
 
 const STATUS_MAP = {
@@ -198,11 +199,12 @@ const Projects = () => {
     .map(project => ({
       id: project.id,
       name: project.projectName,
-      client_name: `Client ${project.clientId}`,
+      client_name: project.clientName || `Client ${project.clientId}`,
       expected_end_date: project.expectedEndDate,
       start_date: project.startDate,
       progress: 0,
-      status: project.status
+      status: project.status,
+      site_engineer_name: project.siteEngineerName || `Engineer ${project.siteEngineerId}`
     }))
     .sort((a, b) => {
       if (sortOption === 'newest') return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
@@ -286,11 +288,6 @@ const Projects = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span>Filter</span>
-                </Button>
               </div>
             </div>
           </CardContent>
@@ -337,6 +334,7 @@ const Projects = () => {
                     start_date={project.start_date}
                     progress={project.progress}
                     status={project.status}
+                    site_engineer_name={project.site_engineer_name}
                     onViewDetails={() => handleViewDetails(project.id)}
                     className="animate-in"
                     style={{ animationDelay: `${index * 0.05}s` }}
