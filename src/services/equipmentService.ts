@@ -60,6 +60,12 @@ export interface DeleteEquipmentResponse {
   errors?: string[];
 }
 
+export interface SetEquipmentStatusResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+}
+
 /**
  * Fetches equipment list with pagination
  * @param pageNumber The current page number
@@ -241,6 +247,55 @@ export async function deleteEquipment(id: number): Promise<DeleteEquipmentRespon
     return result;
   } catch (error) {
     console.error('Error deleting equipment:', error);
+    throw error;
+  }
+}
+
+/**
+ * Sets the status of an equipment item
+ * @param equipmentId The ID of the equipment to update
+ * @param status The new status to set (0=Available, 1=In Use, 2=Under Maintenance, 3=Out of Service)
+ * @returns API response confirming status change
+ */
+export async function setEquipmentStatus(equipmentId: number, status: number): Promise<SetEquipmentStatusResponse> {
+  try {
+    console.log(`Setting equipment ${equipmentId} status to ${status}`);
+    
+    const response = await fetch(`${API_BASE_URL}/Equipment/SetStatus?equipmentId=${equipmentId}&status=${status}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    // Handle both JSON response and empty response
+    const contentType = response.headers.get('content-type');
+    let result: SetEquipmentStatusResponse;
+    
+    if (contentType && contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      // If the API returns no content on successful status change
+      result = {
+        success: true,
+        message: 'Equipment status updated successfully'
+      };
+    }
+    
+    console.log('API Response - Set Equipment Status:', result);
+    return result;
+  } catch (error) {
+    console.error('Error setting equipment status:', error);
     throw error;
   }
 }

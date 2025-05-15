@@ -1,220 +1,218 @@
 
-import React from 'react';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { CalendarIcon, Loader2, Box, Save, X } from 'lucide-react';
+import { format } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import { createEquipment } from '@/services/equipmentService';
-import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon } from 'lucide-react';
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-
-// Form schema for equipment validation
-const equipmentFormSchema = z.object({
-  name: z.string().min(2, "Equipment name must be at least 2 characters").max(100),
-  model: z.string().min(1, "Model is required"),
-  serialNumber: z.string().min(1, "Serial number is required"),
-  purchaseDate: z.date({
-    required_error: "Purchase date is required",
-  }),
-  notes: z.string().optional(),
-});
-
-type EquipmentFormValues = z.infer<typeof equipmentFormSchema>;
 
 interface AddEquipmentDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 export function AddEquipmentDialog({ isOpen, onClose, onSuccess }: AddEquipmentDialogProps) {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [name, setName] = useState('');
+  const [model, setModel] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
+  const [purchaseDate, setPurchaseDate] = useState<Date | undefined>(new Date());
+  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const form = useForm<EquipmentFormValues>({
-    resolver: zodResolver(equipmentFormSchema),
-    defaultValues: {
-      name: "",
-      model: "",
-      serialNumber: "",
-      notes: "",
-    },
-  });
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!name.trim()) errors.name = "Equipment name is required";
+    if (!model.trim()) errors.model = "Model information is required";
+    if (!serialNumber.trim()) errors.serialNumber = "Serial number is required";
+    if (!purchaseDate) errors.purchaseDate = "Purchase date is required";
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
-  const onSubmit = async (data: EquipmentFormValues) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
     try {
       setIsSubmitting(true);
       
-      // Format the date as ISO string for the API
-      const formattedData = {
-        ...data,
-        purchaseDate: data.purchaseDate.toISOString(),
-        notes: data.notes || ""
-      };
-      
-      const response = await createEquipment(formattedData);
-      
-      toast({
-        title: "Equipment Added",
-        description: "The equipment has been successfully added.",
-        variant: "default",
+      await createEquipment({
+        name,
+        model,
+        serialNumber,
+        purchaseDate: purchaseDate ? purchaseDate.toISOString() : new Date().toISOString(),
+        notes
       });
       
-      // Close the dialog and refresh the equipment list
-      form.reset();
-      onSuccess();
+      // Reset form
+      setName('');
+      setModel('');
+      setSerialNumber('');
+      setPurchaseDate(new Date());
+      setNotes('');
+      setFormErrors({});
+      
+      // Close dialog and notify parent component
       onClose();
-      
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add equipment. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Failed to add equipment:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleClose = () => {
+    // Reset form state
+    setName('');
+    setModel('');
+    setSerialNumber('');
+    setPurchaseDate(new Date());
+    setNotes('');
+    setFormErrors({});
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Add New Equipment</DialogTitle>
+          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+            <Box className="h-6 w-6 text-primary" />
+            Add New Equipment
+          </DialogTitle>
           <DialogDescription>
             Fill out the form below to add new equipment to the inventory.
           </DialogDescription>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Equipment Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter equipment name" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    The name of the equipment (e.g., Excavator, Bulldozer)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className={formErrors.name ? "text-destructive" : ""}>
+                Equipment Name *
+              </Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={formErrors.name ? "border-destructive focus-visible:ring-destructive" : ""}
+                placeholder="Enter equipment name"
+              />
+              {formErrors.name && (
+                <p className="text-sm text-destructive">{formErrors.name}</p>
               )}
-            />
+            </div>
             
-            <FormField
-              control={form.control}
-              name="model"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Model</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter model name" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    The specific model of the equipment
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-2">
+              <Label htmlFor="model" className={formErrors.model ? "text-destructive" : ""}>
+                Model *
+              </Label>
+              <Input
+                id="model"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                className={formErrors.model ? "border-destructive focus-visible:ring-destructive" : ""}
+                placeholder="Enter model details"
+              />
+              {formErrors.model && (
+                <p className="text-sm text-destructive">{formErrors.model}</p>
               )}
-            />
+            </div>
             
-            <FormField
-              control={form.control}
-              name="serialNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Serial Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter serial number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-2">
+              <Label htmlFor="serialNumber" className={formErrors.serialNumber ? "text-destructive" : ""}>
+                Serial Number *
+              </Label>
+              <Input
+                id="serialNumber"
+                value={serialNumber}
+                onChange={(e) => setSerialNumber(e.target.value)}
+                className={formErrors.serialNumber ? "border-destructive focus-visible:ring-destructive" : ""}
+                placeholder="Enter serial number"
+              />
+              {formErrors.serialNumber && (
+                <p className="text-sm text-destructive">{formErrors.serialNumber}</p>
               )}
-            />
+            </div>
             
-            <FormField
-              control={form.control}
-              name="purchaseDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Purchase Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Select a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-2">
+              <Label className={formErrors.purchaseDate ? "text-destructive" : ""}>
+                Purchase Date *
+              </Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !purchaseDate && "text-muted-foreground",
+                      formErrors.purchaseDate && "border-destructive focus-visible:ring-destructive"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {purchaseDate ? format(purchaseDate, "PPP") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={purchaseDate}
+                    onSelect={setPurchaseDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              {formErrors.purchaseDate && (
+                <p className="text-sm text-destructive">{formErrors.purchaseDate}</p>
               )}
-            />
+            </div>
             
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Additional information about the equipment (optional)" 
-                      className="min-h-[100px]" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add any additional notes"
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting} className="gap-2">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save Equipment
+                </>
               )}
-            />
-            
-            <DialogFooter className="pt-4">
-              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add Equipment"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
