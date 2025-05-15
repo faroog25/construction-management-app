@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface Worker {
@@ -60,6 +59,17 @@ export interface CreateTaskResponse {
   message: string;
   errors?: string[];
   data?: any;
+}
+
+export interface AssignWorkersRequest {
+  taskId: number;
+  workerIds: number[];
+}
+
+export interface AssignWorkersResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
 }
 
 export async function getStageTasks(stageId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiTask[]> {
@@ -142,6 +152,46 @@ export async function createTask(taskData: CreateTaskRequest): Promise<CreateTas
     return result;
   } catch (error) {
     console.error('Error creating task:', error);
+    throw error;
+  }
+}
+
+/**
+ * Assigns workers to a specific task
+ * @param assignData The task ID and worker IDs to assign
+ * @returns API response with success status and message
+ */
+export async function assignWorkersToTask(assignData: AssignWorkersRequest): Promise<AssignWorkersResponse> {
+  try {
+    console.log('Assigning workers to task:', assignData);
+    const response = await fetch(`${API_BASE_URL}/Tasks/AssignWorkersToTask`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(assignData),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response for worker assignment:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: AssignWorkersResponse = await response.json();
+    console.log('API Response - Assign Workers:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to assign workers to task');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error assigning workers to task:', error);
     throw error;
   }
 }

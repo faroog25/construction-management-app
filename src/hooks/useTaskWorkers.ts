@@ -1,0 +1,56 @@
+
+import { useState } from 'react';
+import { Worker } from '@/services/workerService';
+import { assignWorkersToTask } from '@/services/taskService';
+import { toast } from '@/components/ui/use-toast';
+
+export function useTaskWorkers(taskId: number) {
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [assignedWorkers, setAssignedWorkers] = useState<Worker[]>([]);
+
+  const handleWorkerAssignment = async (selectedWorkers: Worker[]) => {
+    if (!taskId) return;
+    
+    try {
+      setIsAssigning(true);
+      
+      // Prepare worker IDs for the API request
+      const workerIds = selectedWorkers.map(worker => worker.id);
+      
+      // Make the API request to assign workers
+      const result = await assignWorkersToTask({
+        taskId,
+        workerIds
+      });
+      
+      // Update the local state with the selected workers
+      setAssignedWorkers(selectedWorkers);
+      
+      // Show a success toast
+      toast({
+        title: "تم تعيين العمال",
+        description: result.message || "تم تعيين العمال للمهمة بنجاح",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error assigning workers:', error);
+      // Show an error toast
+      toast({
+        title: "فشل تعيين العمال",
+        description: error instanceof Error ? error.message : "حدث خطأ أثناء تعيين العمال للمهمة",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
+  return {
+    isAssigning,
+    assignedWorkers,
+    setAssignedWorkers,
+    handleWorkerAssignment
+  };
+}
