@@ -464,3 +464,41 @@ export async function getWorkersForTask(taskId: number): Promise<Worker[]> {
     return [];
   }
 }
+
+/**
+ * Fetches tasks assigned to a specific worker
+ * @param workerId The worker ID to get assigned tasks for
+ * @returns API response with task assignments data
+ */
+export async function getTasksForWorker(workerId: number): Promise<WorkerAssignment[]> {
+  try {
+    console.log('Fetching tasks for worker:', workerId);
+    const response = await fetch(`${API_BASE_URL}/TaskAssignments/ByWorker/${workerId}`);
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log('No tasks assigned to this worker yet');
+        return [];
+      }
+      const errorText = await response.text();
+      console.error('API Error Response for worker tasks:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: TaskAssignmentsResponse = await response.json();
+    console.log('API Response - Worker Tasks:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch tasks for worker');
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error fetching tasks for worker:', error);
+    return [];
+  }
+}
