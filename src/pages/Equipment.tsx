@@ -9,7 +9,8 @@ import EquipmentList from '@/components/equipment/EquipmentList';
 import BookingForm from '@/components/equipment/BookingForm';
 import BookingsList from '@/components/equipment/BookingsList';
 import { EquipmentItem, Booking } from '@/types/equipment';
-import { Box, Clipboard, CalendarDays } from 'lucide-react';
+import { Box, CalendarDays } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Equipment = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,6 +18,7 @@ const Equipment = () => {
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentItem | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value });
@@ -31,6 +33,12 @@ const Equipment = () => {
     setBookings([...bookings, { ...booking, id: Date.now().toString() }]);
     setIsBookingDialogOpen(false);
     setSelectedEquipment(null);
+    
+    toast({
+      title: "Booking Confirmed",
+      description: `You've successfully booked ${booking.equipmentName} for ${booking.duration} days.`,
+      variant: "default",
+    });
   };
 
   return (

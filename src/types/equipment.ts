@@ -1,3 +1,4 @@
+
 export interface EquipmentItem {
   id: string;
   name: string;
@@ -6,6 +7,7 @@ export interface EquipmentItem {
   status: 'Available' | 'In Use' | 'Maintenance';
   imageUrl?: string;
   featured: boolean;
+  purchaseDate?: string;
   [key: string]: any;
 }
 
