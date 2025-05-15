@@ -34,7 +34,20 @@ export interface CreateStageRequest {
   projectId: number;
 }
 
+export interface UpdateStageRequest {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export interface CreateStageResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: string;
+}
+
+export interface UpdateStageResponse {
   success: boolean;
   message: string;
   errors?: string[];
@@ -106,6 +119,41 @@ export async function createStage(stageData: CreateStageRequest): Promise<Create
     return result;
   } catch (error) {
     console.error('Error creating stage:', error);
+    throw error;
+  }
+}
+
+export async function updateStage(stageData: UpdateStageRequest): Promise<UpdateStageResponse> {
+  try {
+    console.log('Updating stage with data:', stageData);
+    const response = await fetch(`${API_BASE_URL}/Stages`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(stageData),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response when updating stage:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: UpdateStageResponse = await response.json();
+    console.log('API Response - Update Stage:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to update stage');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error updating stage:', error);
     throw error;
   }
 }

@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
-import { ApiStage, getProjectStages, createStage, CreateStageRequest } from '@/services/stageService';
+import { ApiStage, getProjectStages, createStage, CreateStageRequest, updateStage, UpdateStageRequest } from '@/services/stageService';
 import { ApiTask, getStageTasks } from '@/services/taskService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { WorkerMultiSelect } from './WorkerMultiSelect';
 import StageFormModal from './StageFormModal';
+import EditStageModal from './EditStageModal';
 import TaskDetailsModal from './TaskDetailsModal';
 import { 
   CircleDot, 
@@ -82,8 +82,11 @@ const ProjectStages = ({ project }: { project: Project }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddStageModalOpen, setIsAddStageModalOpen] = useState(false);
+  const [isEditStageModalOpen, setIsEditStageModalOpen] = useState(false);
   const [isCreatingStage, setIsCreatingStage] = useState(false);
+  const [isEditingStage, setIsEditingStage] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [selectedStage, setSelectedStage] = useState<ApiStage | null>(null);
   const [isTaskDetailsModalOpen, setIsTaskDetailsModalOpen] = useState(false);
   
   // Fetch workers and stages
@@ -231,18 +234,55 @@ const ProjectStages = ({ project }: { project: Project }) => {
       }
     } catch (error) {
       console.error('Error creating stage:', error);
-      toast.error(error instanceof Error ? error.message : "فشل في إنشاء المرحلة");
+      toast.error(error instanceof Error ? error.message : "فش�� في إنشاء المرحلة");
     } finally {
       setIsCreatingStage(false);
     }
   };
   
-  const handleAddTask = (stageId: number) => {
-    toast.info(`سيتم تنفيذ إضافة مهمة للمرحلة ${stageId} قريبًا`);
+  const handleEditStage = (stage: ApiStage) => {
+    setSelectedStage(stage);
+    setIsEditStageModalOpen(true);
   };
   
-  const handleEditStage = (stageId: number) => {
-    toast.info(`سيتم تنفيذ تعديل المرحلة ${stageId} قريبًا`);
+  const handleEditStageSubmit = async (formData: UpdateStageRequest) => {
+    setIsEditingStage(true);
+    
+    try {
+      const result = await updateStage(formData);
+      
+      if (result.success) {
+        toast.success(result.message || "تم تحديث المرحلة بنجاح");
+        setIsEditStageModalOpen(false);
+        
+        // Refresh the stages list
+        if (project && project.id) {
+          const stagesData = await getProjectStages(project.id);
+          
+          // Update state with refreshed stages
+          const updatedStages = stagesData.map(stage => {
+            const existingStage = apiStages.find(s => s.id === stage.id);
+            return {
+              ...stage,
+              tasks: existingStage?.tasks || []
+            };
+          });
+          
+          setApiStages(updatedStages);
+        }
+      } else {
+        toast.error(result.message || "فشل في تحديث المرحلة");
+      }
+    } catch (error) {
+      console.error('Error updating stage:', error);
+      toast.error(error instanceof Error ? error.message : "فشل في تحديث المرحلة");
+    } finally {
+      setIsEditingStage(false);
+    }
+  };
+  
+  const handleAddTask = (stageId: number) => {
+    toast.info(`سيتم تنفيذ إضافة مهمة للمرحلة ${stageId} قريبًا`);
   };
   
   const handleDeleteStage = (stageId: number) => {
@@ -329,6 +369,15 @@ const ProjectStages = ({ project }: { project: Project }) => {
         projectId={Number(project.id)}
       />
       
+      {/* Edit Stage Modal */}
+      <EditStageModal 
+        isOpen={isEditStageModalOpen}
+        onClose={() => setIsEditStageModalOpen(false)}
+        onSubmit={handleEditStageSubmit}
+        isLoading={isEditingStage}
+        stage={selectedStage}
+      />
+      
       {/* Task Details Modal */}
       <TaskDetailsModal
         isOpen={isTaskDetailsModalOpen}
@@ -403,7 +452,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditStage(stage.id); }}>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditStage(stage); }}>
                             <Edit className="mr-2 h-4 w-4" />
                             تعديل مرحلة
                           </DropdownMenuItem>
