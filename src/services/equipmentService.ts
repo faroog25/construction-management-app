@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { EquipmentItem } from '@/types/equipment';
 
@@ -23,6 +22,21 @@ export interface EquipmentResponse {
     hasNextPage: boolean;
     hasPreveiosPage: boolean;
   };
+}
+
+export interface CreateEquipmentRequest {
+  name: string;
+  model: string;
+  serialNumber: string;
+  purchaseDate: string;
+  notes: string;
+}
+
+export interface CreateEquipmentResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data?: ApiEquipmentItem;
 }
 
 /**
@@ -86,4 +100,44 @@ export function mapApiEquipmentToEquipmentItem(apiEquipment: ApiEquipmentItem): 
     featured: false, // Default to false since the API doesn't provide this
     purchaseDate: apiEquipment.purchaseDate
   };
+}
+
+/**
+ * Creates a new equipment item
+ * @param equipment The equipment data to create
+ * @returns API response with the created equipment
+ */
+export async function createEquipment(equipment: CreateEquipmentRequest): Promise<CreateEquipmentResponse> {
+  try {
+    console.log('Creating new equipment:', equipment);
+    const response = await fetch(`${API_BASE_URL}/Equipment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(equipment),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: CreateEquipmentResponse = await response.json();
+    console.log('API Response - Create Equipment:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to create equipment');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error creating equipment:', error);
+    throw error;
+  }
 }
