@@ -48,11 +48,55 @@ export function useTaskWorkers(taskId: number) {
       setIsAssigning(false);
     }
   };
+  
+  const removeWorker = async (workerId: number) => {
+    if (!taskId) return false;
+    
+    try {
+      setIsAssigning(true);
+      
+      // Filter out the worker to be removed
+      const updatedWorkers = assignedWorkers.filter(worker => worker.id !== workerId);
+      const workerIds = updatedWorkers.map(worker => worker.id);
+      
+      console.log('Removing worker', workerId, 'from task', taskId);
+      console.log('Updated worker IDs:', workerIds);
+      
+      // Make the API request with the updated worker list
+      const result = await assignWorkersToTask({
+        taskId,
+        workerIds
+      });
+      
+      // Update the local state with the remaining workers
+      setAssignedWorkers(updatedWorkers);
+      
+      // Show a success toast
+      toast({
+        title: "تم إزالة العامل",
+        description: "تم إزالة العامل من المهمة بنجاح",
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error removing worker:', error);
+      // Show an error toast
+      toast({
+        title: "فشل إزالة العامل",
+        description: error instanceof Error ? error.message : "حدث خطأ أثناء إزالة العامل من المهمة",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsAssigning(false);
+    }
+  };
 
   return {
     isAssigning,
     assignedWorkers,
     setAssignedWorkers,
-    handleWorkerAssignment
+    handleWorkerAssignment,
+    removeWorker
   };
 }
