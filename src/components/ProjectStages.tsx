@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
 import { ApiStage, getProjectStages, createStage, CreateStageRequest, updateStage, UpdateStageRequest, deleteStage } from '@/services/stageService';
-import { ApiTask, getStageTasks, createTask } from '@/services/taskService';
+import { ApiTask, getStageTasks, createTask, completeTask } from '@/services/taskService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -106,6 +106,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
   const [isTaskFormModalOpen, setIsTaskFormModalOpen] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [selectedStageForTask, setSelectedStageForTask] = useState<number | null>(null);
+  const [completingTaskId, setCompletingTaskId] = useState<number | null>(null);
   
   // Fetch workers and stages
   useEffect(() => {
@@ -218,12 +219,68 @@ const ProjectStages = ({ project }: { project: Project }) => {
     );
   };
   
-  const toggleTaskCompletion = (taskId: number) => {
-    setCompletedTasks(prev => 
-      prev.includes(taskId)
-        ? prev.filter(id => id !== taskId)
-        : [...prev, taskId]
-    );
+  const toggleTaskCompletion = async (taskId: number) => {
+    // Check if task is already completed
+    const isAlreadyCompleted = completedTasks.includes(taskId);
+    
+    if (isAlreadyCompleted) {
+      // If already completed, just update UI state
+      setCompletedTasks(prev => prev.filter(id => id !== taskId));
+      return;
+    }
+    
+    // Set loading state for this specific task
+    setCompletingTaskId(taskId);
+    
+    try {
+      // Call the API to complete the task
+      const result = await completeTask(taskId);
+      
+      if (result.success) {
+        // Update UI state
+        setCompletedTasks(prev => [...prev, taskId]);
+        
+        toast({
+          title: "تم بنجاح",
+          description: "تم إكمال المهمة بنجاح",
+        });
+        
+        // Find and update the task in state
+        const updatedStages = [...apiStages];
+        for (let i = 0; i < updatedStages.length; i++) {
+          const taskIndex = updatedStages[i].tasks.findIndex(t => t.id === taskId);
+          if (taskIndex !== -1) {
+            updatedStages[i].tasks[taskIndex] = {
+              ...updatedStages[i].tasks[taskIndex],
+              isCompleted: true,
+              status: 'completed',
+              progress: 100
+            };
+            break;
+          }
+        }
+        setApiStages(updatedStages);
+      } else {
+        toast({
+          title: "خطأ",
+          description: result.message || "فشل في إكمال المهمة",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error completing task:', error);
+      toast({
+        title: "خطأ",
+        description: error instanceof Error ? error.message : "فشل في إكمال المهمة",
+        variant: "destructive"
+      });
+      
+      // Revert UI state if API call fails
+      setCompletedTasks(prev => prev.filter(id => id !== taskId));
+    } finally {
+      // Clear loading state
+      setCompletingTaskId(null);
+    }
   };
   
   const handleAddStage = () => {
@@ -788,6 +845,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                             {stage.tasks.map((task) => {
                               const overdueDays = calculateOverdueDays(task.endDate);
                               const isCompleted = completedTasks.includes(task.id);
+                              const isCompletingThisTask = completingTaskId === task.id;
                               
                               return (
                                 <Card key={task.id} className={cn(
@@ -841,12 +899,25 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                       </div>
                                       
                                       <div className="flex items-center gap-2">
-                                        <Checkbox
-                                          id={`task-${task.id}`}
-                                          checked={isCompleted}
-                                          onCheckedChange={() => toggleTaskCompletion(task.id)}
-                                          className="h-4 w-4 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
-                                        />
+                                        <div className="relative">
+                                          <Checkbox
+                                            id={`task-${task.id}`}
+                                            checked={isCompleted}
+                                            onCheckedChange={() => toggleTaskCompletion(task.id)}
+                                            disabled={isCompletingThisTask}
+                                            className={cn(
+                                              "h-5 w-5 rounded-md transition-all duration-200",
+                                              isCompleted ? "bg-green-500 border-green-500 text-white" : "border-slate-300",
+                                              "data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500",
+                                              "focus:ring-2 focus:ring-green-200 focus:ring-offset-0"
+                                            )}
+                                          />
+                                          {isCompletingThisTask && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-white/70 rounded-md">
+                                              <div className="h-3 w-3 border-2 border-t-transparent border-violet-600 rounded-full animate-spin"></div>
+                                            </div>
+                                          )}
+                                        </div>
                                         
                                         <Button 
                                           variant="ghost" 

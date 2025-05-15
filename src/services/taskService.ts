@@ -72,6 +72,12 @@ export interface AssignWorkersResponse {
   errors?: string[];
 }
 
+export interface CompleteTaskResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+}
+
 export async function getStageTasks(stageId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiTask[]> {
   try {
     console.log('Fetching tasks from:', `${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`);
@@ -192,6 +198,45 @@ export async function assignWorkersToTask(assignData: AssignWorkersRequest): Pro
     return result;
   } catch (error) {
     console.error('Error assigning workers to task:', error);
+    throw error;
+  }
+}
+
+/**
+ * Marks a task as completed
+ * @param taskId The task ID to complete
+ * @returns API response with success status and message
+ */
+export async function completeTask(taskId: number): Promise<CompleteTaskResponse> {
+  try {
+    console.log('Completing task:', taskId);
+    const response = await fetch(`${API_BASE_URL}/Tasks/CompleteTask/${taskId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response for task completion:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: CompleteTaskResponse = await response.json();
+    console.log('API Response - Complete Task:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to complete task');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error completing task:', error);
     throw error;
   }
 }

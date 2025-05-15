@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getTaskById, TaskDetailResponse } from '@/services/taskService';
+import { getTaskById, TaskDetailResponse, completeTask } from '@/services/taskService';
 import { toast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -12,8 +12,11 @@ import {
 import { TaskAssignWorkers } from './TaskAssignWorkers';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, Clock, CalendarClock, ListTodo, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, CalendarClock, ListTodo, Users, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 interface TaskDetailsModalProps {
   isOpen: boolean;
@@ -29,6 +32,7 @@ const formatDate = (dateString: string) => {
 export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetailsModalProps) {
   const [taskData, setTaskData] = useState<TaskDetailResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const fetchTaskDetails = async () => {
     if (!taskId) return;
@@ -60,13 +64,66 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
     fetchTaskDetails();
   };
 
+  // Handle task completion
+  const handleCompleteTask = async () => {
+    if (!taskId || !taskData) return;
+    
+    // Task is already completed
+    if (taskData.data.isCompleted) return;
+    
+    setIsCompleting(true);
+    
+    try {
+      const result = await completeTask(taskId);
+      
+      if (result.success) {
+        toast({
+          title: "تم بنجاح",
+          description: "تم إكمال المهمة بنجاح"
+        });
+        
+        // Update the local state to show the task as completed
+        setTaskData(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            data: {
+              ...prev.data,
+              isCompleted: true
+            }
+          };
+        });
+      } else {
+        toast({
+          title: "خطأ",
+          description: result.message || "فشل في إكمال المهمة",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error completing task:', error);
+      toast({
+        title: "خطأ",
+        description: error instanceof Error ? error.message : "فشل في إكمال المهمة",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
   if (!taskId) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">تفاصيل المهمة</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-bold">تفاصيل المهمة</DialogTitle>
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
           <DialogDescription>
             عرض تفاصيل المهمة وتعيين العمال
           </DialogDescription>
@@ -103,6 +160,30 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                         )}
                       </div>
                     </div>
+                    
+                    {!taskData.data.isCompleted && (
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <Checkbox
+                            id="complete-task"
+                            checked={taskData.data.isCompleted}
+                            onCheckedChange={handleCompleteTask}
+                            disabled={isCompleting}
+                            className={cn(
+                              "h-6 w-6 rounded-md transition-all duration-200 border-2",
+                              "data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500",
+                              "focus-visible:ring-2 focus-visible:ring-green-200"
+                            )}
+                          />
+                          {isCompleting && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/70 rounded-md">
+                              <div className="h-4 w-4 border-2 border-t-transparent border-green-600 rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-sm text-green-600 font-medium">إكمال المهمة</span>
+                      </div>
+                    )}
                   </div>
                   
                   <Separator className="my-3" />
