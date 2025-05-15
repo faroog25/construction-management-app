@@ -41,7 +41,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,12 +101,15 @@ const ProjectStages = ({ project }: { project: Project }) => {
   const [isDeletingStage, setIsDeletingStage] = useState(false);
   const [stageToDelete, setStageToDelete] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [noStagesFound, setNoStagesFound] = useState(false);
   
   // Fetch workers and stages
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
+        setNoStagesFound(false);
         
         // Fetch workers
         const workersData = await getAllWorkers();
@@ -119,67 +122,78 @@ const ProjectStages = ({ project }: { project: Project }) => {
         
         // Fetch stages
         if (project && project.id) {
-          const stagesData = await getProjectStages(project.id);
-          
-          // Create enhanced stages array to store stages with their tasks
-          const enhancedStages: EnhancedStage[] = [];
-          
-          // Process each stage
-          for (const stage of stagesData) {
-            try {
-              // Fetch tasks for this stage
-              const stageTasks = await getStageTasks(stage.id);
-              
-              // Map API tasks to UI format with status and other UI properties
-              const uiTasks: UITask[] = stageTasks.map(task => {
-                // Determine task status based on isCompleted and dates
-                let status = 'not-started';
-                if (task.isCompleted) {
-                  status = 'completed';
-                } else {
-                  const now = new Date();
-                  const startDate = new Date(task.startDate);
-                  const endDate = new Date(task.endDate);
-                  
-                  if (now > endDate) {
-                    status = 'delayed';
-                  } else if (now >= startDate) {
-                    status = 'in-progress';
+          try {
+            const stagesData = await getProjectStages(project.id);
+            
+            // Create enhanced stages array to store stages with their tasks
+            const enhancedStages: EnhancedStage[] = [];
+            
+            // Process each stage
+            for (const stage of stagesData) {
+              try {
+                // Fetch tasks for this stage
+                const stageTasks = await getStageTasks(stage.id);
+                
+                // Map API tasks to UI format with status and other UI properties
+                const uiTasks: UITask[] = stageTasks.map(task => {
+                  // Determine task status based on isCompleted and dates
+                  let status = 'not-started';
+                  if (task.isCompleted) {
+                    status = 'completed';
+                  } else {
+                    const now = new Date();
+                    const startDate = new Date(task.startDate);
+                    const endDate = new Date(task.endDate);
+                    
+                    if (now > endDate) {
+                      status = 'delayed';
+                    } else if (now >= startDate) {
+                      status = 'in-progress';
+                    }
                   }
-                }
+                  
+                  // Set completedTasks state for checked tasks
+                  if (task.isCompleted) {
+                    setCompletedTasks(prev => 
+                      prev.includes(task.id) ? prev : [...prev, task.id]
+                    );
+                  }
+                  
+                  return {
+                    ...task,
+                    status,
+                    progress: task.isCompleted ? 100 : 0,
+                    assignedWorkers: [] // Placeholder for assigned workers
+                  };
+                });
                 
-                // Set completedTasks state for checked tasks
-                if (task.isCompleted) {
-                  setCompletedTasks(prev => 
-                    prev.includes(task.id) ? prev : [...prev, task.id]
-                  );
-                }
+                // Add enhanced stage to array
+                enhancedStages.push({
+                  ...stage,
+                  tasks: uiTasks
+                });
+              } catch (err) {
+                console.error(`Error fetching tasks for stage ${stage.id}:`, err);
                 
-                return {
-                  ...task,
-                  status,
-                  progress: task.isCompleted ? 100 : 0,
-                  assignedWorkers: [] // Placeholder for assigned workers
-                };
-              });
-              
-              // Add enhanced stage to array
-              enhancedStages.push({
-                ...stage,
-                tasks: uiTasks
-              });
-            } catch (err) {
-              console.error(`Error fetching tasks for stage ${stage.id}:`, err);
-              
-              // Add stage with empty tasks list in case of error
-              enhancedStages.push({
-                ...stage,
-                tasks: []
-              });
+                // Add stage with empty tasks list in case of error
+                enhancedStages.push({
+                  ...stage,
+                  tasks: []
+                });
+              }
             }
+            
+            setApiStages(enhancedStages);
+          } catch (err: any) {
+            console.error('Error fetching stages:', err);
+            // Check if it's a 404 error indicating no stages found
+            if (err.message && err.message.includes('404')) {
+              setNoStagesFound(true);
+            } else {
+              setError(err instanceof Error ? err.message : 'Failed to fetch stages');
+            }
+            setApiStages([]);
           }
-          
-          setApiStages(enhancedStages);
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -216,7 +230,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
     if (!project.id) {
       toast({
         title: "خطأ",
-        description: "رقم المشروع مفقود",
+        description: "رقم المشروع م��قود",
         variant: "destructive"
       });
       return;
@@ -236,9 +250,9 @@ const ProjectStages = ({ project }: { project: Project }) => {
         toast({
           title: "تم بنجاح",
           description: result.message || "تم إنشاء المرحلة بنجاح",
-          variant: "success"
         });
         setIsAddStageModalOpen(false);
+        setNoStagesFound(false); // Reset the no stages found state
         
         // Refresh the stages list
         const stagesData = await getProjectStages(project.id);
@@ -284,7 +298,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
         toast({
           title: "تم بنجاح",
           description: result.message || "تم تحديث المرحلة بنجاح",
-          variant: "success"
         });
         setIsEditStageModalOpen(false);
         
@@ -342,11 +355,16 @@ const ProjectStages = ({ project }: { project: Project }) => {
         toast({
           title: "تم بنجاح",
           description: result.message || "تم حذف المرحلة بنجاح",
-          variant: "success"
         });
         
         // Remove deleted stage from state
-        setApiStages(prev => prev.filter(stage => stage.id !== stageToDelete));
+        const updatedStages = apiStages.filter(stage => stage.id !== stageToDelete);
+        setApiStages(updatedStages);
+        
+        // If we deleted the last stage, set noStagesFound to true
+        if (updatedStages.length === 0) {
+          setNoStagesFound(true);
+        }
       } else {
         toast({
           title: "خطأ",
@@ -372,7 +390,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
     toast({
       title: "قريبًا",
       description: `سيتم تنفيذ إضافة مهمة للمرحلة ${stageId} قريبًا`,
-      variant: "info"
     });
   };
   
@@ -380,7 +397,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
     toast({
       title: "قريبًا",
       description: `سيتم تنفيذ تعديل المهمة ${taskId} قريبًا`,
-      variant: "info"
     });
   };
   
@@ -388,7 +404,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
     toast({
       title: "قريبًا",
       description: `سيتم تنفيذ حذف المهمة ${taskId} قريبًا`,
-      variant: "info"
     });
   };
   
@@ -432,9 +447,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
       </div>
     );
   }
-
-  // Use the real API stages if they exist, otherwise use an empty array
-  const projectStages = apiStages.length > 0 ? apiStages : [];
 
   return (
     <div className="space-y-6">
@@ -509,7 +521,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
         </AlertDialogContent>
       </AlertDialog>
       
-      {projectStages.length === 0 ? (
+      {/* No Stages Found or Empty Stages Array */}
+      {(noStagesFound || apiStages.length === 0) ? (
         <div className="flex flex-col items-center justify-center py-16 bg-slate-50 rounded-lg border border-dashed border-slate-200">
           <div className="p-3 rounded-full bg-slate-100">
             <Clock className="h-6 w-6 text-slate-400" />
@@ -525,7 +538,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
         </div>
       ) : (
         <div className="grid gap-6">
-          {projectStages.map((stage) => {
+          {apiStages.map((stage) => {
             const isExpanded = expandedStages.includes(stage.id);
             
             return (
