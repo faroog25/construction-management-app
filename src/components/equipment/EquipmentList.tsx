@@ -1,15 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, ArrowUpDown, Wrench, RotateCcw, Box, Tag, Loader2 } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, Wrench, RotateCcw, Box, Tag, Loader2, Info } from 'lucide-react';
 import { EquipmentItem } from '@/types/equipment';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { getEquipment, mapApiEquipmentToEquipmentItem } from '@/services/equipmentService';
 import { useToast } from '@/hooks/use-toast';
+import EquipmentDetailsDialog from './EquipmentDetailsDialog';
 
 interface EquipmentListProps {
   onSelectEquipment: (equipment: EquipmentItem) => void;
@@ -30,6 +30,10 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
   const [totalItems, setTotalItems] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPrevPage, setHasPrevPage] = useState(false);
+  
+  // Equipment details dialog state
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState<number | null>(null);
   
   const { toast } = useToast();
 
@@ -93,6 +97,12 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
     setEquipment(equipment.map(item => 
       item.id === id ? { ...item, status: 'Available' } : item
     ));
+  };
+
+  // Show equipment details dialog
+  const handleViewDetails = (equipmentId: string) => {
+    setSelectedEquipmentId(Number(equipmentId));
+    setIsDetailsDialogOpen(true);
   };
 
   // Apply client-side sorting and filtering
@@ -212,7 +222,11 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                   </TableRow>
                 ) : (
                   sortedEquipment.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-muted/50 transition-colors">
+                    <TableRow 
+                      key={item.id} 
+                      className="hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => handleViewDetails(item.id)}
+                    >
                       <TableCell className="font-medium">
                         {item.name}
                         {item.featured && (
@@ -230,13 +244,28 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                           {item.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent row click event
+                              handleViewDetails(item.id);
+                            }}
+                            className="gap-1"
+                          >
+                            <Info className="h-4 w-4" />
+                            Details
+                          </Button>
                           {item.status === 'Maintenance' ? (
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => handleMakeAvailable(item.id)}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent row click event
+                                handleMakeAvailable(item.id);
+                              }}
                               className="gap-1 hover:bg-green-50"
                             >
                               <Wrench className="h-4 w-4" />
@@ -246,7 +275,10 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => handleRestore(item.id)}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent row click event
+                                handleRestore(item.id);
+                              }}
                               className="gap-1 hover:bg-blue-50"
                             >
                               <RotateCcw className="h-4 w-4" />
@@ -257,7 +289,10 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
                               variant="default"
                               size="sm"
                               disabled={item.status !== 'Available'}
-                              onClick={() => onSelectEquipment(item)}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent row click event
+                                onSelectEquipment(item);
+                              }}
                               className="bg-primary hover:bg-primary/90"
                             >
                               Book Now
@@ -320,6 +355,13 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment }) => {
           )}
         </div>
       </CardContent>
+      
+      {/* Equipment Details Dialog */}
+      <EquipmentDetailsDialog
+        equipmentId={selectedEquipmentId}
+        isOpen={isDetailsDialogOpen}
+        onClose={() => setIsDetailsDialogOpen(false)}
+      />
     </Card>
   );
 };

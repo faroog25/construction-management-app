@@ -39,6 +39,21 @@ export interface CreateEquipmentResponse {
   data?: ApiEquipmentItem;
 }
 
+export interface EquipmentDetailResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: {
+    id: number;
+    name: string;
+    model: string;
+    serialNumber: string;
+    status: string;
+    purchaseDate: string;
+    notes: string;
+  };
+}
+
 /**
  * Fetches equipment list with pagination
  * @param pageNumber The current page number
@@ -138,6 +153,40 @@ export async function createEquipment(equipment: CreateEquipmentRequest): Promis
     return result;
   } catch (error) {
     console.error('Error creating equipment:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetches equipment details by ID
+ * @param id The equipment ID to fetch
+ * @returns API response with detailed equipment information
+ */
+export async function getEquipmentById(id: number): Promise<EquipmentDetailResponse> {
+  try {
+    console.log(`Fetching equipment details for ID: ${id}`);
+    const response = await fetch(`${API_BASE_URL}/Equipment/${id}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: EquipmentDetailResponse = await response.json();
+    console.log('API Response - Equipment Details:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch equipment details');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error fetching equipment details:', error);
     throw error;
   }
 }
