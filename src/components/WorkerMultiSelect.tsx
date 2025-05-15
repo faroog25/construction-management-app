@@ -22,14 +22,14 @@ interface WorkerMultiSelectProps {
 }
 
 // Helper function to format worker full name
-const formatWorkerName = (worker: Worker): string => {
+const formatWorkerName = (worker: any): string => {
   // Check if fullName is already available
-  if ('fullName' in worker && worker.fullName) {
+  if (worker.fullName) {
     return worker.fullName;
   }
   
   // Otherwise construct from individual name parts if available
-  if ('firstName' in worker) {
+  if (worker.firstName) {
     return [
       worker.firstName,
       worker.secondName,

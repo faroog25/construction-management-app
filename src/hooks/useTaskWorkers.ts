@@ -2,13 +2,13 @@
 import { useState } from 'react';
 import { Worker } from '@/services/workerService';
 import { assignWorkersToTask } from '@/services/taskService';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export function useTaskWorkers(taskId: number) {
   const [isAssigning, setIsAssigning] = useState(false);
-  const [assignedWorkers, setAssignedWorkers] = useState<Worker[]>([]);
+  const [assignedWorkers, setAssignedWorkers] = useState<any[]>([]);
 
-  const handleWorkerAssignment = async (selectedWorkers: Worker[]) => {
+  const handleWorkerAssignment = async (selectedWorkers: any[]) => {
     if (!taskId) return;
     
     try {

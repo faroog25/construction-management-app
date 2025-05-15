@@ -4,7 +4,7 @@ import { Worker, getAllWorkers } from '@/services/workerService';
 import { WorkerMultiSelect } from './WorkerMultiSelect';
 import { useTaskWorkers } from '@/hooks/useTaskWorkers';
 import { getTaskById } from '@/services/taskService';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 interface TaskAssignWorkersProps {
   taskId: number;
@@ -13,7 +13,7 @@ interface TaskAssignWorkersProps {
 
 export function TaskAssignWorkers({ taskId, onWorkersAssigned }: TaskAssignWorkersProps) {
   const [workers, setWorkers] = useState<Worker[]>([]);
-  const [selectedWorkers, setSelectedWorkers] = useState<Worker[]>([]);
+  const [selectedWorkers, setSelectedWorkers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { handleWorkerAssignment, isAssigning } = useTaskWorkers(taskId);
 
@@ -50,7 +50,7 @@ export function TaskAssignWorkers({ taskId, onWorkersAssigned }: TaskAssignWorke
   }, [taskId]);
 
   // Handle worker selection change and update assignment
-  const handleSelectionChange = async (selectedWorkers: Worker[]) => {
+  const handleSelectionChange = async (selectedWorkers: any[]) => {
     try {
       const success = await handleWorkerAssignment(selectedWorkers);
       if (success && onWorkersAssigned) {
