@@ -108,3 +108,18 @@ export interface ProjectCardProps {
   className?: string;
   style?: React.CSSProperties;
 }
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: {
+    items: T[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+    hasNextPage: boolean;
+    hasPreveiosPage: boolean; // Note: There's a typo in the API response, kept as is
+  };
+}
