@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 import { Project, ProjectApiResponse } from '@/types/project';
 
@@ -31,6 +32,12 @@ export interface ProjectResponse {
   message: string;
   data: {
     items: Project[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+    hasNextPage: boolean;
+    hasPreveiosPage: boolean;
   };
 }
 
@@ -69,7 +76,7 @@ export async function getAllProjects(): Promise<Project[]> {
   }
 }
 
-export async function getProjects(page: number = 1, pageSize: number = 10): Promise<Project[]> {
+export async function getProjects(page: number = 1, pageSize: number = 8): Promise<Project[]> {
   try {
     console.log('Fetching projects from:', `${API_BASE_URL}/Projects?pageNumber=${page}&pageSize=${pageSize}`);
     const response = await fetch(`${API_BASE_URL}/Projects?pageNumber=${page}&pageSize=${pageSize}`);
@@ -240,7 +247,7 @@ export interface SiteEngineer {
   fullName: string;
 }
 
-export const getClients = async (): Promise<Client[]> => {
+export const getClients = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/Clients`);
     if (!response.ok) {
@@ -254,7 +261,7 @@ export const getClients = async (): Promise<Client[]> => {
   }
 };
 
-export const getSiteEngineers = async (): Promise<SiteEngineer[]> => {
+export const getSiteEngineers = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/SiteEngineers`);
     if (!response.ok) {

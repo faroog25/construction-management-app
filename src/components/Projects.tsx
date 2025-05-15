@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Table,
@@ -57,6 +57,22 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { API_BASE_URL } from '@/config/api';
+
+interface PaginatedResponse<T> {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: {
+    items: T[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+    hasNextPage: boolean;
+    hasPreveiosPage: boolean; // Note: There's a typo in the API response, kept as is
+  };
+}
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -69,7 +85,10 @@ const Projects = () => {
   const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [pageSize] = useState(8); // Fixed page size of 8 projects per page
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [hasPreviousPage, setHasPreviousPage] = useState(false);
 
   // Update the clients query to handle paginated response
   const { data: clientsResponse, isLoading: isLoadingClients } = useQuery({
@@ -78,25 +97,48 @@ const Projects = () => {
   });
 
   // Get the clients array from the response
-  const clients = clientsResponse?.data?.items || [];
+  const clients = clientsResponse?.data || [];
 
-  // Fetch projects
-  React.useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        const projectsData = await getAllProjects();
-        setProjects(Array.isArray(projectsData) ? projectsData : []);
-      } catch (err) {
-        console.error('Error fetching projects:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch projects');
-      } finally {
-        setLoading(false);
+  // Fetch projects with pagination
+  const fetchPaginatedProjects = async (page: number, size: number) => {
+    try {
+      setLoading(true);
+      const url = `${API_BASE_URL}/Projects?pageNumber=${page}&pageSize=${size}`;
+      console.log('Fetching projects from:', url);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
+      
+      const result: PaginatedResponse<Project> = await response.json();
+      console.log('Paginated API Response:', result);
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch projects');
+      }
+      
+      setProjects(result.data.items);
+      setTotalPages(result.data.totalPages);
+      setCurrentPage(result.data.currentPage);
+      setHasNextPage(result.data.hasNextPage);
+      setHasPreviousPage(result.data.hasPreveiosPage);
+      
+      return result.data.items;
+    } catch (err) {
+      console.error('Error fetching paginated projects:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch projects');
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchProjects();
-  }, []);
+  // Load projects when component mounts or when page changes
+  useEffect(() => {
+    fetchPaginatedProjects(currentPage, pageSize);
+  }, [currentPage, pageSize]);
 
   const handleEditProject = (project: Project) => {
     setProjectToEdit(project);
@@ -144,7 +186,7 @@ const Projects = () => {
     });
   };
 
-  // Filter and sort projects
+  // Filter projects based on search
   const filteredProjects = projects
     .filter(project => 
       project.projectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -158,12 +200,6 @@ const Projects = () => {
       }
       return 0;
     });
-
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
-  const indexOfLastProject = currentPage * itemsPerPage;
-  const indexOfFirstProject = indexOfLastProject - itemsPerPage;
-  const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
 
   // Generate page numbers for pagination
   const pageNumbers = [];
@@ -180,6 +216,13 @@ const Projects = () => {
   for (let i = startPage; i <= endPage; i++) {
     pageNumbers.push(i);
   }
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -217,12 +260,12 @@ const Projects = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentProjects.map((project) => (
+              {filteredProjects.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.projectName}</TableCell>
                   <TableCell>{project.description}</TableCell>
-                  <TableCell>{project.startDate}</TableCell>
-                  <TableCell>{project.expectedEndDate}</TableCell>
+                  <TableCell>{project.startDate?.toString()}</TableCell>
+                  <TableCell>{project.expectedEndDate?.toString()}</TableCell>
                   <TableCell>{project.status}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
@@ -262,7 +305,7 @@ const Projects = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleViewStages(project.id)}
+                        onClick={() => handleViewStages(project.id as number)}
                         className="text-green-600 hover:text-green-700 hover:bg-green-50"
                       >
                         <Layers className="h-3 w-3 mr-1" />
@@ -271,7 +314,7 @@ const Projects = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleViewTasks(project.id)}
+                        onClick={() => handleViewTasks(project.id as number)}
                         className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                       >
                         <ListTodo className="h-3 w-3 mr-1" />
@@ -285,71 +328,69 @@ const Projects = () => {
           </Table>
           
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-4">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                      aria-disabled={currentPage === 1}
-                    />
-                  </PaginationItem>
-                  
-                  {/* Show first page if not in view */}
-                  {startPage > 1 && (
-                    <>
+          <div className="mt-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className={!hasPreviousPage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                    aria-disabled={!hasPreviousPage}
+                  />
+                </PaginationItem>
+                
+                {/* Show first page if not in view */}
+                {startPage > 1 && (
+                  <>
+                    <PaginationItem>
+                      <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
+                    </PaginationItem>
+                    {startPage > 2 && (
                       <PaginationItem>
-                        <PaginationLink onClick={() => setCurrentPage(1)}>1</PaginationLink>
+                        <PaginationEllipsis />
                       </PaginationItem>
-                      {startPage > 2 && (
-                        <PaginationItem>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      )}
-                    </>
-                  )}
-                  
-                  {/* Page numbers */}
-                  {pageNumbers.map(number => (
-                    <PaginationItem key={number}>
-                      <PaginationLink 
-                        isActive={currentPage === number}
-                        onClick={() => setCurrentPage(number)}
-                      >
-                        {number}
+                    )}
+                  </>
+                )}
+                
+                {/* Page numbers */}
+                {pageNumbers.map(number => (
+                  <PaginationItem key={number}>
+                    <PaginationLink 
+                      isActive={currentPage === number}
+                      onClick={() => handlePageChange(number)}
+                    >
+                      {number}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                
+                {/* Show last page if not in view */}
+                {endPage < totalPages && (
+                  <>
+                    {endPage < totalPages - 1 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+                    <PaginationItem>
+                      <PaginationLink onClick={() => handlePageChange(totalPages)}>
+                        {totalPages}
                       </PaginationLink>
                     </PaginationItem>
-                  ))}
-                  
-                  {/* Show last page if not in view */}
-                  {endPage < totalPages && (
-                    <>
-                      {endPage < totalPages - 1 && (
-                        <PaginationItem>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      )}
-                      <PaginationItem>
-                        <PaginationLink onClick={() => setCurrentPage(totalPages)}>
-                          {totalPages}
-                        </PaginationLink>
-                      </PaginationItem>
-                    </>
-                  )}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      className={currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                      aria-disabled={currentPage === totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+                  </>
+                )}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className={!hasNextPage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                    aria-disabled={!hasNextPage}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       )}
     </div>
