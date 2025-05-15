@@ -40,7 +40,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface ProjectStagesProps {
   project: Project;
@@ -235,7 +235,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
   
   const handleAddStageSubmit = async (formData: { name: string; description: string; startDate: string; endDate: string }) => {
     if (!project.id) {
-      toast.error("Project ID is missing");
+      toast.error("رقم المشروع مفقود");
       return;
     }
     
@@ -250,7 +250,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
       const result = await createStage(stageData);
       
       if (result.success) {
-        toast.success(result.message || "Stage created successfully");
+        toast.success(result.message || "تم إنشاء الم��حلة بنجاح");
         setIsAddStageModalOpen(false);
         
         // Refresh the stages list
@@ -268,34 +268,34 @@ const ProjectStages = ({ project }: { project: Project }) => {
         
         setApiStages(newStages);
       } else {
-        toast.error(result.message || "Failed to create stage");
+        toast.error(result.message || "فشل في إنشاء المرحلة");
       }
     } catch (error) {
       console.error('Error creating stage:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to create stage");
+      toast.error(error instanceof Error ? error.message : "فشل في إنشاء المرحلة");
     } finally {
       setIsCreatingStage(false);
     }
   };
   
   const handleAddTask = (stageId: number) => {
-    toast.info(`Add task to stage ${stageId} will be implemented soon`);
+    toast.info(`سيتم تنفيذ إضافة مهمة للمرحلة ${stageId} قريبًا`);
   };
   
   const handleEditStage = (stageId: number) => {
-    toast.info(`Edit stage ${stageId} will be implemented soon`);
+    toast.info(`سيتم تنفيذ تعديل المرحلة ${stageId} قريبًا`);
   };
   
   const handleDeleteStage = (stageId: number) => {
-    toast.info(`Delete stage ${stageId} will be implemented soon`);
+    toast.info(`سيتم تنفيذ حذف المرحلة ${stageId} قريبًا`);
   };
   
   const handleEditTask = (taskId: number) => {
-    toast.info(`Edit task ${taskId} will be implemented soon`);
+    toast.info(`سيتم تنفيذ تعديل المهمة ${taskId} قريبًا`);
   };
   
   const handleDeleteTask = (taskId: number) => {
-    toast.info(`Delete task ${taskId} will be implemented soon`);
+    toast.info(`سيتم تنفيذ حذف المهمة ${taskId} قريبًا`);
   };
   
   const handleViewTaskDetails = (taskId: number) => {
@@ -314,7 +314,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
       <div className="flex justify-center items-center py-20">
         <div className="flex flex-col items-center">
           <div className="h-8 w-8 border-4 border-t-primary animate-spin rounded-full"></div>
-          <p className="mt-4 text-gray-500">Loading project stages...</p>
+          <p className="mt-4 text-gray-500">جاري تحميل مراحل المشروع...</p>
         </div>
       </div>
     );
@@ -325,14 +325,14 @@ const ProjectStages = ({ project }: { project: Project }) => {
       <div className="flex justify-center items-center py-20">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center max-w-md">
           <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-red-700">Failed to load stages</h3>
+          <h3 className="text-lg font-semibold text-red-700">فشل في تحميل المراحل</h3>
           <p className="text-red-600 mt-2">{error}</p>
           <Button 
             variant="outline" 
             className="mt-4 border-red-300 text-red-700 hover:bg-red-50"
             onClick={() => window.location.reload()}
           >
-            Retry
+            إعادة المحاولة
           </Button>
         </div>
       </div>
@@ -348,8 +348,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
         <div className="flex items-center">
           <SquareKanban className="h-7 w-7 text-indigo-600 mr-3" />
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Project Stages</h2>
-            <p className="text-gray-500 mt-1">Manage and track all stages and tasks</p>
+            <h2 className="text-2xl font-bold text-gray-900">مراحل المشروع</h2>
+            <p className="text-gray-500 mt-1">إدارة وتتبع جميع المراحل والمهام</p>
           </div>
         </div>
         <Button 
@@ -357,7 +357,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
           className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-md transition-all duration-300"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Stage
+          إضافة مرحلة
         </Button>
       </div>
       
@@ -382,13 +382,13 @@ const ProjectStages = ({ project }: { project: Project }) => {
           <div className="p-3 rounded-full bg-slate-100">
             <Clock className="h-6 w-6 text-slate-400" />
           </div>
-          <h3 className="mt-4 text-lg font-medium text-slate-900">No Stages Found</h3>
+          <h3 className="mt-4 text-lg font-medium text-slate-900">لا توجد مراحل</h3>
           <p className="mt-1 text-sm text-slate-500 text-center max-w-sm">
-            This project doesn't have any stages yet. Add your first stage to start tracking progress.
+            هذا المشروع لا يحتوي على أي مراحل بعد. أضف أول مرحلة لبدء تتبع التقدم.
           </p>
           <Button onClick={handleAddStage} className="mt-6">
             <Plus className="mr-2 h-4 w-4" />
-            Add First Stage
+            إضافة أول مرحلة
           </Button>
         </div>
       ) : (
@@ -471,11 +471,11 @@ const ProjectStages = ({ project }: { project: Project }) => {
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditStage(stage.id); }}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit Stage
+                            تعديل مرحلة
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}>
                             <Plus className="mr-2 h-4 w-4" />
-                            Add Task
+                            إضافة مهمة
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
@@ -483,7 +483,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                             onClick={(e) => { e.stopPropagation(); handleDeleteStage(stage.id); }}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Stage
+                            حذف مرحلة
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -556,7 +556,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                           <Button size="sm" onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}
                             className="bg-violet-100 text-violet-700 hover:bg-violet-200 hover:text-violet-800">
                             <Plus className="mr-1 h-3.5 w-3.5" />
-                            Add Task
+                            إضافة مهمة
                           </Button>
                         </div>
                         
@@ -687,7 +687,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                               onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}
                             >
                               <Plus className="mr-1 h-3.5 w-3.5" />
-                              Add Task
+                              إضافة مهمة
                             </Button>
                           </div>
                         )}

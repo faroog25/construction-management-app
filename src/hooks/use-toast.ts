@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import type {
   ToastActionElement,
@@ -13,8 +12,6 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
-  open: boolean
-  onOpenChange?: (open: boolean) => void
 }
 
 const actionTypes = {
@@ -40,7 +37,7 @@ type Action =
     }
   | {
       type: ActionType["UPDATE_TOAST"]
-      toast: Partial<ToasterToast>
+      toast: Partial<ToasterToast> & { id: string }
     }
   | {
       type: ActionType["DISMISS_TOAST"]
@@ -66,7 +63,7 @@ const addToRemoveQueue = (toastId: string) => {
     toastTimeouts.delete(toastId)
     dispatch({
       type: actionTypes.REMOVE_TOAST,
-      toastId: toastId,
+      toastId,
     })
   }, TOAST_REMOVE_DELAY)
 
@@ -78,7 +75,7 @@ export const reducer = (state: State, action: Action): State => {
     case actionTypes.ADD_TOAST:
       return {
         ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+        toasts: [...state.toasts, action.toast],
       }
 
     case actionTypes.UPDATE_TOAST:
@@ -92,6 +89,8 @@ export const reducer = (state: State, action: Action): State => {
     case actionTypes.DISMISS_TOAST: {
       const { toastId } = action
 
+      // ! Side effects ! - This could be extracted into a dismissToast() action,
+      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -112,7 +111,6 @@ export const reducer = (state: State, action: Action): State => {
         ),
       }
     }
-
     case actionTypes.REMOVE_TOAST:
       if (action.toastId === undefined) {
         return {
@@ -127,7 +125,7 @@ export const reducer = (state: State, action: Action): State => {
   }
 }
 
-const listeners: Array<(state: State) => void> = []
+const listeners: ((state: State) => void)[] = []
 
 let memoryState: State = { toasts: [] }
 
@@ -138,9 +136,7 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
-
-function toast({ ...props }: Toast) {
+function toast(props: Omit<ToasterToast, "id">) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -156,14 +152,14 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
-      onOpenChange: (open) => {
+      onOpenChange: (open: boolean) => {
         if (!open) dismiss()
       },
     },
   })
 
   return {
-    id: id,
+    id,
     dismiss,
     update,
   }
@@ -186,10 +182,26 @@ function useToast() {
     toasts: state.toasts,
     toast,
     dismiss: (toastId?: string) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
-    success: (message: string) => toast({ variant: "success", description: message }),
-    error: (message: string) => toast({ variant: "destructive", description: message }),
-    warning: (message: string) => toast({ variant: "warning", description: message }),
-    info: (message: string) => toast({ variant: "info", description: message }),
+    success: (message: string) => toast({ 
+      variant: "success", 
+      description: message,
+      open: true 
+    }),
+    error: (message: string) => toast({ 
+      variant: "destructive", 
+      description: message,
+      open: true 
+    }),
+    warning: (message: string) => toast({ 
+      variant: "warning", 
+      description: message,
+      open: true 
+    }),
+    info: (message: string) => toast({ 
+      variant: "info", 
+      description: message,
+      open: true 
+    }),
   }
 }
 
@@ -197,15 +209,31 @@ toast.dismiss = (toastId?: string) =>
   dispatch({ type: actionTypes.DISMISS_TOAST, toastId })
 
 toast.success = (message: string) => 
-  toast({ variant: "success", description: message })
+  toast({ 
+    variant: "success", 
+    description: message,
+    open: true 
+  })
 
 toast.error = (message: string) => 
-  toast({ variant: "destructive", description: message })
+  toast({ 
+    variant: "destructive", 
+    description: message,
+    open: true 
+  })
 
 toast.warning = (message: string) => 
-  toast({ variant: "warning", description: message })
+  toast({ 
+    variant: "warning", 
+    description: message,
+    open: true 
+  })
 
 toast.info = (message: string) => 
-  toast({ variant: "info", description: message })
+  toast({ 
+    variant: "info", 
+    description: message,
+    open: true 
+  })
 
 export { useToast, toast }
