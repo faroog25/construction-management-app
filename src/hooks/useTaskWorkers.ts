@@ -9,13 +9,15 @@ export function useTaskWorkers(taskId: number) {
   const [assignedWorkers, setAssignedWorkers] = useState<any[]>([]);
 
   const handleWorkerAssignment = async (selectedWorkers: any[]) => {
-    if (!taskId) return;
+    if (!taskId) return false;
     
     try {
       setIsAssigning(true);
       
       // Prepare worker IDs for the API request
       const workerIds = selectedWorkers.map(worker => worker.id);
+      
+      console.log('Assigning workers to task', taskId, 'Worker IDs:', workerIds);
       
       // Make the API request to assign workers
       const result = await assignWorkersToTask({

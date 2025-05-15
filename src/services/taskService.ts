@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface Worker {
@@ -231,7 +232,7 @@ export async function editTask(taskData: EditTaskRequest): Promise<EditTaskRespo
 export async function assignWorkersToTask(assignData: AssignWorkersRequest): Promise<AssignWorkersResponse> {
   try {
     console.log('Assigning workers to task:', assignData);
-    const response = await fetch(`${API_BASE_URL}/Tasks/AssignWorkersToTask`, {
+    const response = await fetch(`${API_BASE_URL}/TaskAssignments/AssignWorkersToTask`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
