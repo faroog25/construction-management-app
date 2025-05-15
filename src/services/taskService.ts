@@ -47,6 +47,21 @@ export interface TaskResponse {
   };
 }
 
+export interface CreateTaskRequest {
+  stageId: number;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface CreateTaskResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data?: any;
+}
+
 export async function getStageTasks(stageId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiTask[]> {
   try {
     console.log('Fetching tasks from:', `${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`);
@@ -106,6 +121,27 @@ export async function getTaskById(taskId: number | string): Promise<TaskDetailRe
     return result;
   } catch (error) {
     console.error('Error fetching task by ID:', error);
+    throw error;
+  }
+}
+
+export async function createTask(taskData: CreateTaskRequest): Promise<CreateTaskResponse> {
+  try {
+    console.log('Creating task with data:', taskData);
+    const response = await fetch(`${API_BASE_URL}/Tasks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(taskData),
+    });
+    
+    const result = await response.json();
+    console.log('API Response - Create Task:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('Error creating task:', error);
     throw error;
   }
 }

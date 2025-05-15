@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
 import { ApiStage, getProjectStages, createStage, CreateStageRequest, updateStage, UpdateStageRequest, deleteStage } from '@/services/stageService';
-import { ApiTask, getStageTasks } from '@/services/taskService';
+import { ApiTask, getStageTasks, createTask } from '@/services/taskService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -13,6 +13,7 @@ import { WorkerMultiSelect } from './WorkerMultiSelect';
 import StageFormModal from './StageFormModal';
 import EditStageModal from './EditStageModal';
 import TaskDetailsModal from './TaskDetailsModal';
+import TaskFormModal, { TaskFormData } from './TaskFormModal';
 import { 
   CircleDot, 
   CheckCircle, 
@@ -102,6 +103,9 @@ const ProjectStages = ({ project }: { project: Project }) => {
   const [stageToDelete, setStageToDelete] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [noStagesFound, setNoStagesFound] = useState(false);
+  const [isTaskFormModalOpen, setIsTaskFormModalOpen] = useState(false);
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  const [selectedStageForTask, setSelectedStageForTask] = useState<number | null>(null);
   
   // Fetch workers and stages
   useEffect(() => {
@@ -387,10 +391,106 @@ const ProjectStages = ({ project }: { project: Project }) => {
   };
   
   const handleAddTask = (stageId: number) => {
-    toast({
-      title: "قريبًا",
-      description: `سيتم تنفيذ إضافة مهمة للمرحلة ${stageId} قريبًا`,
-    });
+    setSelectedStageForTask(stageId);
+    setIsTaskFormModalOpen(true);
+  };
+  
+  const handleAddTaskSubmit = async (formData: TaskFormData) => {
+    setIsCreatingTask(true);
+    
+    try {
+      const result = await createTask({
+        stageId: formData.stageId,
+        name: formData.name,
+        description: formData.description,
+        startDate: formData.startDate,
+        endDate: formData.endDate
+      });
+      
+      if (result.success) {
+        toast({
+          title: "تم بنجاح",
+          description: "تم إضافة المهمة بنجاح",
+        });
+        setIsTaskFormModalOpen(false);
+        
+        // Refresh tasks for this stage
+        if (project && project.id && formData.stageId) {
+          // Find the stage that needs to be refreshed
+          const updatedStages = [...apiStages];
+          const stageIndex = updatedStages.findIndex(s => s.id === formData.stageId);
+          
+          if (stageIndex !== -1) {
+            try {
+              const refreshedTasks = await getStageTasks(formData.stageId);
+              
+              // Convert API tasks to UI tasks
+              const uiTasks = refreshedTasks.map(task => {
+                let status = 'not-started';
+                if (task.isCompleted) {
+                  status = 'completed';
+                } else {
+                  const now = new Date();
+                  const startDate = new Date(task.startDate);
+                  const endDate = new Date(task.endDate);
+                  
+                  if (now > endDate) {
+                    status = 'delayed';
+                  } else if (now >= startDate) {
+                    status = 'in-progress';
+                  }
+                }
+                
+                // Update completedTasks state for newly added task
+                if (task.isCompleted) {
+                  setCompletedTasks(prev => 
+                    prev.includes(task.id) ? prev : [...prev, task.id]
+                  );
+                }
+                
+                return {
+                  ...task,
+                  status,
+                  progress: task.isCompleted ? 100 : 0,
+                  assignedWorkers: []
+                };
+              });
+              
+              // Update the tasks for this stage
+              updatedStages[stageIndex] = {
+                ...updatedStages[stageIndex],
+                tasks: uiTasks
+              };
+              
+              setApiStages(updatedStages);
+              
+            } catch (err) {
+              console.error(`Error refreshing tasks for stage ${formData.stageId}:`, err);
+              toast({
+                title: "خطأ",
+                description: "تم إضافة المهمة ولكن فشل في تحديث القائمة",
+                variant: "destructive"
+              });
+            }
+          }
+        }
+      } else {
+        toast({
+          title: "خطأ",
+          description: result.message || "فشل في إضافة المهمة",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error creating task:', error);
+      toast({
+        title: "خطأ",
+        description: error instanceof Error ? error.message : "فشل في إضافة المهمة",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCreatingTask(false);
+    }
   };
   
   const handleEditTask = (taskId: number) => {
@@ -490,6 +590,15 @@ const ProjectStages = ({ project }: { project: Project }) => {
         isOpen={isTaskDetailsModalOpen}
         onClose={() => setIsTaskDetailsModalOpen(false)}
         taskId={selectedTaskId}
+      />
+      
+      {/* Task Form Modal */}
+      <TaskFormModal
+        isOpen={isTaskFormModalOpen}
+        onClose={() => setIsTaskFormModalOpen(false)}
+        onSubmit={handleAddTaskSubmit}
+        isLoading={isCreatingTask}
+        stageId={selectedStageForTask || 0}
       />
       
       {/* Delete Stage Confirmation Dialog */}
