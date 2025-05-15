@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getTaskById, TaskDetailResponse, completeTask } from '@/services/taskService';
+import { getTaskById, TaskDetailResponse, completeTask, uncheckTask } from '@/services/taskService';
 import { toast } from '@/components/ui/use-toast';
 import {
   Dialog,
@@ -64,47 +64,54 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
     fetchTaskDetails();
   };
 
-  // Handle task completion
-  const handleCompleteTask = async () => {
+  // Handle task completion or unchecking
+  const handleToggleTaskCompletion = async () => {
     if (!taskId || !taskData) return;
-    
-    // Task is already completed
-    if (taskData.data.isCompleted) return;
     
     setIsCompleting(true);
     
     try {
-      const result = await completeTask(taskId);
+      // Determine if we need to complete or uncheck the task
+      const isTaskCompleted = taskData.data.isCompleted;
+      
+      let result;
+      if (isTaskCompleted) {
+        // Task is already completed, uncheck it
+        result = await uncheckTask(taskId);
+      } else {
+        // Task is not completed, complete it
+        result = await completeTask(taskId);
+      }
       
       if (result.success) {
         toast({
           title: "تم بنجاح",
-          description: "تم إكمال المهمة بنجاح"
+          description: isTaskCompleted ? "تم إلغاء اكتمال المهمة بنجاح" : "تم إكمال المهمة بنجاح"
         });
         
-        // Update the local state to show the task as completed
+        // Update the local state to show the task as completed/uncompleted
         setTaskData(prev => {
           if (!prev) return null;
           return {
             ...prev,
             data: {
               ...prev.data,
-              isCompleted: true
+              isCompleted: !isTaskCompleted
             }
           };
         });
       } else {
         toast({
           title: "خطأ",
-          description: result.message || "فشل في إكمال المهمة",
+          description: result.message || (isTaskCompleted ? "فشل في إلغاء اكتمال المهمة" : "فشل في إكمال المهمة"),
           variant: "destructive"
         });
       }
     } catch (error) {
-      console.error('Error completing task:', error);
+      console.error('Error toggling task completion:', error);
       toast({
         title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في إكمال المهمة",
+        description: error instanceof Error ? error.message : "فشل في تغيير حالة المهمة",
         variant: "destructive"
       });
     } finally {
@@ -161,29 +168,29 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                       </div>
                     </div>
                     
-                    {!taskData.data.isCompleted && (
-                      <div className="flex items-center gap-2">
-                        <div className="relative">
-                          <Checkbox
-                            id="complete-task"
-                            checked={taskData.data.isCompleted}
-                            onCheckedChange={handleCompleteTask}
-                            disabled={isCompleting}
-                            className={cn(
-                              "h-6 w-6 rounded-md transition-all duration-200 border-2",
-                              "data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500",
-                              "focus-visible:ring-2 focus-visible:ring-green-200"
-                            )}
-                          />
-                          {isCompleting && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/70 rounded-md">
-                              <div className="h-4 w-4 border-2 border-t-transparent border-green-600 rounded-full animate-spin"></div>
-                            </div>
+                    <div className="flex items-center gap-2">
+                      <div className="relative">
+                        <Checkbox
+                          id="complete-task"
+                          checked={taskData.data.isCompleted}
+                          onCheckedChange={handleToggleTaskCompletion}
+                          disabled={isCompleting}
+                          className={cn(
+                            "h-6 w-6 rounded-md transition-all duration-200 border-2",
+                            "data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500",
+                            "focus-visible:ring-2 focus-visible:ring-green-200"
                           )}
-                        </div>
-                        <span className="text-sm text-green-600 font-medium">إكمال المهمة</span>
+                        />
+                        {isCompleting && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-white/70 rounded-md">
+                            <div className="h-4 w-4 border-2 border-t-transparent border-green-600 rounded-full animate-spin"></div>
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <span className="text-sm text-green-600 font-medium">
+                        {taskData.data.isCompleted ? "إلغاء اكتمال المهمة" : "إكمال المهمة"}
+                      </span>
+                    </div>
                   </div>
                   
                   <Separator className="my-3" />

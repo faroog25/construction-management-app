@@ -78,6 +78,12 @@ export interface CompleteTaskResponse {
   errors?: string[];
 }
 
+export interface UncheckTaskResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+}
+
 export async function getStageTasks(stageId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiTask[]> {
   try {
     console.log('Fetching tasks from:', `${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`);
@@ -237,6 +243,45 @@ export async function completeTask(taskId: number): Promise<CompleteTaskResponse
     return result;
   } catch (error) {
     console.error('Error completing task:', error);
+    throw error;
+  }
+}
+
+/**
+ * Marks a completed task as uncompleted
+ * @param taskId The task ID to uncheck
+ * @returns API response with success status and message
+ */
+export async function uncheckTask(taskId: number): Promise<UncheckTaskResponse> {
+  try {
+    console.log('Unchecking task:', taskId);
+    const response = await fetch(`${API_BASE_URL}/Tasks/UnCheckTask/${taskId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response for task unchecking:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: UncheckTaskResponse = await response.json();
+    console.log('API Response - Uncheck Task:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to uncheck task');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error unchecking task:', error);
     throw error;
   }
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
 import { ApiStage, getProjectStages, createStage, CreateStageRequest, updateStage, UpdateStageRequest, deleteStage } from '@/services/stageService';
-import { ApiTask, getStageTasks, createTask, completeTask } from '@/services/taskService';
+import { ApiTask, getStageTasks, createTask, completeTask, uncheckTask } from '@/services/taskService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -220,63 +220,118 @@ const ProjectStages = ({ project }: { project: Project }) => {
   };
   
   const toggleTaskCompletion = async (taskId: number) => {
-    // Check if task is already completed
-    const isAlreadyCompleted = completedTasks.includes(taskId);
+    // Find the task to determine its current completion status
+    let isAlreadyCompleted = false;
+    let stageId = 0;
     
-    if (isAlreadyCompleted) {
-      // If already completed, just update UI state
-      setCompletedTasks(prev => prev.filter(id => id !== taskId));
-      return;
+    // Find the task in the stages
+    for (const stage of apiStages) {
+      const task = stage.tasks.find(t => t.id === taskId);
+      if (task) {
+        isAlreadyCompleted = task.isCompleted;
+        stageId = stage.id;
+        break;
+      }
     }
     
     // Set loading state for this specific task
     setCompletingTaskId(taskId);
     
     try {
-      // Call the API to complete the task
-      const result = await completeTask(taskId);
+      let result;
       
-      if (result.success) {
-        // Update UI state
-        setCompletedTasks(prev => [...prev, taskId]);
+      if (isAlreadyCompleted) {
+        // If already completed, uncheck it
+        result = await uncheckTask(taskId);
         
-        toast({
-          title: "تم بنجاح",
-          description: "تم إكمال المهمة بنجاح",
-        });
-        
-        // Find and update the task in state
-        const updatedStages = [...apiStages];
-        for (let i = 0; i < updatedStages.length; i++) {
-          const taskIndex = updatedStages[i].tasks.findIndex(t => t.id === taskId);
-          if (taskIndex !== -1) {
-            updatedStages[i].tasks[taskIndex] = {
-              ...updatedStages[i].tasks[taskIndex],
-              isCompleted: true,
-              status: 'completed',
-              progress: 100
-            };
-            break;
+        if (result.success) {
+          // Update UI state to mark as not completed
+          setCompletedTasks(prev => prev.filter(id => id !== taskId));
+          
+          toast({
+            title: "تم بنجاح",
+            description: "تم إلغاء اكتمال المهمة بنجاح",
+          });
+          
+          // Find and update the task in state
+          const updatedStages = [...apiStages];
+          for (let i = 0; i < updatedStages.length; i++) {
+            const taskIndex = updatedStages[i].tasks.findIndex(t => t.id === taskId);
+            if (taskIndex !== -1) {
+              updatedStages[i].tasks[taskIndex] = {
+                ...updatedStages[i].tasks[taskIndex],
+                isCompleted: false,
+                status: 'in-progress',
+                progress: 0
+              };
+              
+              // Update stage progress
+              const completedTasksCount = updatedStages[i].tasks.filter(t => t.isCompleted).length;
+              const totalTasks = updatedStages[i].tasks.length;
+              const stageProgress = totalTasks > 0 ? Math.round((completedTasksCount / totalTasks) * 100) : 0;
+              updatedStages[i].progress = stageProgress;
+              
+              break;
+            }
           }
+          setApiStages(updatedStages);
+        } else {
+          toast({
+            title: "خطأ",
+            description: result.message || "فشل في إلغاء اكتمال المهمة",
+            variant: "destructive"
+          });
         }
-        setApiStages(updatedStages);
       } else {
-        toast({
-          title: "خطأ",
-          description: result.message || "فشل في إكمال المهمة",
-          variant: "destructive"
-        });
+        // If not completed, complete it
+        result = await completeTask(taskId);
+        
+        if (result.success) {
+          // Update UI state
+          setCompletedTasks(prev => [...prev, taskId]);
+          
+          toast({
+            title: "تم بنجاح",
+            description: "تم إكمال المهمة بنجاح",
+          });
+          
+          // Find and update the task in state
+          const updatedStages = [...apiStages];
+          for (let i = 0; i < updatedStages.length; i++) {
+            const taskIndex = updatedStages[i].tasks.findIndex(t => t.id === taskId);
+            if (taskIndex !== -1) {
+              updatedStages[i].tasks[taskIndex] = {
+                ...updatedStages[i].tasks[taskIndex],
+                isCompleted: true,
+                status: 'completed',
+                progress: 100
+              };
+              
+              // Update stage progress
+              const completedTasksCount = updatedStages[i].tasks.filter(t => t.isCompleted).length;
+              const totalTasks = updatedStages[i].tasks.length;
+              const stageProgress = totalTasks > 0 ? Math.round((completedTasksCount / totalTasks) * 100) : 0;
+              updatedStages[i].progress = stageProgress;
+              
+              break;
+            }
+          }
+          setApiStages(updatedStages);
+        } else {
+          toast({
+            title: "خطأ",
+            description: result.message || "فشل في إكمال المهمة",
+            variant: "destructive"
+          });
+        }
       }
     } catch (error) {
-      console.error('Error completing task:', error);
+      console.error('Error toggling task completion:', error);
       toast({
         title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في إكمال المهمة",
+        description: error instanceof Error ? error.message : "فشل في تغيير حالة المهمة",
         variant: "destructive"
       });
-      
-      // Revert UI state if API call fails
-      setCompletedTasks(prev => prev.filter(id => id !== taskId));
     } finally {
       // Clear loading state
       setCompletingTaskId(null);
