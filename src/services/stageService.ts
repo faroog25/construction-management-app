@@ -6,7 +6,9 @@ export interface ApiStage {
   name: string;
   description: string;
   startDate: string;
-  endDate: string;
+  endDate?: string;
+  expectedEndDate?: string;
+  progress: number;
 }
 
 export interface StageResponse {

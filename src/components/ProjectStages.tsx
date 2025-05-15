@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
@@ -46,15 +47,6 @@ interface ProjectStagesProps {
   project: Project;
 }
 
-// Status configuration
-const statusConfig = {
-  'completed': { label: 'Completed', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle },
-  'in-progress': { label: 'In Progress', className: 'bg-blue-100 text-blue-800 border-blue-200', icon: PlayCircle },
-  'delayed': { label: 'Delayed', className: 'bg-red-100 text-red-800 border-red-200', icon: AlertCircle },
-  'not-started': { label: 'Not Started', className: 'bg-gray-100 text-gray-800 border-gray-200', icon: Clock },
-  'paused': { label: 'Paused', className: 'bg-amber-100 text-amber-800 border-amber-200', icon: PauseCircle },
-};
-
 // Format date function
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -74,17 +66,11 @@ const calculateOverdueDays = (endDate: string) => {
 interface UITask extends ApiTask {
   status: string;
   progress: number;
-  assignee?: string;
-  nameAr?: string;
   assignedWorkers: Worker[];
 }
 
-// Enhanced stage interface to include progress and status
+// Enhanced stage interface to include tasks
 interface EnhancedStage extends ApiStage {
-  progress: number;
-  status: string;
-  nameAr?: string;
-  assignee?: string;
   tasks: UITask[];
 }
 
@@ -128,19 +114,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
               // Fetch tasks for this stage
               const stageTasks = await getStageTasks(stage.id);
               
-              // Calculate stage progress based on task completion
-              const stageProgress = stageTasks.length > 0
-                ? Math.round((stageTasks.filter(task => task.isCompleted).length / stageTasks.length) * 100)
-                : 0;
-              
-              // Determine status based on progress
-              let stageStatus = 'not-started';
-              if (stageProgress === 100) {
-                stageStatus = 'completed';
-              } else if (stageProgress > 0) {
-                stageStatus = 'in-progress';
-              }
-              
               // Map API tasks to UI format with status and other UI properties
               const uiTasks: UITask[] = stageTasks.map(task => {
                 // Determine task status based on isCompleted and dates
@@ -170,8 +143,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
                   ...task,
                   status,
                   progress: task.isCompleted ? 100 : 0,
-                  assignee: "Assigned Worker", // Placeholder assignee
-                  nameAr: `${task.name} (Arabic)`, // Placeholder for Arabic name
                   assignedWorkers: [] // Placeholder for assigned workers
                 };
               });
@@ -179,10 +150,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
               // Add enhanced stage to array
               enhancedStages.push({
                 ...stage,
-                progress: stageProgress,
-                status: stageStatus,
-                nameAr: `${stage.name} (Arabic)`, // Placeholder for Arabic name
-                assignee: "Project Manager", // Placeholder assignee
                 tasks: uiTasks
               });
             } catch (err) {
@@ -191,10 +158,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
               // Add stage with empty tasks list in case of error
               enhancedStages.push({
                 ...stage,
-                progress: 0,
-                status: 'not-started',
-                nameAr: `${stage.name} (Arabic)`,
-                assignee: "Project Manager",
                 tasks: []
               });
             }
@@ -250,7 +213,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
       const result = await createStage(stageData);
       
       if (result.success) {
-        toast.success(result.message || "تم إنشاء الم��حلة بنجاح");
+        toast.success(result.message || "تم إنشاء المرحلة بنجاح");
         setIsAddStageModalOpen(false);
         
         // Refresh the stages list
@@ -259,10 +222,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
         // Update state with new stages (simplified for brevity)
         const newStages = stagesData.map(stage => ({
           ...stage,
-          progress: 0,
-          status: 'not-started',
-          nameAr: `${stage.name} (Arabic)`,
-          assignee: "Project Manager",
           tasks: []
         }));
         
@@ -394,8 +353,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
       ) : (
         <div className="grid gap-6">
           {projectStages.map((stage) => {
-            const stageStatus = statusConfig[stage.status as keyof typeof statusConfig];
-            const StageStatusIcon = stageStatus.icon;
             const isExpanded = expandedStages.includes(stage.id);
             
             return (
@@ -414,38 +371,15 @@ const ProjectStages = ({ project }: { project: Project }) => {
                   onClick={() => toggleStage(stage.id)}
                 >
                   <div className="flex items-center gap-3 mb-2 md:mb-0">
-                    <div className={cn(
-                      "p-2 rounded-lg",
-                      stage.status === 'completed' ? "bg-emerald-100" : 
-                      stage.status === 'in-progress' ? "bg-blue-100" :
-                      stage.status === 'delayed' ? "bg-red-100" : "bg-slate-100"
-                    )}>
-                      <SquareKanban 
-                        className={cn(
-                          "h-5 w-5",
-                          stage.status === 'completed' ? "text-emerald-600" : 
-                          stage.status === 'in-progress' ? "text-blue-600" :
-                          stage.status === 'delayed' ? "text-red-600" : "text-slate-600"
-                        )} 
-                      />
+                    <div className="p-2 rounded-lg bg-indigo-100">
+                      <SquareKanban className="h-5 w-5 text-indigo-600" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-base">{stage.name}</h3>
-                      {stage.nameAr && <p className="text-sm text-gray-500">{stage.nameAr}</p>}
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-3 md:gap-6">
-                    <div className="hidden md:block">
-                      <Badge className={cn(
-                        "px-3 py-1 font-medium text-xs", 
-                        stageStatus.className,
-                        "rounded-md shadow-sm"
-                      )}>
-                        {stageStatus.label}
-                      </Badge>
-                    </div>
-                    
                     <div className="flex flex-1 items-center gap-2 md:w-48">
                       <div className="h-2.5 flex-1 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                         <div 
@@ -507,16 +441,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                 {isExpanded && (
                   <div className="p-5 bg-white">
                     <div className="py-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-indigo-50 rounded-full">
-                            <User className="h-3.5 w-3.5 text-indigo-500" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500">Assignee</p>
-                            <p className="text-sm font-medium">{stage.assignee || 'Not assigned'}</p>
-                          </div>
-                        </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-emerald-50 rounded-full">
                             <Calendar className="h-3.5 w-3.5 text-emerald-500" />
@@ -532,7 +457,10 @@ const ProjectStages = ({ project }: { project: Project }) => {
                           </div>
                           <div>
                             <p className="text-xs text-gray-500">Expected Date</p>
-                            <p className="text-sm font-medium">{formatDate(stage.endDate)}</p>
+                            <p className="text-sm font-medium">
+                              {stage.expectedEndDate ? formatDate(stage.expectedEndDate) : 
+                               stage.endDate ? formatDate(stage.endDate) : 'Not set'}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -563,8 +491,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
                         {stage.tasks && stage.tasks.length > 0 ? (
                           <div className="space-y-4">
                             {stage.tasks.map((task) => {
-                              const taskStatus = statusConfig[task.status as keyof typeof statusConfig] || statusConfig['not-started'];
-                              const TaskStatusIcon = taskStatus.icon;
                               const overdueDays = calculateOverdueDays(task.endDate);
                               const isCompleted = completedTasks.includes(task.id);
                               
@@ -576,20 +502,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                   <div className="p-4">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                                       <div className="flex items-start gap-3">
-                                        <div className={cn(
-                                          "p-1.5 rounded-md",
-                                          task.status === 'completed' ? "bg-emerald-50" : 
-                                          task.status === 'in-progress' ? "bg-blue-50" :
-                                          task.status === 'delayed' ? "bg-red-50" : "bg-gray-50"
-                                        )}>
-                                          <ListTodo 
-                                            className={cn(
-                                              "h-3.5 w-3.5",
-                                              task.status === 'completed' ? "text-emerald-500" : 
-                                              task.status === 'in-progress' ? "text-blue-500" :
-                                              task.status === 'delayed' ? "text-red-500" : "text-gray-400"
-                                            )} 
-                                          />
+                                        <div className="p-1.5 rounded-md bg-violet-50">
+                                          <ListTodo className="h-3.5 w-3.5 text-violet-500" />
                                         </div>
                                         <div>
                                           <div className="flex items-center">
@@ -597,9 +511,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                               "font-medium",
                                               isCompleted && "line-through text-gray-500"
                                             )}>{task.name}</p>
-                                            <Badge className={cn("ml-2 rounded-md", taskStatus.className)}>
-                                              {taskStatus.label}
-                                            </Badge>
                                           </div>
                                           <p className="text-xs text-gray-500 mt-0.5">{task.description || 'No description'}</p>
                                         </div>
@@ -616,7 +527,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                           />
                                         )}
                                         
-                                        {overdueDays > 0 && task.status !== 'completed' && (
+                                        {overdueDays > 0 && !isCompleted && (
                                           <Badge variant="destructive" className="h-6 px-2 text-xs">
                                             متأخر {overdueDays} يوم
                                           </Badge>
@@ -631,10 +542,6 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                           <span className="text-xs text-gray-500">
                                             {formatDate(task.startDate)} - {formatDate(task.endDate)}
                                           </span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                          <User className="h-3.5 w-3.5 text-violet-400" />
-                                          <span className="text-xs text-gray-500">{task.assignee || 'Unassigned'}</span>
                                         </div>
                                       </div>
                                       
