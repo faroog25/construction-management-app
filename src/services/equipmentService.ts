@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 import { EquipmentItem } from '@/types/equipment';
 
@@ -107,15 +108,25 @@ export async function getEquipment(pageNumber: number = 1, pageSize: number = 10
  * @returns Formatted equipment item for the UI
  */
 export function mapApiEquipmentToEquipmentItem(apiEquipment: ApiEquipmentItem): EquipmentItem {
-  // Determine the status based on the API status string
-  const statusMap: Record<string, 'Available' | 'In Use' | 'Maintenance'> = {
-    'Available': 'Available',
-    'In Use': 'In Use',
-    'Maintenance': 'Maintenance',
-    // Add more mappings as needed
-  };
+  // Convert API status to our internal status format
+  let status: 'Available' | 'In Use' | 'Maintenance' = 'Available';
   
-  const status = statusMap[apiEquipment.status] || 'Maintenance';
+  // Normalize the status string by removing spaces and converting to lowercase
+  const normalizedStatus = apiEquipment.status.toLowerCase().replace(/\s+/g, '');
+  
+  // Map status values correctly
+  if (normalizedStatus === 'available' || normalizedStatus === '0') {
+    status = 'Available';
+  } else if (normalizedStatus === 'inuse' || normalizedStatus === 'in-use' || normalizedStatus === '1') {
+    status = 'In Use';
+  } else if (normalizedStatus === 'undermaintenance' || normalizedStatus === 'under-maintenance' || normalizedStatus === 'maintenance' || normalizedStatus === '2') {
+    status = 'Maintenance';
+  } else if (normalizedStatus === 'outofservice' || normalizedStatus === 'out-of-service' || normalizedStatus === '3') {
+    // Out of Service cases will be mapped to Maintenance for UI display purposes
+    status = 'Maintenance';
+  }
+  
+  console.log(`API Status: ${apiEquipment.status}, Mapped Status: ${status}`);
   
   // Convert the equipment from API format to our internal format
   return {

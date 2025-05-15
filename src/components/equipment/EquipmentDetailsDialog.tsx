@@ -106,29 +106,35 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
 
   // Determine the badge style based on status
   const getBadgeVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'available':
-        return 'bg-green-500 hover:bg-green-600';
-      case 'inuse':
-        return 'bg-blue-500 hover:bg-blue-600';
-      case 'undermaintenance':
-      case 'underholdion':
-        return 'bg-amber-500 hover:bg-amber-600';
-      case 'outofservice':
-        return 'bg-red-500 hover:bg-red-600';
-      default:
-        return '';
+    if (!status) return '';
+    
+    const lowerStatus = status.toLowerCase();
+    
+    if (lowerStatus === 'available' || lowerStatus === '0') {
+      return 'bg-green-500 hover:bg-green-600';
+    } else if (lowerStatus === 'inuse' || lowerStatus === 'in use' || lowerStatus === '1') {
+      return 'bg-blue-500 hover:bg-blue-600';
+    } else if (lowerStatus === 'undermaintenance' || lowerStatus === 'under maintenance' ||
+              lowerStatus === 'maintenance' || lowerStatus === '2') {
+      return 'bg-amber-500 hover:bg-amber-600';
+    } else if (lowerStatus === 'outofservice' || lowerStatus === 'out of service' || lowerStatus === '3') {
+      return 'bg-red-500 hover:bg-red-600';
     }
+    
+    return '';
   };
 
   // Format the status text for display
   const formatStatus = (status: string) => {
     if (!status) return 'Unknown';
     
+    const lowerStatus = status.toLowerCase();
+    
     // Handle different status formats
-    if (status.toLowerCase() === 'inuse') return 'In Use';
-    if (status.toLowerCase() === 'undermaintenance') return 'Under Maintenance';
-    if (status.toLowerCase() === 'outofservice') return 'Out of Service';
+    if (lowerStatus === 'available' || lowerStatus === '0') return 'Available';
+    if (lowerStatus === 'inuse' || lowerStatus === 'in use' || lowerStatus === '1') return 'In Use';
+    if (lowerStatus === 'undermaintenance' || lowerStatus === 'under maintenance' || lowerStatus === '2') return 'Under Maintenance';
+    if (lowerStatus === 'outofservice' || lowerStatus === 'out of service' || lowerStatus === '3') return 'Out of Service';
     
     // Capitalize first letter of each word
     return status.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());

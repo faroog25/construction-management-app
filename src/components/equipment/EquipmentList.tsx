@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -144,11 +143,22 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
 
   // Convert API status string to our status numbers
   const getStatusNumber = (statusString: string): number => {
+    if (!statusString) return EQUIPMENT_STATUS.AVAILABLE;
+    
     const lowerStatus = statusString.toLowerCase();
+    
     if (lowerStatus === 'available') return EQUIPMENT_STATUS.AVAILABLE;
     if (lowerStatus === 'inuse' || lowerStatus === 'in use') return EQUIPMENT_STATUS.IN_USE;
-    if (lowerStatus === 'undermaintenance' || lowerStatus === 'under maintenance') return EQUIPMENT_STATUS.UNDER_MAINTENANCE;
+    if (lowerStatus === 'undermaintenance' || lowerStatus === 'under maintenance' || 
+        lowerStatus === 'maintenance') return EQUIPMENT_STATUS.UNDER_MAINTENANCE;
     if (lowerStatus === 'outofservice' || lowerStatus === 'out of service') return EQUIPMENT_STATUS.OUT_OF_SERVICE;
+    
+    // Try to parse numeric status
+    const numericStatus = parseInt(lowerStatus, 10);
+    if (!isNaN(numericStatus) && numericStatus >= 0 && numericStatus <= 3) {
+      return numericStatus;
+    }
+    
     return EQUIPMENT_STATUS.AVAILABLE; // Default
   };
 
@@ -170,7 +180,8 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
         if (item.id === equipmentId) {
           return {
             ...item,
-            status: EQUIPMENT_STATUS_LABELS[newStatus] as 'Available' | 'In Use' | 'Maintenance'
+            status: newStatus === EQUIPMENT_STATUS.AVAILABLE ? 'Available' : 
+                   newStatus === EQUIPMENT_STATUS.IN_USE ? 'In Use' : 'Maintenance'
           };
         }
         return item;
