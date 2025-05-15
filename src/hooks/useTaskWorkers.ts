@@ -1,14 +1,43 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Worker } from '@/services/workerService';
-import { assignWorkersToTask } from '@/services/taskService';
+import { assignWorkersToTask, getTaskById } from '@/services/taskService';
 import { toast } from '@/hooks/use-toast';
 
 export function useTaskWorkers(taskId: number) {
   const [isAssigning, setIsAssigning] = useState(false);
-  const [assignedWorkers, setAssignedWorkers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [assignedWorkers, setAssignedWorkers] = useState<Worker[]>([]);
 
-  const handleWorkerAssignment = async (selectedWorkers: any[]) => {
+  // Fetch assigned workers when taskId changes
+  useEffect(() => {
+    if (!taskId) return;
+
+    const fetchAssignedWorkers = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch task details to get assigned workers (if any)
+        const taskDetails = await getTaskById(taskId);
+        
+        // Check if the task has workers assigned and update state
+        if (taskDetails.success && taskDetails.data.workers) {
+          setAssignedWorkers(taskDetails.data.workers);
+        } else {
+          setAssignedWorkers([]);
+        }
+      } catch (error) {
+        console.error('Error fetching assigned workers:', error);
+        setAssignedWorkers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssignedWorkers();
+  }, [taskId]);
+
+  const handleWorkerAssignment = async (selectedWorkers: Worker[]) => {
     if (!taskId) return false;
     
     try {
@@ -93,6 +122,7 @@ export function useTaskWorkers(taskId: number) {
   };
 
   return {
+    isLoading,
     isAssigning,
     assignedWorkers,
     setAssignedWorkers,

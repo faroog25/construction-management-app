@@ -1,9 +1,11 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface Worker {
   id: number;
   fullName: string;
+  email?: string;
+  phoneNumber?: string;
+  specialty?: string;
 }
 
 export interface ApiTask {
@@ -26,9 +28,10 @@ export interface TaskDetailResponse {
     name: string;
     description: string;
     startDate: string;
-    endDate: string;
+    endDate?: string;
+    expectedEndDate?: string;
     isCompleted: boolean;
-    workers: Worker[];
+    workers?: Worker[];
   };
 }
 
@@ -158,6 +161,25 @@ export async function getTaskById(taskId: number | string): Promise<TaskDetailRe
     
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch task details');
+    }
+
+    // Fetch task workers in a separate request if they're not included
+    if (!result.data.workers) {
+      try {
+        const workersResponse = await fetch(`${API_BASE_URL}/TaskAssignments/GetWorkersForTask/${taskId}`);
+        
+        if (workersResponse.ok) {
+          const workersResult = await workersResponse.json();
+          if (workersResult.success && workersResult.data) {
+            result.data.workers = workersResult.data;
+          } else {
+            result.data.workers = [];
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching task workers:', error);
+        result.data.workers = [];
+      }
     }
     
     return result;

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Worker, getAllWorkers } from '@/services/workerService';
 import { WorkerMultiSelect } from './WorkerMultiSelect';
 import { useTaskWorkers } from '@/hooks/useTaskWorkers';
-import { getTaskById } from '@/services/taskService';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
@@ -15,32 +14,26 @@ interface TaskAssignWorkersProps {
 
 export function TaskAssignWorkers({ taskId, onWorkersAssigned }: TaskAssignWorkersProps) {
   const [workers, setWorkers] = useState<Worker[]>([]);
-  const [selectedWorkers, setSelectedWorkers] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedWorkers, setSelectedWorkers] = useState<Worker[]>([]);
+  const [isLoadingWorkers, setIsLoadingWorkers] = useState(true);
+  
   const { 
     handleWorkerAssignment, 
     isAssigning, 
-    assignedWorkers, 
-    setAssignedWorkers, 
+    isLoading: isLoadingAssignedWorkers,
+    assignedWorkers,
     removeWorker 
   } = useTaskWorkers(taskId);
 
-  // Load all available workers and current task workers
+  // Load all available workers
   useEffect(() => {
-    const loadData = async () => {
+    const loadWorkers = async () => {
       try {
-        setIsLoading(true);
+        setIsLoadingWorkers(true);
         
         // Fetch all available workers
         const workersData = await getAllWorkers();
         setWorkers(workersData);
-        
-        // Fetch the task details to get currently assigned workers
-        const taskDetails = await getTaskById(taskId);
-        if (taskDetails.success && taskDetails.data.workers) {
-          setSelectedWorkers(taskDetails.data.workers);
-          setAssignedWorkers(taskDetails.data.workers);
-        }
       } catch (error) {
         console.error('Error loading workers data:', error);
         toast({
@@ -49,24 +42,26 @@ export function TaskAssignWorkers({ taskId, onWorkersAssigned }: TaskAssignWorke
           variant: "destructive"
         });
       } finally {
-        setIsLoading(false);
+        setIsLoadingWorkers(false);
       }
     };
     
     if (taskId) {
-      loadData();
+      loadWorkers();
     }
-  }, [taskId, setAssignedWorkers]);
+  }, [taskId]);
+
+  // Update selected workers whenever assigned workers change
+  useEffect(() => {
+    setSelectedWorkers(assignedWorkers);
+  }, [assignedWorkers]);
 
   // Handle worker selection change and update assignment
-  const handleSelectionChange = async (selectedWorkers: any[]) => {
+  const handleSelectionChange = async (workers: Worker[]) => {
     try {
-      const success = await handleWorkerAssignment(selectedWorkers);
-      if (success) {
-        setSelectedWorkers(selectedWorkers);
-        if (onWorkersAssigned) {
-          onWorkersAssigned();
-        }
+      const success = await handleWorkerAssignment(workers);
+      if (success && onWorkersAssigned) {
+        onWorkersAssigned();
       }
     } catch (error) {
       console.error('Error in worker assignment:', error);
@@ -77,19 +72,15 @@ export function TaskAssignWorkers({ taskId, onWorkersAssigned }: TaskAssignWorke
   const handleRemoveWorker = async (workerId: number) => {
     try {
       const success = await removeWorker(workerId);
-      if (success) {
-        // Update local selected workers state
-        const updatedWorkers = selectedWorkers.filter(worker => worker.id !== workerId);
-        setSelectedWorkers(updatedWorkers);
-        
-        if (onWorkersAssigned) {
-          onWorkersAssigned();
-        }
+      if (success && onWorkersAssigned) {
+        onWorkersAssigned();
       }
     } catch (error) {
       console.error('Error removing worker:', error);
     }
   };
+
+  const isLoading = isLoadingWorkers || isLoadingAssignedWorkers;
 
   return (
     <div className="space-y-4">
