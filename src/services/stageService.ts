@@ -54,6 +54,12 @@ export interface UpdateStageResponse {
   data: string;
 }
 
+export interface DeleteStageResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+}
+
 export async function getProjectStages(projectId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiStage[]> {
   try {
     console.log('Fetching stages from:', `${API_BASE_URL}/Stages?projectId=${projectId}&pageNumber=${page}&pageSize=${pageSize}`);
@@ -154,6 +160,40 @@ export async function updateStage(stageData: UpdateStageRequest): Promise<Update
     return result;
   } catch (error) {
     console.error('Error updating stage:', error);
+    throw error;
+  }
+}
+
+export async function deleteStage(stageId: number): Promise<DeleteStageResponse> {
+  try {
+    console.log('Deleting stage with ID:', stageId);
+    const response = await fetch(`${API_BASE_URL}/Stages/${stageId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response when deleting stage:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: DeleteStageResponse = await response.json();
+    console.log('API Response - Delete Stage:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to delete stage');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error deleting stage:', error);
     throw error;
   }
 }

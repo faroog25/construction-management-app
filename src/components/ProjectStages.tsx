@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
-import { ApiStage, getProjectStages, createStage, CreateStageRequest, updateStage, UpdateStageRequest } from '@/services/stageService';
+import { ApiStage, getProjectStages, createStage, CreateStageRequest, updateStage, UpdateStageRequest, deleteStage } from '@/services/stageService';
 import { ApiTask, getStageTasks } from '@/services/taskService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +42,16 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { toast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectStagesProps {
   project: Project;
@@ -88,6 +98,9 @@ const ProjectStages = ({ project }: { project: Project }) => {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [selectedStage, setSelectedStage] = useState<ApiStage | null>(null);
   const [isTaskDetailsModalOpen, setIsTaskDetailsModalOpen] = useState(false);
+  const [isDeletingStage, setIsDeletingStage] = useState(false);
+  const [stageToDelete, setStageToDelete] = useState<number | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // Fetch workers and stages
   useEffect(() => {
@@ -201,7 +214,11 @@ const ProjectStages = ({ project }: { project: Project }) => {
   
   const handleAddStageSubmit = async (formData: { name: string; description: string; startDate: string; endDate: string }) => {
     if (!project.id) {
-      toast.error("رقم المشروع مفقود");
+      toast({
+        title: "خطأ",
+        description: "رقم المشروع مفقود",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -216,7 +233,11 @@ const ProjectStages = ({ project }: { project: Project }) => {
       const result = await createStage(stageData);
       
       if (result.success) {
-        toast.success(result.message || "تم إنشاء المرحلة بنجاح");
+        toast({
+          title: "تم بنجاح",
+          description: result.message || "تم إنشاء المرحلة بنجاح",
+          variant: "success"
+        });
         setIsAddStageModalOpen(false);
         
         // Refresh the stages list
@@ -230,11 +251,19 @@ const ProjectStages = ({ project }: { project: Project }) => {
         
         setApiStages(newStages);
       } else {
-        toast.error(result.message || "فشل في إنشاء المرحلة");
+        toast({
+          title: "خطأ",
+          description: result.message || "فشل في إنشاء المرحلة",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error creating stage:', error);
-      toast.error(error instanceof Error ? error.message : "فش�� في إنشاء المرحلة");
+      toast({
+        title: "خطأ",
+        description: error instanceof Error ? error.message : "فشل في إنشاء المرحلة",
+        variant: "destructive"
+      });
     } finally {
       setIsCreatingStage(false);
     }
@@ -252,7 +281,11 @@ const ProjectStages = ({ project }: { project: Project }) => {
       const result = await updateStage(formData);
       
       if (result.success) {
-        toast.success(result.message || "تم تحديث المرحلة بنجاح");
+        toast({
+          title: "تم بنجاح",
+          description: result.message || "تم تحديث المرحلة بنجاح",
+          variant: "success"
+        });
         setIsEditStageModalOpen(false);
         
         // Refresh the stages list
@@ -271,30 +304,92 @@ const ProjectStages = ({ project }: { project: Project }) => {
           setApiStages(updatedStages);
         }
       } else {
-        toast.error(result.message || "فشل في تحديث المرحلة");
+        toast({
+          title: "خطأ",
+          description: result.message || "فشل في تحديث المرحلة",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error updating stage:', error);
-      toast.error(error instanceof Error ? error.message : "فشل في تحديث المرحلة");
+      toast({
+        title: "خطأ",
+        description: error instanceof Error ? error.message : "فشل في تحديث المرحلة",
+        variant: "destructive"
+      });
     } finally {
       setIsEditingStage(false);
     }
   };
   
-  const handleAddTask = (stageId: number) => {
-    toast.info(`سيتم تنفيذ إضافة مهمة للمرحلة ${stageId} قريبًا`);
+  const handleDeleteStageConfirm = (stageId: number) => {
+    setStageToDelete(stageId);
+    setIsDeleteDialogOpen(true);
   };
   
-  const handleDeleteStage = (stageId: number) => {
-    toast.info(`سيتم تنفيذ حذف المرحلة ${stageId} قريبًا`);
+  const handleDeleteStage = async () => {
+    if (!stageToDelete) {
+      setIsDeleteDialogOpen(false);
+      return;
+    }
+    
+    setIsDeletingStage(true);
+    
+    try {
+      const result = await deleteStage(stageToDelete);
+      
+      if (result.success) {
+        toast({
+          title: "تم بنجاح",
+          description: result.message || "تم حذف المرحلة بنجاح",
+          variant: "success"
+        });
+        
+        // Remove deleted stage from state
+        setApiStages(prev => prev.filter(stage => stage.id !== stageToDelete));
+      } else {
+        toast({
+          title: "خطأ",
+          description: result.message || "فشل في حذف المرحلة",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting stage:', error);
+      toast({
+        title: "خطأ",
+        description: error instanceof Error ? error.message : "فشل في حذف المرحلة",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeletingStage(false);
+      setIsDeleteDialogOpen(false);
+      setStageToDelete(null);
+    }
+  };
+  
+  const handleAddTask = (stageId: number) => {
+    toast({
+      title: "قريبًا",
+      description: `سيتم تنفيذ إضافة مهمة للمرحلة ${stageId} قريبًا`,
+      variant: "info"
+    });
   };
   
   const handleEditTask = (taskId: number) => {
-    toast.info(`سيتم تنفيذ تعديل المهمة ${taskId} قريبًا`);
+    toast({
+      title: "قريبًا",
+      description: `سيتم تنفيذ تعديل المهمة ${taskId} قريبًا`,
+      variant: "info"
+    });
   };
   
   const handleDeleteTask = (taskId: number) => {
-    toast.info(`سيتم تنفيذ حذف المهمة ${taskId} قريبًا`);
+    toast({
+      title: "قريبًا",
+      description: `سيتم تنفيذ حذف المهمة ${taskId} قريبًا`,
+      variant: "info"
+    });
   };
   
   const handleViewTaskDetails = (taskId: number) => {
@@ -385,6 +480,35 @@ const ProjectStages = ({ project }: { project: Project }) => {
         taskId={selectedTaskId}
       />
       
+      {/* Delete Stage Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد حذف المرحلة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من أنك تريد حذف هذه المرحلة؟ هذا الإجراء لا يمكن التراجع عنه وسيؤدي إلى حذف جميع المهام المرتبطة بها.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingStage}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteStage}
+              disabled={isDeletingStage}
+              className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+            >
+              {isDeletingStage ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
+                  جاري الحذف...
+                </>
+              ) : (
+                <>حذف</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       {projectStages.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 bg-slate-50 rounded-lg border border-dashed border-slate-200">
           <div className="p-3 rounded-full bg-slate-100">
@@ -463,7 +587,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
                             className="text-red-600" 
-                            onClick={(e) => { e.stopPropagation(); handleDeleteStage(stage.id); }}
+                            onClick={(e) => { e.stopPropagation(); handleDeleteStageConfirm(stage.id); }}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             حذف مرحلة
