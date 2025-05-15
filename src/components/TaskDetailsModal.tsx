@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import EditTaskModal from './EditTaskModal';
+import { EditTaskModal } from './EditTaskModal';
 
 interface TaskDetailsModalProps {
   isOpen: boolean;
@@ -281,10 +281,12 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
         <EditTaskModal
           isOpen={editModalOpen}
           onClose={() => setEditModalOpen(false)}
-          taskId={taskId}
-          taskName={taskData.data.name}
-          taskDescription={taskData.data.description}
           onTaskUpdated={handleTaskUpdated}
+          task={{
+            id: taskData.data.id,
+            name: taskData.data.name,
+            description: taskData.data.description || '',
+          }}
         />
       )}
     </>
