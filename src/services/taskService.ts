@@ -97,6 +97,12 @@ export interface UncheckTaskResponse {
   errors?: string[];
 }
 
+export interface DeleteTaskResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+}
+
 export async function getStageTasks(stageId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiTask[]> {
   try {
     console.log('Fetching tasks from:', `${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`);
@@ -331,6 +337,45 @@ export async function uncheckTask(taskId: number): Promise<UncheckTaskResponse> 
     return result;
   } catch (error) {
     console.error('Error unchecking task:', error);
+    throw error;
+  }
+}
+
+/**
+ * Deletes a task
+ * @param taskId The task ID to delete
+ * @returns API response with success status and message
+ */
+export async function deleteTask(taskId: number): Promise<DeleteTaskResponse> {
+  try {
+    console.log('Deleting task:', taskId);
+    const response = await fetch(`${API_BASE_URL}/Tasks/${taskId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response for task deletion:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: DeleteTaskResponse = await response.json();
+    console.log('API Response - Delete Task:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to delete task');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error deleting task:', error);
     throw error;
   }
 }

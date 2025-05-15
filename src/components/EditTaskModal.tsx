@@ -1,135 +1,150 @@
 
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import React, { useState } from 'react';
+import { editTask, EditTaskRequest } from '@/services/taskService';
+import { toast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/use-toast';
-import { editTask } from '@/services/taskService';
+import { Loader2 } from 'lucide-react';
 
-export interface EditTaskModalProps {
+interface EditTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  taskId: number;
-  taskName: string;
-  taskDescription: string;
   onTaskUpdated: () => void;
+  task: {
+    id: number;
+    name: string;
+    description: string;
+  };
 }
 
-const EditTaskModal = ({ 
-  isOpen, 
-  onClose, 
-  taskId, 
-  taskName, 
-  taskDescription, 
-  onTaskUpdated 
-}: EditTaskModalProps) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+export function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: EditTaskModalProps) {
+  const [formData, setFormData] = useState<EditTaskRequest>({
+    id: task.id,
+    name: task.name,
+    description: task.description || '',
+  });
   
-  useEffect(() => {
-    if (isOpen) {
-      setName(taskName);
-      setDescription(taskDescription || '');
-    }
-  }, [isOpen, taskName, taskDescription]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) {
-      toast({ 
-        title: "خطأ",
-        description: "اسم المهمة مطلوب",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      const result = await editTask({
-        id: taskId,
-        name,
-        description
-      });
+      // Validate form data
+      if (!formData.name.trim()) {
+        setError('اسم المهمة مطلوب');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const result = await editTask(formData);
       
       if (result.success) {
         toast({
           title: "تم بنجاح",
-          description: "تم تحديث المهمة بنجاح"
+          description: "تم تحديث المهمة بنجاح",
         });
         onTaskUpdated();
-        handleClose();
+        onClose();
       } else {
+        setError(result.message || 'فشل في تحديث المهمة');
         toast({
           title: "خطأ",
-          description: result.message || "فشل في تحديث المهمة",
-          variant: "destructive"
+          description: result.message || 'فشل في تحديث المهمة',
+          variant: "destructive",
         });
       }
-    } catch (error) {
-      console.error('Error updating task:', error);
+    } catch (err) {
+      console.error('Error updating task:', err);
+      const errorMessage = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث المهمة';
+      setError(errorMessage);
       toast({
         title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في تحديث المهمة",
-        variant: "destructive"
+        description: errorMessage,
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleClose = () => {
-    setName('');
-    setDescription('');
-    onClose();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>تعديل المهمة</DialogTitle>
+          <DialogDescription>
+            قم بتعديل تفاصيل المهمة هنا
+          </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="grid w-full gap-2">
-            <Label htmlFor="name">اسم المهمة</Label>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+          
+          <div className="grid w-full items-center gap-2">
+            <Label htmlFor="name" className="required">اسم المهمة</Label>
             <Input
               id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="أدخل اسم المهمة"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
               required
             />
           </div>
           
-          <div className="grid w-full gap-2">
-            <Label htmlFor="description">الوصف</Label>
+          <div className="grid w-full items-center gap-2">
+            <Label htmlFor="description">وصف المهمة</Label>
             <Textarea
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="أدخل وصف المهمة"
-              className="min-h-20"
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              rows={4}
             />
           </div>
           
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               إلغاء
             </Button>
-            <Button type="submit" disabled={isLoading || !name}>
-              {isLoading ? (
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
                 <>
-                  <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></span>
-                  جاري التحديث...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  جاري الحفظ...
                 </>
               ) : (
-                "تحديث المهمة"
+                'حفظ التغييرات'
               )}
             </Button>
           </DialogFooter>
@@ -137,6 +152,4 @@ const EditTaskModal = ({
       </DialogContent>
     </Dialog>
   );
-};
-
-export default EditTaskModal;
+}

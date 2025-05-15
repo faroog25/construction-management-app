@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Project } from '@/services/projectService';
 import { Worker, getAllWorkers } from '@/services/workerService';
 import { ApiStage, getProjectStages, createStage, CreateStageRequest, updateStage, UpdateStageRequest, deleteStage } from '@/services/stageService';
-import { ApiTask, getStageTasks, createTask, completeTask, uncheckTask } from '@/services/taskService';
+import { ApiTask, getStageTasks, createTask, completeTask, uncheckTask, deleteTask } from '@/services/taskService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -13,6 +13,7 @@ import { WorkerMultiSelect } from './WorkerMultiSelect';
 import StageFormModal from './StageFormModal';
 import EditStageModal from './EditStageModal';
 import TaskDetailsModal from './TaskDetailsModal';
+import { EditTaskModal } from './EditTaskModal';
 import TaskFormModal, { TaskFormData } from './TaskFormModal';
 import { 
   CircleDot, 
@@ -107,6 +108,13 @@ const ProjectStages = ({ project }: { project: Project }) => {
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [selectedStageForTask, setSelectedStageForTask] = useState<number | null>(null);
   const [completingTaskId, setCompletingTaskId] = useState<number | null>(null);
+  
+  // New state for EditTaskModal
+  const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
+  const [selectedTaskForEdit, setSelectedTaskForEdit] = useState<{ id: number; name: string; description: string } | null>(null);
+  const [isDeletingTask, setIsDeletingTask] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
+  const [isDeleteTaskDialogOpen, setIsDeleteTaskDialogOpen] = useState(false);
   
   // Fetch workers and stages
   useEffect(() => {
@@ -605,18 +613,148 @@ const ProjectStages = ({ project }: { project: Project }) => {
     }
   };
   
-  const handleEditTask = (taskId: number) => {
-    toast({
-      title: "قريبًا",
-      description: `سيتم تنفيذ تعديل المهمة ${taskId} قريبًا`,
+  const handleEditTask = (task: ApiTask) => {
+    setSelectedTaskForEdit({
+      id: task.id,
+      name: task.name,
+      description: task.description
     });
+    setIsEditTaskModalOpen(true);
   };
   
-  const handleDeleteTask = (taskId: number) => {
-    toast({
-      title: "قريبًا",
-      description: `سيتم تنفيذ حذف المهمة ${taskId} قريبًا`,
-    });
+  const handleTaskEdited = async () => {
+    // Refresh tasks for the stage containing the edited task
+    if (project && project.id) {
+      try {
+        // Refresh stages
+        const stagesData = await getProjectStages(project.id);
+        
+        // Create enhanced stages array
+        const enhancedStages: EnhancedStage[] = [];
+        
+        // Process each stage
+        for (const stage of stagesData) {
+          try {
+            // Fetch tasks for this stage
+            const stageTasks = await getStageTasks(stage.id);
+            
+            // Map API tasks to UI format
+            const uiTasks: UITask[] = stageTasks.map(task => {
+              let status = 'not-started';
+              if (task.isCompleted) {
+                status = 'completed';
+              } else {
+                const now = new Date();
+                const startDate = new Date(task.startDate);
+                const endDate = new Date(task.endDate);
+                
+                if (now > endDate) {
+                  status = 'delayed';
+                } else if (now >= startDate) {
+                  status = 'in-progress';
+                }
+              }
+              
+              if (task.isCompleted) {
+                setCompletedTasks(prev => 
+                  prev.includes(task.id) ? prev : [...prev, task.id]
+                );
+              }
+              
+              return {
+                ...task,
+                status,
+                progress: task.isCompleted ? 100 : 0,
+                assignedWorkers: []
+              };
+            });
+            
+            enhancedStages.push({
+              ...stage,
+              tasks: uiTasks
+            });
+          } catch (err) {
+            console.error(`Error fetching tasks for stage ${stage.id}:`, err);
+            enhancedStages.push({
+              ...stage,
+              tasks: []
+            });
+          }
+        }
+        
+        setApiStages(enhancedStages);
+        
+      } catch (err) {
+        console.error('Error refreshing stages:', err);
+        toast({
+          title: "خطأ",
+          description: "فشل في تحديث البيانات",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+  
+  const handleDeleteTaskConfirm = (taskId: number) => {
+    setTaskToDelete(taskId);
+    setIsDeleteTaskDialogOpen(true);
+  };
+  
+  const handleDeleteTask = async () => {
+    if (!taskToDelete) {
+      setIsDeleteTaskDialogOpen(false);
+      return;
+    }
+    
+    setIsDeletingTask(true);
+    
+    try {
+      const result = await deleteTask(taskToDelete);
+      
+      if (result.success) {
+        toast({
+          title: "تم بنجاح",
+          description: "تم حذف المهمة بنجاح",
+        });
+        
+        // Remove deleted task from state
+        const updatedStages = [...apiStages].map(stage => ({
+          ...stage,
+          tasks: stage.tasks.filter(task => task.id !== taskToDelete)
+        }));
+        
+        // Update stage progress for the affected stage
+        const affectedStageIndex = updatedStages.findIndex(stage => 
+          stage.tasks.length < apiStages[updatedStages.indexOf(stage)].tasks.length
+        );
+        
+        if (affectedStageIndex !== -1) {
+          const completedTasksCount = updatedStages[affectedStageIndex].tasks.filter(t => t.isCompleted).length;
+          const totalTasks = updatedStages[affectedStageIndex].tasks.length;
+          const stageProgress = totalTasks > 0 ? Math.round((completedTasksCount / totalTasks) * 100) : 0;
+          updatedStages[affectedStageIndex].progress = stageProgress;
+        }
+        
+        setApiStages(updatedStages);
+      } else {
+        toast({
+          title: "خطأ",
+          description: result.message || "فشل في حذف المهمة",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: "خطأ",
+        description: error instanceof Error ? error.message : "فشل في حذف المهمة",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeletingTask(false);
+      setIsDeleteTaskDialogOpen(false);
+      setTaskToDelete(null);
+    }
   };
   
   const handleViewTaskDetails = (taskId: number) => {
@@ -713,6 +851,16 @@ const ProjectStages = ({ project }: { project: Project }) => {
         stageId={selectedStageForTask || 0}
       />
       
+      {/* Edit Task Modal */}
+      {selectedTaskForEdit && (
+        <EditTaskModal
+          isOpen={isEditTaskModalOpen}
+          onClose={() => setIsEditTaskModalOpen(false)}
+          onTaskUpdated={handleTaskEdited}
+          task={selectedTaskForEdit}
+        />
+      )}
+      
       {/* Delete Stage Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -730,6 +878,35 @@ const ProjectStages = ({ project }: { project: Project }) => {
               className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
             >
               {isDeletingStage ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
+                  جاري الحذف...
+                </>
+              ) : (
+                <>حذف</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Delete Task Confirmation Dialog */}
+      <AlertDialog open={isDeleteTaskDialogOpen} onOpenChange={setIsDeleteTaskDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد حذف المهمة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من أنك تريد حذف هذه المهمة؟ هذا الإجراء لا يمكن التراجع عنه.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingTask}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteTask}
+              disabled={isDeletingTask}
+              className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+            >
+              {isDeletingTask ? (
                 <>
                   <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
                   جاري الحذف...
@@ -901,6 +1078,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                               const overdueDays = calculateOverdueDays(task.endDate);
                               const isCompleted = completedTasks.includes(task.id);
                               const isCompletingThisTask = completingTaskId === task.id;
+                              const isDeletingThisTask = isDeletingTask && taskToDelete === task.id;
                               
                               return (
                                 <Card key={task.id} className={cn(
@@ -986,7 +1164,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                           variant="ghost" 
                                           size="icon" 
                                           className="h-7 w-7 text-slate-500 hover:bg-violet-50 hover:text-violet-700" 
-                                          onClick={() => handleEditTask(task.id)}
+                                          onClick={() => handleEditTask(task)}
+                                          disabled={isDeletingThisTask}
                                         >
                                           <Edit className="h-3.5 w-3.5" />
                                         </Button>
@@ -994,9 +1173,14 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                           variant="ghost" 
                                           size="icon" 
                                           className="h-7 w-7 text-red-500 hover:bg-red-50" 
-                                          onClick={() => handleDeleteTask(task.id)}
+                                          onClick={() => handleDeleteTaskConfirm(task.id)}
+                                          disabled={isDeletingThisTask}
                                         >
-                                          <Trash2 className="h-3.5 w-3.5" />
+                                          {isDeletingThisTask ? (
+                                            <div className="h-3.5 w-3.5 border-2 border-t-transparent border-red-500 rounded-full animate-spin"></div>
+                                          ) : (
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                          )}
                                         </Button>
                                       </div>
                                     </div>
