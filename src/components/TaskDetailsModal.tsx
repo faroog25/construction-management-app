@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getTaskById, TaskDetailResponse, completeTask, uncheckTask } from '@/services/taskService';
+import { getTaskById, TaskDetailResponse, completeTask, uncheckTask, getWorkersForTask, WorkerAssignment } from '@/services/taskService';
 import { toast } from '@/components/ui/use-toast';
 import {
   Dialog,
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { EditTaskModal } from './EditTaskModal';
+import { Worker } from '@/services/workerService';
 
 interface TaskDetailsModalProps {
   isOpen: boolean;
@@ -32,9 +33,11 @@ const formatDate = (dateString: string) => {
 
 export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetailsModalProps) {
   const [taskData, setTaskData] = useState<TaskDetailResponse | null>(null);
+  const [assignedWorkers, setAssignedWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [loadingWorkers, setLoadingWorkers] = useState(false);
 
   const fetchTaskDetails = async () => {
     if (!taskId) return;
@@ -43,6 +46,9 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
       setLoading(true);
       const data = await getTaskById(taskId);
       setTaskData(data);
+      
+      // Fetch assigned workers separately using the new API endpoint
+      await fetchAssignedWorkers(taskId);
     } catch (error) {
       console.error('Error fetching task details:', error);
       toast({
@@ -54,6 +60,19 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
       setLoading(false);
     }
   };
+  
+  const fetchAssignedWorkers = async (taskId: number) => {
+    try {
+      setLoadingWorkers(true);
+      const workers = await getWorkersForTask(taskId);
+      setAssignedWorkers(workers);
+    } catch (error) {
+      console.error('Error fetching assigned workers:', error);
+      setAssignedWorkers([]);
+    } finally {
+      setLoadingWorkers(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen && taskId) {
@@ -63,7 +82,9 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
 
   // Handler when workers are successfully assigned
   const handleWorkersAssigned = () => {
-    fetchTaskDetails();
+    if (taskId) {
+      fetchAssignedWorkers(taskId);
+    }
   };
 
   // Handler when task is successfully edited
@@ -230,23 +251,29 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                         <CalendarClock className="h-4 w-4 text-gray-500" />
                         <div>
                           <p className="text-xs text-gray-500">تاريخ الانتهاء</p>
-                          <p className="text-sm font-medium">{formatDate(taskData.data.endDate)}</p>
+                          <p className="text-sm font-medium">{formatDate(taskData.data.endDate || taskData.data.expectedEndDate || '')}</p>
                         </div>
                       </div>
                     </div>
                     
-                    {taskData.data.workers && taskData.data.workers.length > 0 && (
+                    {assignedWorkers && assignedWorkers.length > 0 && (
                       <div className="mt-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Users className="h-4 w-4 text-gray-500" />
-                          <p className="text-xs text-gray-500">العمال المعينون</p>
+                          <p className="text-xs font-medium text-gray-500">العمال المعينون ({assignedWorkers.length})</p>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {taskData.data.workers.map((worker) => (
-                            <span key={worker.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                              {worker.fullName}
-                            </span>
-                          ))}
+                          {loadingWorkers ? (
+                            <div className="w-full flex justify-center py-2">
+                              <div className="h-4 w-4 border-2 border-t-transparent border-primary rounded-full animate-spin"></div>
+                            </div>
+                          ) : (
+                            assignedWorkers.map((worker) => (
+                              <span key={worker.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                {worker.fullName}
+                              </span>
+                            ))
+                          )}
                         </div>
                       </div>
                     )}

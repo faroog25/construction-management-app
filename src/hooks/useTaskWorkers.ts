@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Worker } from '@/services/workerService';
-import { assignWorkersToTask, getTaskById, getWorkersForTask } from '@/services/taskService';
+import { assignWorkersToTask, getWorkersForTask } from '@/services/taskService';
 import { toast } from '@/hooks/use-toast';
 
 export function useTaskWorkers(taskId: number) {
@@ -19,7 +19,7 @@ export function useTaskWorkers(taskId: number) {
         
         // Use the new API endpoint to fetch workers assigned to this task
         const workers = await getWorkersForTask(taskId);
-        setAssignedWorkers(workers as Worker[]);
+        setAssignedWorkers(workers);
       } catch (error) {
         console.error('Error fetching assigned workers:', error);
         setAssignedWorkers([]);
@@ -49,7 +49,7 @@ export function useTaskWorkers(taskId: number) {
       });
       
       // Update the local state with the selected workers
-      setAssignedWorkers(selectedWorkers as Worker[]);
+      setAssignedWorkers(selectedWorkers);
       
       // Show a success toast
       toast({

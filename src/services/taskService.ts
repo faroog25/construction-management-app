@@ -107,6 +107,24 @@ export interface DeleteTaskResponse {
   errors?: string[];
 }
 
+/**
+ * Interface for worker assignment data returned from the API
+ */
+export interface WorkerAssignment {
+  taskId: number;
+  workerId: number;
+  assignedDate: string;
+  taskName: string;
+  workerName: string;
+}
+
+export interface TaskAssignmentsResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: WorkerAssignment[];
+}
+
 export async function getStageTasks(stageId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiTask[]> {
   try {
     console.log('Fetching tasks from:', `${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`);
@@ -427,14 +445,20 @@ export async function getWorkersForTask(taskId: number): Promise<Worker[]> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const result = await response.json();
+    const result: TaskAssignmentsResponse = await response.json();
     console.log('API Response - Task Workers:', result);
     
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch workers for task');
     }
     
-    return result.data || [];
+    // Convert WorkerAssignment objects to Worker objects
+    const workers: Worker[] = result.data.map(assignment => ({
+      id: assignment.workerId,
+      fullName: assignment.workerName
+    }));
+    
+    return workers;
   } catch (error) {
     console.error('Error fetching workers for task:', error);
     return [];
