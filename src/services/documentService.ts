@@ -45,8 +45,8 @@ export const getDocuments = async (params: DocumentsParams): Promise<Document[]>
     // Add an estimated size if not provided
     const size = '2.5 MB';
     
-    // Default status to approved if not provided
-    const status = 'approved';
+    // Default status as one of the acceptable enum values
+    const status = 'approved' as const;
     
     return { ...doc, type, size, status };
   });

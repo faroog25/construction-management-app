@@ -12,7 +12,7 @@ export interface Document {
   createdDate: string;
   type?: string; // Added for UI display
   size?: string; // Added for UI display
-  status?: string; // Added for UI display
+  status?: 'approved' | 'pending' | 'rejected' | 'draft'; // Fixed typing
 }
 
 export interface DocumentsParams {

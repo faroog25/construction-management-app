@@ -8,7 +8,6 @@ import ProjectDetailsInfo from '@/components/ProjectDetailsInfo';
 import ProjectStages from '@/components/ProjectStages';
 import GanttChart from '@/components/GanttChart';
 import ProjectTimeline from '@/components/ProjectTimeline';
-import Documents from '@/pages/Documents';
 import ProjectEquipment from '@/components/project/ProjectEquipment';
 import ProjectDocuments from '@/components/ProjectDocuments';
 import { 
@@ -197,7 +196,6 @@ const ProjectDetails = () => {
           
           <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
             <ProjectDetailsInfo project={projectWithDefaults} />
-            <ProjectDocuments project={{ id: projectId, projectName: project.projectName }} />
             <ProjectTimeline />
           </TabsContent>
           
@@ -214,7 +212,7 @@ const ProjectDetails = () => {
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6 animate-in fade-in-50">
-            <Documents projectId={project?.id} />
+            <ProjectDocuments project={{ id: projectId, projectName: project.projectName }} />
           </TabsContent>
         </Tabs>
       </main>

@@ -82,6 +82,15 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
     return 'pdf'; // Default to PDF
   };
 
+  // Map status string to the appropriate enum value
+  const mapStatus = (status?: string): 'approved' | 'pending' | 'rejected' | 'draft' => {
+    if (status === 'approved') return 'approved';
+    if (status === 'pending') return 'pending';
+    if (status === 'rejected') return 'rejected';
+    if (status === 'draft') return 'draft';
+    return 'approved'; // Default
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -119,7 +128,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
                     dateModified: new Date(doc.createdDate).toLocaleDateString('ar-SA'),
                     project: doc.projectName,
                     owner: 'Admin',
-                    status: doc.status || 'approved'
+                    status: mapStatus(doc.status)
                   }}
                   onView={() => handleView(doc.id)}
                   onDownload={() => handleDownload(doc.id)}
