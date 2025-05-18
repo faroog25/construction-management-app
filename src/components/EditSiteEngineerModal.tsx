@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,6 +22,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Skeleton } from './ui/skeleton';
+import { getSiteEngineerById } from '@/services/siteEngineerService';
 
 interface EditSiteEngineerModalProps {
   isOpen: boolean;
@@ -42,6 +45,9 @@ export function EditSiteEngineerModal({
   onEngineerUpdated,
   engineer 
 }: EditSiteEngineerModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+
   const form = useForm<SiteEngineerFormValues>({
     resolver: zodResolver(siteEngineerSchema),
     defaultValues: {
@@ -53,26 +59,46 @@ export function EditSiteEngineerModal({
       phoneNumber: '',
       address: '',
       hireDate: '',
+      nationalNumber: '',
     },
     mode: "onChange"
   });
 
+  // جلب بيانات المهندس من API عند فتح النافذة
   useEffect(() => {
-    if (engineer) {
-      // Split the fullName into parts
-      const nameParts = engineer.fullName.split(' ').filter(part => part.trim());
-      form.reset({
-        firstName: nameParts[0] || '',
-        lastName: nameParts[nameParts.length - 1] || '',
-        secondName: nameParts.length > 2 ? nameParts[1] : '',
-        thirdName: nameParts.length > 3 ? nameParts[2] : '',
-        email: engineer.email || '',
-        phoneNumber: engineer.phoneNumber || '',
-        address: engineer.address || '',
-        hireDate: '',
-      });
+    if (isOpen && engineer?.id) {
+      const fetchEngineerData = async () => {
+        try {
+          setLoading(true);
+          setApiError(null);
+          const engineerData = await getSiteEngineerById(engineer.id.toString());
+          
+          // تقسيم الاسم الكامل إلى أجزاء
+          const nameParts = engineerData.fullName.split(' ').filter(part => part.trim());
+          
+          form.reset({
+            firstName: nameParts[0] || '',
+            lastName: nameParts[nameParts.length - 1] || '',
+            secondName: nameParts.length > 2 ? nameParts[1] : '',
+            thirdName: nameParts.length > 3 ? nameParts[2] : '',
+            email: engineerData.email || '',
+            phoneNumber: engineerData.phoneNumber || '',
+            address: engineerData.address || '',
+            hireDate: engineerData.hireDate || '',
+            nationalNumber: engineerData.nationalNumber || '',
+          });
+        } catch (error) {
+          console.error('Error fetching engineer data:', error);
+          setApiError(error instanceof Error ? error.message : 'حدث خطأ أثناء جلب بيانات المهندس');
+          toast.error('فشل في جلب بيانات المهندس');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchEngineerData();
     }
-  }, [engineer, form]);
+  }, [isOpen, engineer?.id, form]);
 
   const onSubmit = async (data: SiteEngineerFormValues) => {
     if (!engineer?.id) {
@@ -94,6 +120,8 @@ export function EditSiteEngineerModal({
         email: data.email?.trim() || undefined,
         phoneNumber: data.phoneNumber.trim(),
         address: data.address?.trim() || undefined,
+        nationalNumber: data.nationalNumber?.trim() || undefined,
+        hireDate: data.hireDate || undefined,
       };
 
       await updateEngineer(engineer.id, updatedEngineer);
@@ -122,120 +150,166 @@ export function EditSiteEngineerModal({
         <DialogHeader>
           <DialogTitle>تعديل بيانات مهندس الموقع</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الاسم الأول</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل الاسم الأول" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        
+        {apiError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            {apiError}
+          </div>
+        )}
+        
+        {loading ? (
+          <div className="space-y-4 py-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الاسم الأول</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل الاسم الأول" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="secondName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الاسم الثاني</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل الاسم الثاني" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="secondName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الاسم الثاني</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل الاسم الثاني" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="thirdName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الاسم الثالث</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل الاسم الثالث" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="thirdName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الاسم الثالث</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل الاسم الثالث" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>اسم العائلة</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل اسم العائلة" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>اسم العائلة</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل اسم العائلة" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>البريد الإلكتروني</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="أدخل البريد الإلكتروني" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>البريد الإلكتروني</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="أدخل البريد الإلكتروني" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="phoneNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>رقم الهاتف</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل رقم الهاتف" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>رقم الهاتف</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل رقم الهاتف" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>العنوان</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل العنوان" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="nationalNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الرقم الوطني</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل الرقم الوطني" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                إلغاء
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={!form.formState.isValid || form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? 'جاري التحديث...' : 'تحديث البيانات'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>العنوان</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل العنوان" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="hireDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>تاريخ التعيين</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  إلغاء
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={!form.formState.isValid || form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? 'جاري التحديث...' : 'تحديث البيانات'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
       </DialogContent>
     </Dialog>
   );
-} 
+}

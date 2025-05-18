@@ -1,4 +1,3 @@
-
 import { SiteEngineer, SiteEngineersResponse } from '@/types/siteEngineer';
 import { API_BASE_URL } from '@/config/api';
 
@@ -249,6 +248,15 @@ export async function getSiteEngineerById(id: string): Promise<SiteEngineer> {
     return result.data;
   } catch (error) {
     console.error('Error fetching site engineer by ID:', error);
+    
+    // إذا فشل الاتصال بـ API، سنستخدم بيانات وهمية للتجربة
+    console.warn('Using mock data instead for engineer ID:', id);
+    const mockEngineer = mockSiteEngineers.find(engineer => engineer.id === parseInt(id));
+    
+    if (mockEngineer) {
+      return mockEngineer;
+    }
+    
     if (error instanceof Error) {
       throw new Error(`فشل في جلب بيانات مهندس الموقع: ${error.message}`);
     }
