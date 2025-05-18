@@ -63,13 +63,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
   const progressColor = getProgressColor(progress);
 
-  // تنسيق التواريخ
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'غير محدد';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ar-SA');
-  };
-
   return (
     <Card 
       className={cn(
@@ -110,18 +103,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           <div className="flex items-center gap-2 text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg">
             <User className="h-4 w-4" />
             <p className="text-sm font-medium">{site_engineer_name || 'لم يتم تعيين مهندس'}</p>
-          </div>
-          
-          {/* تواريخ المشروع */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="text-xs text-muted-foreground">
-              <span className="block font-medium">تاريخ البدء</span>
-              <span>{formatDate(start_date)}</span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              <span className="block font-medium">تاريخ الانتهاء</span>
-              <span>{formatDate(expected_end_date)}</span>
-            </div>
           </div>
         </div>
         
