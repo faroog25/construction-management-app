@@ -11,6 +11,13 @@ export interface SiteEngineer {
   projectsCompleted?: number;
   rating?: number;
   nationalId?: string;
+  projects?: Array<{ id: number; name: string }>;
+  hireDate?: string;
+  firstName?: string;
+  secondName?: string;
+  thirdName?: string;
+  lastName?: string;
+  nationalNumber?: string;
 }
 
 export interface SiteEngineersResponse {
