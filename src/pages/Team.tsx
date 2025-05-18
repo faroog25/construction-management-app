@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeamMembers } from '@/components/TeamMembers';
@@ -11,6 +12,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Workers } from '@/components/Workers';
 
 const Team = () => {
   const [activeTab, setActiveTab] = useState('team');
@@ -121,21 +123,11 @@ const Team = () => {
             </div>
             
             <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-t-blue-500">
-              <TeamMembers />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-              <div className="col-span-3">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold flex items-center gap-2">
-                    <UserCog className="h-5 w-5 text-primary" />
-                    تفاصيل العمال
-                  </h2>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/team/workers">عرض كل العمال</Link>
-                  </Button>
-                </div>
-              </div>
+              <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
+                <UserCog className="h-5 w-5 text-primary" />
+                تفاصيل العمال
+              </h2>
+              <Workers />
             </div>
           </TabsContent>
           
