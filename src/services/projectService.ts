@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { Project, ProjectApiResponse, PaginatedResponse } from '@/types/project';
 
@@ -7,7 +6,7 @@ export interface Project {
   projectName: string;
   description?: string;
   siteAddress: string;
-  geographicalCoordinates: string;
+  geographicalCoordinates?: string;
   siteEngineerId: number;
   clientId: number;
   startDate: string;
@@ -17,7 +16,6 @@ export interface Project {
   siteEngineerName?: string;
   clientName?: string;
   projectStatus?: string;
-  geographicalCoordinates?: string;
   cancellationReason?: string;
   cancellationDate?: string;
   completionDate?: string;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -230,13 +229,13 @@ const Projects = () => {
 
   // تحويل المشاريع إلى تنسيق ProjectAdapter
   const adaptedProjects: ProjectAdapter[] = projectsData.map(project => ({
-    id: project.id,
+    id: project.id as number,
     name: project.projectName,
     client_name: project.clientName || `Client ${project.clientId}`,
-    expected_end_date: project.expectedEndDate,
-    start_date: project.startDate,
+    expected_end_date: project.expectedEndDate || '',
+    start_date: project.startDate || '',
     progress: project.progress || 0,
-    status: project.status,
+    status: project.status as number,
     site_engineer_name: project.siteEngineerName || `Engineer ${project.siteEngineerId}`
   }))
   .sort((a, b) => {
@@ -254,6 +253,11 @@ const Projects = () => {
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
+      // تمرير للأعلى بعد تغيير الصفحة
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -261,9 +265,96 @@ const Projects = () => {
     try {
       navigate(`/projects/${projectId}`);
     } catch (error) {
-      // console.error('Error navigating to project details:', error);
       toast.error('Failed to navigate to project details');
     }
+  };
+
+  // توليد أرقام الصفحات
+  const generatePaginationItems = () => {
+    const items = [];
+    const maxPagesToShow = 5;
+    
+    // إذا كان عدد الصفحات أقل من أو يساوي الحد الأقصى، عرض جميع الصفحات
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              isActive={currentPage === i}
+              onClick={() => handlePageChange(i)}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+      return items;
+    }
+    
+    // عرض أول صفحة دائمًا
+    items.push(
+      <PaginationItem key={1}>
+        <PaginationLink
+          isActive={currentPage === 1}
+          onClick={() => handlePageChange(1)}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+    
+    let startPage = Math.max(currentPage - Math.floor(maxPagesToShow / 2), 2);
+    let endPage = Math.min(startPage + maxPagesToShow - 3, totalPages - 1);
+    
+    if (endPage - startPage < maxPagesToShow - 3) {
+      startPage = Math.max(totalPages - maxPagesToShow + 2, 2);
+    }
+    
+    // إضافة القطع إذا كانت الصفحة الأولى غير متاخمة للصفحة التالية
+    if (startPage > 2) {
+      items.push(
+        <PaginationItem key="ellipsis1">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // إضافة الصفحات المتوسطة
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            isActive={currentPage === i}
+            onClick={() => handlePageChange(i)}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // إضافة القطع إذا كانت الصفحة الأخيرة غير متاخمة للصفحة السابقة
+    if (endPage < totalPages - 1) {
+      items.push(
+        <PaginationItem key="ellipsis2">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // عرض آخر صفحة دائمًا
+    items.push(
+      <PaginationItem key={totalPages}>
+        <PaginationLink
+          isActive={currentPage === totalPages}
+          onClick={() => handlePageChange(totalPages)}
+        >
+          {totalPages}
+        </PaginationLink>
+      </PaginationItem>
+    );
+    
+    return items;
   };
 
   return (
@@ -315,7 +406,7 @@ const Projects = () => {
                       حسب التقدم
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setSortOption('dueDate')}>
-                      حسب تاريخ الاستحقاق
+                      حسب تاريخ ا��ستحقاق
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -378,52 +469,24 @@ const Projects = () => {
                 </div>
               )}
 
-              {/* الترقيم الصفحي */}
+              {/* الترقيم الصفحي - مُحسّن لعرض أفضل */}
               {totalPages > 1 && (
                 <div className="mt-8">
                   <Pagination>
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious 
-                          onClick={() => handlePageChange(currentPage - 1)}
+                          onClick={() => hasPreviousPage && handlePageChange(currentPage - 1)}
                           className={!hasPreviousPage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                           aria-disabled={!hasPreviousPage}
                         />
                       </PaginationItem>
                       
-                      {/* Generate page numbers for pagination */}
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        // If less than 5 pages, show all
-                        if (totalPages <= 5) {
-                          return i + 1;
-                        }
-                        
-                        // If current page is near the beginning
-                        if (currentPage <= 3) {
-                          return i + 1;
-                        }
-                        
-                        // If current page is near the end
-                        if (currentPage > totalPages - 3) {
-                          return totalPages - 4 + i;
-                        }
-                        
-                        // If current page is in the middle
-                        return currentPage - 2 + i;
-                      }).map((pageNum) => (
-                        <PaginationItem key={pageNum}>
-                          <PaginationLink
-                            isActive={currentPage === pageNum}
-                            onClick={() => handlePageChange(pageNum)}
-                          >
-                            {pageNum}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
+                      {generatePaginationItems()}
                       
                       <PaginationItem>
                         <PaginationNext 
-                          onClick={() => handlePageChange(currentPage + 1)}
+                          onClick={() => hasNextPage && handlePageChange(currentPage + 1)}
                           className={!hasNextPage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                           aria-disabled={!hasNextPage}
                         />
@@ -431,7 +494,7 @@ const Projects = () => {
                     </PaginationContent>
                   </Pagination>
                   <div className="text-center mt-2 text-sm text-muted-foreground">
-                    عرض {filteredProjects.length} من إجمالي {totalItems} مشروع
+                    عرض الصفحة {currentPage} من {totalPages} ({totalItems} مشروع)
                   </div>
                 </div>
               )}
