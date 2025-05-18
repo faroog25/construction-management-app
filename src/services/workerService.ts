@@ -386,9 +386,9 @@ export async function deleteWorker(id: number): Promise<void> {
  */
 export async function updateWorker(id: number, workerData: CreateWorkerRequest): Promise<Worker> {
   try {
-    // استخدام طريقة POST بدلاً من PUT
-    const url = `${API_BASE_URL}/Workers/update/${id}`;
-    console.log('Updating worker using POST method:', { id, url, workerData });
+    // استخدام نقطة النهاية الصحيحة للتعديل
+    const url = `${API_BASE_URL}/Workers`;
+    console.log('Updating worker:', { id, url, workerData });
     
     const response = await fetch(url, {
       method: 'POST',
