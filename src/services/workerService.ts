@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface WorkerTask {
@@ -135,6 +136,72 @@ export async function getAllWorkers(): Promise<Worker[]> {
 }
 
 /**
+ * Fetches paginated workers data with sorting and filtering
+ * @throws {Error} When the API request fails or returns invalid data
+ */
+export async function getPaginatedWorkers(
+  pageNumber: number = 1,
+  pageSize: number = 10,
+  search: string = '',
+  sortColumn: string = 'fullName',
+  sortDirection: 'asc' | 'desc' = 'asc'
+): Promise<WorkersListResponse> {
+  try {
+    const url = new URL(`${API_BASE_URL}/Workers`);
+    url.searchParams.append('pageNumber', pageNumber.toString());
+    url.searchParams.append('pageSize', pageSize.toString());
+    
+    if (search) {
+      url.searchParams.append('search', search);
+    }
+    
+    url.searchParams.append('sortColumn', sortColumn);
+    url.searchParams.append('sortDirection', sortDirection);
+    
+    console.log('Fetching paginated workers from:', url.toString());
+    
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
+      }
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`فشل في جلب العمال. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
+    }
+    
+    const result: WorkersListResponse = await response.json();
+    console.log('API Response:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'فشل في جلب بيانات العمال');
+    }
+    
+    if (!result.data || !result.data.items) {
+      console.error('Invalid API response structure:', result);
+      throw new Error('بيانات غير صالحة من الخادم');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error fetching paginated workers:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في جلب العمال: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء جلب العمال');
+  }
+}
+
+/**
  * Creates a new worker
  */
 export async function createWorker(workerData: CreateWorkerRequest): Promise<Worker> {
@@ -171,7 +238,7 @@ export async function createWorker(workerData: CreateWorkerRequest): Promise<Wor
     if (error instanceof Error) {
       throw new Error(`فشل في إضافة العامل: ${error.message}`);
     }
-    throw new Error('حد�� خطأ غير متوقع أثناء إضافة العامل');
+    throw new Error('حدث خطأ غير متوقع أثناء إضافة العامل');
   }
 }
 

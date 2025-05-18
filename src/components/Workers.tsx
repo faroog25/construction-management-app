@@ -1,6 +1,11 @@
 
 import { useEffect, useState } from 'react';
-import { Worker, getAllWorkers, deleteWorker } from '../services/workerService';
+import { 
+  Worker, 
+  WorkersListResponse, 
+  deleteWorker, 
+  getPaginatedWorkers 
+} from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Skeleton } from './ui/skeleton';
@@ -11,8 +16,25 @@ import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { NewWorkerModal } from './NewWorkerModal';
 import { EditWorkerModal } from './EditWorkerModal';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext,
+  PaginationPrevious 
+} from './ui/pagination';
 import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "./ui/alert-dialog";
 
 export function Workers() {
   const navigate = useNavigate();
@@ -25,10 +47,12 @@ export function Workers() {
   const [isNewWorkerModalOpen, setIsNewWorkerModalOpen] = useState(false);
   const [isEditWorkerModalOpen, setIsEditWorkerModalOpen] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
+  const [workerToDelete, setWorkerToDelete] = useState<Worker | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -36,10 +60,21 @@ export function Workers() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAllWorkers();
-      setWorkers(response);
-      setTotalPages(Math.ceil(response.length / itemsPerPage));
-      setTotalItems(response.length);
+      
+      // Fetch paginated workers data
+      const response: WorkersListResponse = await getPaginatedWorkers(
+        currentPage, 
+        itemsPerPage, 
+        searchQuery, 
+        sortColumn, 
+        sortDirection
+      );
+      
+      // Update state with paginated data
+      setWorkers(response.data.items);
+      setTotalPages(response.data.totalPages);
+      setTotalItems(response.data.totalItems);
+      
     } catch (err) {
       console.error('Error fetching workers:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch workers');
@@ -49,8 +84,9 @@ export function Workers() {
   };
 
   useEffect(() => {
+    // Fetch workers whenever pagination, sorting, or search parameters change
     fetchWorkers();
-  }, []);
+  }, [currentPage, searchQuery, sortColumn, sortDirection]);
 
   const handleSort = (column: string) => {
     if (column === sortColumn) {
@@ -59,12 +95,12 @@ export function Workers() {
       setSortColumn(column);
       setSortDirection('asc');
     }
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when search changes
   };
 
   const handlePageChange = (pageNumber: number) => {
@@ -72,20 +108,30 @@ export function Workers() {
     setCurrentPage(pageNumber);
   };
 
-  const handleDeleteWorker = async (id: number) => {
-    if (window.confirm('هل أنت متأكد من حذف هذا العامل؟')) {
-      try {
-        await deleteWorker(id);
-        toast.success('تم حذف العامل بنجاح');
-        fetchWorkers();
-      } catch (error) {
-        console.error('Error deleting worker:', error);
-        toast.error('فشل في حذف العامل');
-      }
+  const handleDeleteClick = (worker: Worker, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click event
+    setWorkerToDelete(worker);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!workerToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteWorker(workerToDelete.id);
+      toast.success('تم حذف العامل بنجاح');
+      fetchWorkers(); // Refresh data after deletion
+    } catch (error) {
+      console.error('Error deleting worker:', error);
+      toast.error(error instanceof Error ? error.message : 'فشل في حذف العامل');
+    } finally {
+      setIsDeleting(false);
+      setWorkerToDelete(null); // Close the dialog
     }
   };
 
-  const handleEditWorker = (worker: Worker) => {
+  const handleEditWorker = (worker: Worker, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click event
     setSelectedWorker(worker);
     setIsEditWorkerModalOpen(true);
   };
@@ -94,54 +140,29 @@ export function Workers() {
     navigate(`/team/workers/${workerId}`);
   };
 
-  // Filter and sort workers
-  const filteredWorkers = workers
-    .filter((worker) => {
-      if (!searchQuery) return true;
-      
-      // Only search in the displayed fields
-      return (
-        worker.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        worker.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        worker.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        worker.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    })
-    .sort((a, b) => {
-      // Only sort by the displayed fields
-      if (sortColumn === 'fullName') {
-        const valueA = a.fullName || '';
-        const valueB = b.fullName || '';
-        return sortDirection === 'asc' 
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
-      } else if (sortColumn === 'email') {
-        const valueA = a.email || '';
-        const valueB = b.email || '';
-        return sortDirection === 'asc' 
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
-      } else if (sortColumn === 'phoneNumber') {
-        const valueA = a.phoneNumber || '';
-        const valueB = b.phoneNumber || '';
-        return sortDirection === 'asc' 
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
-      } else if (sortColumn === 'specialty') {
-        const valueA = a.specialty || '';
-        const valueB = b.specialty || '';
-        return sortDirection === 'asc' 
-          ? valueA.localeCompare(valueB)
-          : valueB.localeCompare(valueA);
-      }
-      return 0;
-    });
-
-  // Paginate filtered workers
-  const paginatedWorkers = filteredWorkers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Create page numbers array for pagination
+  const pageNumbers = [];
+  const maxPageButtons = 5;
+  
+  if (totalPages <= maxPageButtons) {
+    // If total pages is less than or equal to max buttons, show all pages
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+  } else {
+    // Show a range of pages around current page
+    let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
+    let endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
+    
+    // If we're near the end, adjust start page
+    if (endPage === totalPages) {
+      startPage = Math.max(totalPages - maxPageButtons + 1, 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+  }
 
   if (error) {
     return (
@@ -226,7 +247,7 @@ export function Workers() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : paginatedWorkers.length === 0 ? (
+              ) : workers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
                     {searchQuery ? 
@@ -252,7 +273,7 @@ export function Workers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedWorkers.map((worker) => (
+                workers.map((worker) => (
                   <TableRow 
                     key={worker.id}
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
@@ -270,7 +291,7 @@ export function Workers() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEditWorker(worker)}
+                          onClick={(e) => handleEditWorker(worker, e)}
                           className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         >
                           <Pencil className="h-3 w-3 mr-1" />
@@ -279,7 +300,7 @@ export function Workers() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteWorker(worker.id)}
+                          onClick={(e) => handleDeleteClick(worker, e)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
@@ -293,7 +314,7 @@ export function Workers() {
             </TableBody>
           </Table>
           
-          {!loading && filteredWorkers.length > 0 && (
+          {!loading && workers.length > 0 && (
             <div className="py-4 px-2">
               <Pagination>
                 <PaginationContent>
@@ -305,7 +326,7 @@ export function Workers() {
                     />
                   </PaginationItem>
                   
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                  {pageNumbers.map(number => (
                     <PaginationItem key={number}>
                       <PaginationLink 
                         isActive={number === currentPage}
@@ -326,6 +347,9 @@ export function Workers() {
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
+              <div className="text-sm text-muted-foreground mt-2 text-center">
+                إجمالي العمال: {totalItems}
+              </div>
             </div>
           )}
         </CardContent>
@@ -345,6 +369,30 @@ export function Workers() {
           worker={selectedWorker}
         />
       )}
+
+      <AlertDialog 
+        open={!!workerToDelete}
+        onOpenChange={() => setWorkerToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>هل أنت متأكد من حذف هذا العامل؟</AlertDialogTitle>
+            <AlertDialogDescription>
+              هذا الإجراء لا يمكن التراجع عنه. سيؤدي هذا إلى حذف جميع بيانات العامل بشكل دائم.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'جاري الحذف...' : 'حذف'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
