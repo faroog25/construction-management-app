@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Info, Box, Tag, AlertTriangle, Trash2, PencilIcon } from 'lucide-react';
+import { Loader2, Calendar, Info, Box, Tag, AlertTriangle, Trash2, PencilIcon, Settings } from 'lucide-react';
 import { format } from 'date-fns';
-import { getEquipmentById, EquipmentDetailResponse, deleteEquipment } from '@/services/equipmentService';
+import { getEquipmentById, EquipmentDetailResponse, deleteEquipment, setEquipmentStatus } from '@/services/equipmentService';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +20,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EditEquipmentDialog } from './EditEquipmentDialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 interface EquipmentDetailsDialogProps {
   equipmentId: number | null;
@@ -51,6 +59,7 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isStatusUpdating, setIsStatusUpdating] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -118,6 +127,59 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
           onEquipmentUpdated();
         }
       });
+    }
+  };
+
+  const handleStatusChange = async (statusValue: number) => {
+    if (!equipment) return;
+
+    try {
+      setIsStatusUpdating(true);
+      
+      const response = await setEquipmentStatus(equipment.id, statusValue);
+      
+      if (response.success) {
+        // Update local state with new status
+        setEquipment(prev => {
+          if (!prev) return null;
+          
+          let newStatusText = "";
+          switch (statusValue) {
+            case 0: newStatusText = "Available"; break;
+            case 1: newStatusText = "In Use"; break;
+            case 2: newStatusText = "Under Maintenance"; break;
+            case 3: newStatusText = "Out of Service"; break;
+            default: newStatusText = prev.status;
+          }
+          
+          return { ...prev, status: newStatusText };
+        });
+        
+        toast({
+          title: "Status Updated",
+          description: `Equipment status has been updated successfully.`,
+        });
+        
+        // Notify parent component to refresh equipment list
+        if (onEquipmentUpdated) {
+          onEquipmentUpdated();
+        }
+      } else {
+        toast({
+          title: "Update Failed",
+          description: response.message || "Unable to update equipment status.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update equipment status:', error);
+      toast({
+        title: "Update Failed",
+        description: "An error occurred while updating the status.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsStatusUpdating(false);
     }
   };
 
@@ -227,6 +289,50 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
               )}
               
               <div className="flex justify-end space-x-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="gap-2"
+                      disabled={isStatusUpdating}
+                    >
+                      {isStatusUpdating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Settings className="h-4 w-4" />
+                      )}
+                      Set Status
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                      onClick={() => handleStatusChange(0)}
+                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                    >
+                      Available
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleStatusChange(1)}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      In Use
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleStatusChange(2)}
+                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                    >
+                      Under Maintenance
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => handleStatusChange(3)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      Out of Service
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
                 <Button 
                   variant="outline" 
                   className="gap-2" 

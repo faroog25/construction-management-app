@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface EquipmentAssignmentRequest {
@@ -110,5 +109,34 @@ export async function getAllEquipmentAssignments(): Promise<ProjectEquipment[]> 
       throw new Error(`فشل في جلب بيانات الحجوزات: ${error.message}`);
     }
     throw new Error('حدث خطأ غير متوقع أثناء جلب بيانات الحجوزات');
+  }
+}
+
+export async function returnEquipment(assignmentId: number): Promise<EquipmentAssignmentResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/EquipmentAssignments/Return/${assignmentId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`فشل في إعادة المعدات. (HTTP ${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error returning equipment:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في إعادة المعدات: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء إعادة المعدات');
   }
 }
