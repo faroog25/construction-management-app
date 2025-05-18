@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface WorkerTask {
@@ -387,30 +386,29 @@ export async function deleteWorker(id: number): Promise<void> {
  */
 export async function updateWorker(id: number, workerData: CreateWorkerRequest): Promise<Worker> {
   try {
-    // Prepare the request body according to the API's expected format
-    const requestBody = {
-      id: id,
-      firstName: workerData.firstName,
-      secondName: workerData.secondName,
-      thirdName: workerData.thirdName,
-      lastName: workerData.lastName,
-      nationalNumber: workerData.nationalNumber,
-      phoneNumber: workerData.phoneNumber,
-      email: workerData.email,
-      address: workerData.address,
-      specialtyId: workerData.specialtyId
-    };
+    // استخدام طريقة POST بدلاً من PUT
+    const url = `${API_BASE_URL}/Workers/update/${id}`;
+    console.log('Updating worker using POST method:', { id, url, workerData });
     
-    console.log('Updating worker:', { id, requestBody });
-    
-    const response = await fetch(`${API_BASE_URL}/Workers/${id}`, {
-      method: 'PUT',
+    const response = await fetch(url, {
+      method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        id: id,
+        firstName: workerData.firstName,
+        secondName: workerData.secondName,
+        thirdName: workerData.thirdName,
+        lastName: workerData.lastName,
+        nationalNumber: workerData.nationalNumber,
+        phoneNumber: workerData.phoneNumber,
+        email: workerData.email,
+        address: workerData.address,
+        specialtyId: workerData.specialtyId
+      })
     });
 
     if (!response.ok) {
