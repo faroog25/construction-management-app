@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Worker, getAllWorkers, deleteWorker } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -6,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { Button } from './ui/button';
-import { CheckCircle2, XCircle, Search, Plus, User, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { Search, Plus, User, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { NewWorkerModal } from './NewWorkerModal';
@@ -133,15 +132,9 @@ export function Workers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('fullName')} className="cursor-pointer">
                   <div className="flex items-center">
-                    الاسم
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort('phoneNumber')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    رقم الهاتف
+                    الاسم الكامل
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
@@ -151,15 +144,15 @@ export function Workers() {
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead onClick={() => handleSort('specialty')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('phoneNumber')} className="cursor-pointer">
                   <div className="flex items-center">
-                    التخصص
+                    رقم الهاتف
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead onClick={() => handleSort('status')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('specialty')} className="cursor-pointer">
                   <div className="flex items-center">
-                    الحالة
+                    التخصص
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
@@ -175,13 +168,10 @@ export function Workers() {
                       <Skeleton className="h-4 w-[150px]" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-[120px]" />
-                    </TableCell>
-                    <TableCell>
                       <Skeleton className="h-4 w-[150px]" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-[80px]" />
+                      <Skeleton className="h-4 w-[120px]" />
                     </TableCell>
                     <TableCell>
                       <Skeleton className="h-4 w-[80px]" />
@@ -196,7 +186,7 @@ export function Workers() {
                 ))
               ) : workers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     {searchQuery ? 
                       <div className="flex flex-col items-center justify-center p-4">
                         <Search className="h-8 w-8 opacity-30 mb-2" />
@@ -226,31 +216,10 @@ export function Workers() {
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => handleWorkerClick(worker.id)}
                   >
-                    <TableCell>
-                      {worker.fullName}
-                    </TableCell>
-                    <TableCell>{worker.phoneNumber || '-'}</TableCell>
+                    <TableCell>{worker.fullName}</TableCell>
                     <TableCell>{worker.email || '-'}</TableCell>
+                    <TableCell>{worker.phoneNumber || '-'}</TableCell>
                     <TableCell>{worker.specialty || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        {worker.isAvailable ? (
-                          <div className="flex items-center">
-                            <CheckCircle2 className="h-4 w-4 text-green-600 mr-1.5" />
-                            <span className="text-green-600 text-sm">
-                              متاح
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center">
-                            <XCircle className="h-4 w-4 text-red-600 mr-1.5" />
-                            <span className="text-red-600 text-sm">
-                              غير متاح
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
                     <TableCell>
                       <div 
                         className="flex space-x-2"
@@ -336,4 +305,4 @@ export function Workers() {
       )}
     </>
   );
-} 
+}
