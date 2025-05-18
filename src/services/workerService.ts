@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface WorkerTask {
@@ -14,13 +15,14 @@ export interface Worker {
   specialty: string;
   isAvailable?: boolean;
   tasks?: WorkerTask[];
-  // الحقول القديمة التي قد تكون مستخدمة في أماكن أخرى
+  // الحقول التفصيلية
   firstName?: string;
   secondName?: string;
   thirdName?: string;
   lastName?: string;
   nationalNumber?: string;
   address?: string;
+  specialtyId?: number;
 }
 
 export interface WorkersListResponse {
@@ -41,7 +43,7 @@ export interface WorkersListResponse {
 export interface WorkerResponse {
   success: boolean;
   message: string;
-  errors: string[];
+  errors?: string[];
   data: Worker;
 }
 
@@ -218,6 +220,8 @@ export const getWorkerById = async (id: number): Promise<Worker> => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       },
     });
 

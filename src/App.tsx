@@ -10,9 +10,8 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Documents from "./pages/Documents";
 import Team from "./pages/Team";
-import Workers from "./pages/Workers"; // صفحة العمال الجديدة
-import SiteEngineersPage from "./pages/SiteEngineers"; // صفحة المهندسين الجديدة
-import ClientsPage from "./pages/Clients"; // صفحة العملاء الجديدة
+import SiteEngineersPage from "./pages/SiteEngineers"; // صفحة المهندسين
+import ClientsPage from "./pages/Clients"; // صفحة العملاء
 import Equipment from "./pages/Equipment";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -73,11 +72,6 @@ const App = () => (
                 <Route path="/team" element={
                   <ProtectedRoute>
                     <Team />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team/workers" element={
-                  <ProtectedRoute>
-                    <Workers />
                   </ProtectedRoute>
                 } />
                 <Route path="/team/engineers" element={

@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { updateWorker, getSpecialties, Specialty, Worker, CreateWorkerRequest } from '@/services/workerService';
+import { updateWorker, getSpecialties, getWorkerById, Specialty, Worker, CreateWorkerRequest } from '@/services/workerService';
 import { toast } from 'sonner';
 import {
   Select,
@@ -24,6 +25,7 @@ interface EditWorkerModalProps {
 export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: EditWorkerModalProps) {
   const { t, isRtl } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [fetchingWorker, setFetchingWorker] = useState(false);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [formData, setFormData] = useState<CreateWorkerRequest>({
     firstName: '',
@@ -54,22 +56,36 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
   }, [isOpen]);
 
   useEffect(() => {
-    if (worker) {
-      // Split the full name into its components
-      const nameParts = worker.fullName.split(' ');
-      setFormData({
-        firstName: nameParts[0] || '',
-        secondName: nameParts[1] || '',
-        thirdName: nameParts[2] || '',
-        lastName: nameParts[3] || '',
-        nationalNumber: '', // These fields need to be fetched from the API
-        phoneNumber: '',   // as they're not included in the Worker interface
-        email: '',         // You might need to update the Worker interface
-        address: '',       // to include these fields
-        specialtyId: 0     // This needs to be fetched from the API
-      });
-    }
-  }, [worker]);
+    const fetchWorkerDetails = async () => {
+      if (!worker || !isOpen) return;
+      
+      setFetchingWorker(true);
+      try {
+        const workerDetails = await getWorkerById(worker.id);
+        console.log('Worker details fetched:', workerDetails);
+        
+        // تعيين بيانات النموذج من البيانات المجلوبة
+        setFormData({
+          firstName: workerDetails.firstName || '',
+          secondName: workerDetails.secondName || '',
+          thirdName: workerDetails.thirdName || '',
+          lastName: workerDetails.lastName || '',
+          nationalNumber: workerDetails.nationalNumber || '',
+          phoneNumber: workerDetails.phoneNumber || '',
+          email: workerDetails.email || '',
+          address: workerDetails.address || '',
+          specialtyId: workerDetails.specialtyId || 0
+        });
+      } catch (error) {
+        console.error('Error fetching worker details:', error);
+        toast.error('فشل في جلب بيانات العامل');
+      } finally {
+        setFetchingWorker(false);
+      }
+    };
+
+    fetchWorkerDetails();
+  }, [worker, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,133 +118,137 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
             {t('workers.edit')}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">الاسم الأول</Label>
-            <Input
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              dir={isRtl ? 'rtl' : 'ltr'}
-            />
-          </div>
+        {fetchingWorker ? (
+          <div className="text-center py-4">جاري تحميل بيانات العامل...</div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">الاسم الأول</Label>
+              <Input
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="secondName">الاسم الثاني</Label>
-            <Input
-              id="secondName"
-              name="secondName"
-              value={formData.secondName}
-              onChange={handleChange}
-              required
-              dir={isRtl ? 'rtl' : 'ltr'}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="secondName">الاسم الثاني</Label>
+              <Input
+                id="secondName"
+                name="secondName"
+                value={formData.secondName}
+                onChange={handleChange}
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="thirdName">الاسم الثالث</Label>
-            <Input
-              id="thirdName"
-              name="thirdName"
-              value={formData.thirdName}
-              onChange={handleChange}
-              required
-              dir={isRtl ? 'rtl' : 'ltr'}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="thirdName">الاسم الثالث</Label>
+              <Input
+                id="thirdName"
+                name="thirdName"
+                value={formData.thirdName}
+                onChange={handleChange}
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="lastName">الاسم الأخير</Label>
-            <Input
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              dir={isRtl ? 'rtl' : 'ltr'}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">الاسم الأخير</Label>
+              <Input
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="nationalNumber">الرقم الوطني</Label>
-            <Input
-              id="nationalNumber"
-              name="nationalNumber"
-              value={formData.nationalNumber}
-              onChange={handleChange}
-              required
-              dir={isRtl ? 'rtl' : 'ltr'}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="nationalNumber">الرقم الوطني</Label>
+              <Input
+                id="nationalNumber"
+                name="nationalNumber"
+                value={formData.nationalNumber}
+                onChange={handleChange}
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber">رقم الهاتف</Label>
-            <Input
-              id="phoneNumber"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              required
-              dir={isRtl ? 'rtl' : 'ltr'}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">البريد الإلكتروني</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              dir={isRtl ? 'rtl' : 'ltr'}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">العنوان</Label>
-            <Input
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-              dir={isRtl ? 'rtl' : 'ltr'}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">العنوان</Label>
+              <Input
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="specialtyId">التخصص</Label>
-            <Select
-              value={formData.specialtyId.toString()}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, specialtyId: parseInt(value) }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر التخصص" />
-              </SelectTrigger>
-              <SelectContent>
-                {specialties.map((specialty) => (
-                  <SelectItem key={specialty.id} value={specialty.id.toString()}>
-                    {specialty.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="specialtyId">التخصص</Label>
+              <Select
+                value={formData.specialtyId ? formData.specialtyId.toString() : ""}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, specialtyId: parseInt(value) }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر التخصص" />
+                </SelectTrigger>
+                <SelectContent>
+                  {specialties.map((specialty) => (
+                    <SelectItem key={specialty.id} value={specialty.id.toString()}>
+                      {specialty.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              إلغاء
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                إلغاء
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
-} 
+}
