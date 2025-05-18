@@ -7,13 +7,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { Button } from './ui/button';
-import { CheckCircle2, XCircle, Search, Plus, HardHat, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { Search, Plus, HardHat, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { NewSiteEngineerModal } from './NewSiteEngineerModal';
 import { EditSiteEngineerModal } from './EditSiteEngineerModal';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from './ui/alert-dialog';
 
 export function SiteEngineers() {
   const [engineers, setEngineers] = useState<SiteEngineer[]>([]);
@@ -25,6 +35,8 @@ export function SiteEngineers() {
   const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
   const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<SiteEngineer | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [engineerToDelete, setEngineerToDelete] = useState<number | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -99,11 +111,13 @@ export function SiteEngineers() {
     }
   }
 
-  const handleDeleteEngineer = async (id: number) => {
-    if (window.confirm('هل أنت متأكد من حذف هذا المهندس؟')) {
+  const handleDeleteConfirm = async () => {
+    if (engineerToDelete !== null) {
       try {
-        await deleteSiteEngineer(id);
+        await deleteSiteEngineer(engineerToDelete);
         toast.success('تم حذف المهندس بنجاح');
+        setIsDeleteDialogOpen(false);
+        setEngineerToDelete(null);
         fetchEngineers();
       } catch (error) {
         console.error('Error deleting engineer:', error);
@@ -112,7 +126,14 @@ export function SiteEngineers() {
     }
   };
 
-  const handleEditEngineer = (engineer: SiteEngineer) => {
+  const handleDeleteClick = (id: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setEngineerToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleEditEngineer = (engineer: SiteEngineer, event: React.MouseEvent) => {
+    event.stopPropagation();
     setSelectedEngineer(engineer);
     setIsEditEngineerModalOpen(true);
   };
@@ -178,12 +199,6 @@ export function SiteEngineers() {
                     <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead onClick={() => handleSort('isAvailable')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    الحالة
-                    <ArrowUpDown className="mr-2 h-4 w-4" />
-                  </div>
-                </TableHead>
                 <TableHead>الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
@@ -202,9 +217,6 @@ export function SiteEngineers() {
                       <Skeleton className="h-4 w-[180px]" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-[80px]" />
-                    </TableCell>
-                    <TableCell>
                       <div className="flex space-x-2">
                         <Skeleton className="h-8 w-[60px]" />
                         <Skeleton className="h-8 w-[60px]" />
@@ -214,7 +226,7 @@ export function SiteEngineers() {
                 ))
               ) : engineers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={4} className="h-24 text-center">
                     {searchQuery ? 
                       <div className="flex flex-col items-center justify-center p-4">
                         <Search className="h-8 w-8 opacity-30 mb-2" />
@@ -250,33 +262,11 @@ export function SiteEngineers() {
                     <TableCell>{engineer.phoneNumber}</TableCell>
                     <TableCell>{engineer.email || '-'}</TableCell>
                     <TableCell>
-                      <div className="flex items-center">
-                        {engineer.isAvailable ? (
-                          <div className="flex items-center">
-                            <CheckCircle2 className="h-4 w-4 text-green-600 mr-1.5" />
-                            <span className="text-green-600 text-sm">
-                              متاح
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center">
-                            <XCircle className="h-4 w-4 text-red-600 mr-1.5" />
-                            <span className="text-red-600 text-sm">
-                              غير متاح
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div 
-                        className="flex space-x-2"
-                        onClick={(e) => e.stopPropagation()} // منع النقر على الصف عند النقر على الأزرار
-                      >
+                      <div className="flex space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEditEngineer(engineer)}
+                          onClick={(e) => handleEditEngineer(engineer, e)}
                           className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         >
                           <Pencil className="h-3 w-3 mr-1" />
@@ -285,7 +275,7 @@ export function SiteEngineers() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteEngineer(engineer.id)}
+                          onClick={(e) => handleDeleteClick(engineer.id, e)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
@@ -354,6 +344,29 @@ export function SiteEngineers() {
           engineer={selectedEngineer}
         />
       )}
+
+      <AlertDialog 
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>هل أنت متأكد من حذف هذا المهندس؟</AlertDialogTitle>
+            <AlertDialogDescription>
+              هذا الإجراء لا يمكن التراجع عنه. سيؤدي هذا إلى حذف جميع بيانات المهندس بشكل دائم.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
