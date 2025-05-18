@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { 
   Worker, 
@@ -11,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Skeleton } from './ui/skeleton';
 import { Alert, AlertDescription } from './ui/alert';
 import { Button } from './ui/button';
-import { Search, Plus, User, ArrowUpDown, Pencil, Trash2 } from 'lucide-react';
+import { Search, Plus, User, ArrowUpDown, Pencil, Trash2, Briefcase } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
 import { NewWorkerModal } from './NewWorkerModal';
@@ -140,6 +139,10 @@ export function Workers() {
     navigate(`/team/workers/${workerId}`);
   };
 
+  const handleGoToSpecialties = () => {
+    navigate('/specialties');
+  };
+
   // Create page numbers array for pagination
   const pageNumbers = [];
   const maxPageButtons = 5;
@@ -191,6 +194,11 @@ export function Workers() {
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
+            
+            <Button variant="outline" size="sm" onClick={handleGoToSpecialties} className="flex items-center gap-1">
+              <Briefcase className="h-4 w-4" />
+              التخصصات
+            </Button>
             
             <Button size="sm" onClick={() => setIsNewWorkerModalOpen(true)}>
               <Plus className="h-4 w-4 mr-1" />
