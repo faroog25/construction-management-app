@@ -175,8 +175,10 @@ export const createEngineer = async (engineer: Omit<SiteEngineer, 'id'>): Promis
   }
 };
 
-export const updateEngineer = async (id: number, engineer: Partial<SiteEngineer>): Promise<SiteEngineer> => {
+export const updateEngineer = async (id: number, engineer: Partial<SiteEngineer> | any): Promise<SiteEngineer> => {
   try {
+    console.log('Updating engineer with data:', engineer);
+    
     const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
       method: 'PUT',
       headers: {
@@ -184,15 +186,17 @@ export const updateEngineer = async (id: number, engineer: Partial<SiteEngineer>
         'Accept': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       },
-      body: JSON.stringify({ id, ...engineer }),
+      body: JSON.stringify(engineer),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('API error response:', errorData);
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();
+    console.log('Update response:', result);
     return result.data;
   } catch (error) {
     console.error('Error updating site engineer:', error);
@@ -219,4 +223,4 @@ export const deleteEngineer = async (id: number): Promise<void> => {
     console.error('Error deleting site engineer:', error);
     throw error;
   }
-}; 
+};

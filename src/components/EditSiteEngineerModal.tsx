@@ -106,23 +106,20 @@ export function EditSiteEngineerModal({
     }
 
     try {
-      const fullName = [
-        data.firstName.trim(),
-        data.secondName?.trim(),
-        data.thirdName?.trim(),
-        data.lastName.trim()
-      ].filter(Boolean).join(' ');
-
+      // تجهيز البيانات وفقًا للصيغة المطلوبة في الـ API
       const updatedEngineer = {
         id: engineer.id,
-        fullName,
-        email: data.email?.trim() || undefined,
+        firstName: data.firstName.trim(),
+        secondName: data.secondName?.trim() || "",
+        thirdName: data.thirdName?.trim() || "",
+        lastName: data.lastName.trim(),
+        email: data.email?.trim() || "",
         phoneNumber: data.phoneNumber.trim(),
-        address: data.address?.trim() || undefined,
-        nationalNumber: data.nationalNumber?.trim() || undefined,
-        hireDate: data.hireDate || undefined,
+        nationalNumber: data.nationalNumber?.trim() || "",
+        address: data.address?.trim() || ""
       };
 
+      console.log('Sending update with data:', updatedEngineer);
       await updateEngineer(engineer.id, updatedEngineer);
       toast.success('تم التحديث بنجاح');
       onOpenChange(false);
