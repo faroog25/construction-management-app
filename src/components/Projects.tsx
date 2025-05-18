@@ -87,6 +87,7 @@ const Projects = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8); // Fixed page size of 8 projects per page
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
 
@@ -121,6 +122,7 @@ const Projects = () => {
       
       setProjects(result.data.items);
       setTotalPages(result.data.totalPages);
+      setTotalItems(result.data.totalItems);
       setCurrentPage(result.data.currentPage);
       setHasNextPage(result.data.hasNextPage);
       setHasPreviousPage(result.data.hasPreveiosPage);
@@ -151,8 +153,6 @@ const Projects = () => {
   const confirmDeleteProject = async () => {
     if (projectToDelete) {
       try {
-        // Instead of using deleteProject which might not be available
-        // we'll just remove it from the local state for now
         setProjects(projects.filter(project => project.id !== projectToDelete.id));
         toast({
           description: 'Project deleted successfully',
@@ -201,27 +201,57 @@ const Projects = () => {
       return 0;
     });
 
-  // Generate page numbers for pagination
-  const pageNumbers = [];
-  const maxPageNumbersToShow = 5;
-  const halfMaxPageNumbersToShow = Math.floor(maxPageNumbersToShow / 2);
-  
-  let startPage = Math.max(currentPage - halfMaxPageNumbersToShow, 1);
-  let endPage = Math.min(startPage + maxPageNumbersToShow - 1, totalPages);
-  
-  if (endPage - startPage + 1 < maxPageNumbersToShow) {
-    startPage = Math.max(endPage - maxPageNumbersToShow + 1, 1);
-  }
-  
-  for (let i = startPage; i <= endPage; i++) {
-    pageNumbers.push(i);
-  }
-
   // Handle page change
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesVisible = 5;
+    
+    // If we have 5 or fewer pages, show all page numbers
+    if (totalPages <= maxPagesVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+    
+    // Always show first page
+    pages.push(1);
+    
+    // Calculate the middle range of pages to show
+    let startPage = Math.max(currentPage - Math.floor(maxPagesVisible / 2), 2);
+    let endPage = Math.min(startPage + maxPagesVisible - 3, totalPages - 1);
+    
+    // Adjust if we're near the end
+    if (endPage - startPage < maxPagesVisible - 3) {
+      startPage = Math.max(totalPages - maxPagesVisible + 2, 2);
+    }
+    
+    // Add ellipsis after page 1 if needed
+    if (startPage > 2) {
+      pages.push(-1); // -1 represents ellipsis
+    }
+    
+    // Add the middle pages
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    // Add ellipsis before the last page if needed
+    if (endPage < totalPages - 1) {
+      pages.push(-2); // -2 represents ellipsis
+    }
+    
+    // Always show last page
+    pages.push(totalPages);
+    
+    return pages;
   };
 
   return (
@@ -345,66 +375,40 @@ const Projects = () => {
             </TableBody>
           </Table>
           
-          {/* Pagination - Added visibility and margin for better display */}
+          {/* Pagination - Enhanced for better display and usability */}
           {totalPages > 1 && (
             <div className="mt-6 border-t pt-4">
               <Pagination className="my-4">
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious 
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      className={!hasPreviousPage ? "opacity-50 pointer-events-none" : ""}
-                      aria-disabled={!hasPreviousPage}
+                      onClick={() => hasPreviousPage && handlePageChange(currentPage - 1)}
+                      className={!hasPreviousPage ? "opacity-50 pointer-events-none cursor-not-allowed" : "cursor-pointer"}
                     />
                   </PaginationItem>
                   
-                  {/* Show first page if not in view */}
-                  {startPage > 1 && (
-                    <>
-                      <PaginationItem>
-                        <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
+                  {getPageNumbers().map((pageNum, index) => (
+                    pageNum === -1 || pageNum === -2 ? (
+                      <PaginationItem key={`ellipsis-${index}`}>
+                        <PaginationEllipsis />
                       </PaginationItem>
-                      {startPage > 2 && (
-                        <PaginationItem>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      )}
-                    </>
-                  )}
-                  
-                  {/* Page numbers */}
-                  {pageNumbers.map(number => (
-                    <PaginationItem key={number}>
-                      <PaginationLink 
-                        isActive={currentPage === number}
-                        onClick={() => handlePageChange(number)}
-                      >
-                        {number}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  
-                  {/* Show last page if not in view */}
-                  {endPage < totalPages && (
-                    <>
-                      {endPage < totalPages - 1 && (
-                        <PaginationItem>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      )}
-                      <PaginationItem>
-                        <PaginationLink onClick={() => handlePageChange(totalPages)}>
-                          {totalPages}
+                    ) : (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink 
+                          isActive={currentPage === pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className="cursor-pointer"
+                        >
+                          {pageNum}
                         </PaginationLink>
                       </PaginationItem>
-                    </>
-                  )}
+                    )
+                  ))}
                   
                   <PaginationItem>
                     <PaginationNext 
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      className={!hasNextPage ? "opacity-50 pointer-events-none" : ""}
-                      aria-disabled={!hasNextPage}
+                      onClick={() => hasNextPage && handlePageChange(currentPage + 1)}
+                      className={!hasNextPage ? "opacity-50 pointer-events-none cursor-not-allowed" : "cursor-pointer"}
                     />
                   </PaginationItem>
                 </PaginationContent>
@@ -412,7 +416,7 @@ const Projects = () => {
               
               {/* Pagination info */}
               <div className="text-center text-sm text-gray-500 mt-2">
-                عرض الصفحة {currentPage} من {totalPages} (إجمالي المشاريع: {projects.length})
+                صفحة {currentPage} من {totalPages} (إجمالي المشاريع: {totalItems})
               </div>
             </div>
           )}

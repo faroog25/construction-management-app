@@ -65,9 +65,9 @@ const PaginationPrevious = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to previous page"
+    aria-label="الانتقال إلى الصفحة السابقة"
     size="default"
-    className={cn("gap-1 pl-2.5 cursor-pointer", className)}
+    className={cn("gap-1 pl-2.5", className)}
     {...props}
   >
     <ChevronLeft className="h-4 w-4" />
@@ -81,9 +81,9 @@ const PaginationNext = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to next page"
+    aria-label="الانتقال إلى الصفحة التالية"
     size="default"
-    className={cn("gap-1 pr-2.5 cursor-pointer", className)}
+    className={cn("gap-1 pr-2.5", className)}
     {...props}
   >
     <span>التالي</span>
@@ -102,7 +102,7 @@ const PaginationEllipsis = ({
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />
-    <span className="sr-only">المزيد من الصفحات</span>
+    <span className="sr-only">صفحات إضافية</span>
   </span>
 )
 PaginationEllipsis.displayName = "PaginationEllipsis"
