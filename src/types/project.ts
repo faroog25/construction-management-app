@@ -49,11 +49,11 @@ export interface ProjectApiResponse {
 }
 
 export interface Project {
-  id: string | number;
+  id: number; // Changed from string | number to number to match projectService.ts
   projectName: string;
   name?: string; // For backward compatibility
   description?: string;
-  status: 'active' | 'completed' | 'on_hold' | number;
+  status: number; // Changed from 'active' | 'completed' | 'on_hold' | number to just number
   startDate?: Date | string;
   endDate?: Date | string;
   expectedEndDate?: string;
@@ -65,8 +65,8 @@ export interface Project {
   actualEndDate?: string;
   stages?: ApiStage[];
   tasks?: ApiTask[];
-  createdAt: Date | string;
-  updatedAt: Date | string;
+  createdAt: Date | string; // Added to fix ProjectDetails.tsx errors
+  updatedAt: Date | string; // Added to fix ProjectDetails.tsx errors
   clientId?: number;
   geographicalCoordinates?: string;
   projectStatus?: string;
@@ -74,6 +74,7 @@ export interface Project {
   cancellationDate?: string;
   completionDate?: string;
   handoverDate?: string;
+  progress?: number; // Added explicit progress property
 }
 
 export interface GanttTask {

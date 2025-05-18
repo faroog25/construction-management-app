@@ -11,17 +11,18 @@ import {
   ChevronRight,
   BarChart2,
   User,
-  XCircle
+  XCircle,
+  Pause
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ProjectCardProps } from '@/types/project';
 
-// تكوين معلومات الحالة بناءً على رمز الحالة
+// تكوين معلومات الحالة بناءً على رمز الحالة - Updated status configuration
 const statusConfig = {
-  0: { label: 'قيد التنفيذ', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2 },
-  1: { label: 'معلق', className: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock3 },
-  2: { label: 'مكتمل', className: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2 },
+  0: { label: 'قيد التنفيذ', className: 'bg-blue-100 text-blue-800 border-blue-200', icon: Clock3 },
+  1: { label: 'معلق', className: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Pause },
+  2: { label: 'مكتمل', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2 },
   3: { label: 'ملغي', className: 'bg-red-100 text-red-800 border-red-200', icon: XCircle },
   4: { label: 'متأخر', className: 'bg-orange-100 text-orange-800 border-orange-200', icon: AlertTriangle },
 };

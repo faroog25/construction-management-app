@@ -23,7 +23,11 @@ import {
   MoreHorizontal,
   Plus,
   FileText,
-  Package
+  Package,
+  LayoutGrid,
+  Gantt,
+  ClipboardList,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -49,7 +53,7 @@ const ProjectDetails = () => {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success('Project link copied to clipboard');
+    toast.success('تم نسخ رابط المشروع إلى الحافظة');
   };
 
   const handlePrint = () => {
@@ -57,7 +61,7 @@ const ProjectDetails = () => {
   };
 
   const handleExport = () => {
-    toast.success('Project data exported');
+    toast.success('تم تصدير بيانات المشروع');
   };
 
   const handleGoBack = () => {
@@ -68,7 +72,7 @@ const ProjectDetails = () => {
     return (
       <div className="flex flex-col justify-center items-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="mt-4 text-lg text-muted-foreground">Loading project details...</span>
+        <span className="mt-4 text-lg text-muted-foreground">جارٍ تحميل تفاصيل المشروع...</span>
       </div>
     );
   }
@@ -77,12 +81,12 @@ const ProjectDetails = () => {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <div className="flex items-center text-destructive">
-          <AlertCircle className="w-5 h-5 mr-2" />
-          <p>Failed to load project details</p>
+          <AlertCircle className="w-5 h-5 ml-2" />
+          <p>فشل تحميل تفاصيل المشروع</p>
         </div>
         <Button variant="outline" onClick={handleGoBack}>
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Back to Projects
+          <ChevronLeft className="ml-2 h-4 w-4" />
+          العودة إلى المشاريع
         </Button>
       </div>
     );
@@ -107,26 +111,26 @@ const ProjectDetails = () => {
                 className="text-muted-foreground" 
                 onClick={handleGoBack}
               >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Projects
+                <ChevronLeft className="h-4 w-4 ml-1" />
+                المشاريع
               </Button>
             </div>
             <h1 className="text-3xl font-bold tracking-tight mt-2">{project?.projectName}</h1>
             <div className="flex flex-wrap gap-4 mt-2">
               <p className="text-muted-foreground flex items-center">
-                <Calendar className="w-4 h-4 mr-1" /> 
-                Project ID: {project?.id}
+                <Calendar className="w-4 h-4 ml-1" /> 
+                معرف المشروع: {project?.id}
               </p>
               {project?.startDate && (
                 <p className="text-muted-foreground flex items-center">
-                  <Clock className="w-4 h-4 mr-1" /> 
-                  Started: {new Date(project?.startDate).toLocaleDateString()}
+                  <Clock className="w-4 h-4 ml-1" /> 
+                  تاريخ البدء: {new Date(project?.startDate).toLocaleDateString('ar-SA')}
                 </p>
               )}
               {project?.clientName && (
                 <p className="text-muted-foreground flex items-center">
-                  <Users className="w-4 h-4 mr-1" /> 
-                  Client: {project?.clientName}
+                  <Users className="w-4 h-4 ml-1" /> 
+                  العميل: {project?.clientName}
                 </p>
               )}
             </div>
@@ -134,8 +138,8 @@ const ProjectDetails = () => {
           
           <div className="flex gap-2 print:hidden sm:mt-0 mt-4 w-full sm:w-auto">
             <Button variant="outline" size="sm" onClick={handleShare} className="flex-1 sm:flex-none">
-              <Share2 className="h-4 w-4 mr-1.5" />
-              Share
+              <Share2 className="h-4 w-4 ml-1.5" />
+              مشاركة
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -145,33 +149,48 @@ const ProjectDetails = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleExport}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
+                  <Download className="h-4 w-4 ml-2" />
+                  تصدير
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handlePrint}>
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print
+                  <Printer className="h-4 w-4 ml-2" />
+                  طباعة
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => toast.info("Archive functionality coming soon")}>
-                  Archive Project
+                <DropdownMenuItem onClick={() => toast.info("سيتم توفير ميزة الأرشفة قريبًا")}>
+                  أرشفة المشروع
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button className="flex-1 sm:flex-none">
-              <Plus className="h-4 w-4 mr-1.5" />
-              Add Task
+              <Plus className="h-4 w-4 ml-1.5" />
+              إضافة مهمة
             </Button>
           </div>
         </div>
 
         <Tabs defaultValue="details" className="space-y-6">
           <TabsList className="w-full max-w-md grid grid-cols-5 p-1 bg-muted/30">
-            <TabsTrigger value="details">Project Details</TabsTrigger>
-            <TabsTrigger value="stages">Stages & Tasks</TabsTrigger>
-            <TabsTrigger value="gantt">Gantt Chart</TabsTrigger>
-            <TabsTrigger value="equipment">Equipment</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="details" className="flex items-center gap-1.5">
+              <LayoutGrid className="h-4 w-4" />
+              تفاصيل المشروع
+            </TabsTrigger>
+            <TabsTrigger value="stages" className="flex items-center gap-1.5">
+              <ClipboardList className="h-4 w-4" />
+              المراحل والمهام
+            </TabsTrigger>
+            <TabsTrigger value="gantt" className="flex items-center gap-1.5">
+              <Gantt className="h-4 w-4" />
+              مخطط جانت
+            </TabsTrigger>
+            <TabsTrigger value="equipment" className="flex items-center gap-1.5">
+              <Settings className="h-4 w-4" />
+              المعدات
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex items-center gap-1.5">
+              <FileText className="h-4 w-4" />
+              المستندات
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
