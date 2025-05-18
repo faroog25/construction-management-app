@@ -1,5 +1,7 @@
+
 import { useEffect, useState } from 'react';
-import { SiteEngineer, getAllEngineers, deleteEngineer } from '../services/engineerService';
+import { getSiteEngineers, deleteSiteEngineer } from '../services/siteEngineerService';
+import { SiteEngineer } from '@/types/siteEngineer';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Skeleton } from './ui/skeleton';
@@ -13,30 +15,20 @@ import { EditSiteEngineerModal } from './EditSiteEngineerModal';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 import { useNavigate } from 'react-router-dom';
 
-export interface BaseEngineer {
-  id: number;
-  fullName: string;
-  phoneNumber: string;
-  email?: string;
-  address?: string;
-  isAvailable?: boolean;
-  nationalId?: string;
-}
-
 export function SiteEngineers() {
-  const [engineers, setEngineers] = useState<BaseEngineer[]>([]);
+  const [engineers, setEngineers] = useState<SiteEngineer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortColumn, setSortColumn] = useState<string>('name');
+  const [sortColumn, setSortColumn] = useState<string>('fullName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
   const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
-  const [selectedEngineer, setSelectedEngineer] = useState<BaseEngineer | null>(null);
+  const [selectedEngineer, setSelectedEngineer] = useState<SiteEngineer | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -46,13 +38,14 @@ export function SiteEngineers() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getAllEngineers(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
+      const response = await getSiteEngineers(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
       setEngineers(response.items);
       setTotalPages(response.totalPages);
       setTotalItems(response.totalItems);
+      setCurrentPage(response.currentPage);
     } catch (err) {
       console.error('Error fetching engineers:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch engineers');
+      setError(err instanceof Error ? err.message : 'فشل في جلب بيانات المهندسين');
     } finally {
       setLoading(false);
     }
@@ -69,30 +62,47 @@ export function SiteEngineers() {
       setSortColumn(column);
       setSortDirection('asc');
     }
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1); // إعادة التعيين للصفحة الأولى عند تغيير الترتيب
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when search changes
+    setCurrentPage(1); // إعادة التعيين للصفحة الأولى عند تغيير البحث
   };
 
   const handlePageChange = (pageNumber: number) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
-    console.log(currentPage)
   };
 
-  // Generate page numbers for pagination
+  // إنشاء أرقام الصفحات للتنقل
   const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
+  const maxPageButtons = 5;
+  
+  if (totalPages <= maxPageButtons) {
+    // إذا كان عدد الصفحات أقل من أو يساوي الحد الأقصى، اعرضها جميعًا
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+  } else {
+    // عرض بعض الصفحات في المنتصف حول الصفحة الحالية
+    let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
+    let endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
+    
+    // تعديل startPage إذا كانت endPage في الحد الأقصى
+    if (endPage === totalPages) {
+      startPage = Math.max(totalPages - maxPageButtons + 1, 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
   }
 
   const handleDeleteEngineer = async (id: number) => {
     if (window.confirm('هل أنت متأكد من حذف هذا المهندس؟')) {
       try {
-        await deleteEngineer(id);
+        await deleteSiteEngineer(id);
         toast.success('تم حذف المهندس بنجاح');
         fetchEngineers();
       } catch (error) {
@@ -102,7 +112,7 @@ export function SiteEngineers() {
     }
   };
 
-  const handleEditEngineer = (engineer: BaseEngineer) => {
+  const handleEditEngineer = (engineer: SiteEngineer) => {
     setSelectedEngineer(engineer);
     setIsEditEngineerModalOpen(true);
   };
@@ -150,40 +160,28 @@ export function SiteEngineers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('fullName')} className="cursor-pointer">
                   <div className="flex items-center">
                     الاسم
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead onClick={() => handleSort('nationalId')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    الرقم الوطني
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort('phone')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('phoneNumber')} className="cursor-pointer">
                   <div className="flex items-center">
                     رقم الهاتف
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
                 <TableHead onClick={() => handleSort('email')} className="cursor-pointer">
                   <div className="flex items-center">
                     البريد الإلكتروني
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead onClick={() => handleSort('address')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    العنوان
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort('status')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('isAvailable')} className="cursor-pointer">
                   <div className="flex items-center">
                     الحالة
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
                 <TableHead>الإجراءات</TableHead>
@@ -204,9 +202,6 @@ export function SiteEngineers() {
                       <Skeleton className="h-4 w-[180px]" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-[150px]" />
-                    </TableCell>
-                    <TableCell>
                       <Skeleton className="h-4 w-[80px]" />
                     </TableCell>
                     <TableCell>
@@ -219,7 +214,7 @@ export function SiteEngineers() {
                 ))
               ) : engineers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     {searchQuery ? 
                       <div className="flex flex-col items-center justify-center p-4">
                         <Search className="h-8 w-8 opacity-30 mb-2" />
@@ -252,10 +247,8 @@ export function SiteEngineers() {
                     <TableCell>
                       {engineer.fullName}
                     </TableCell>
-                    <TableCell>{engineer.nationalId || '-'}</TableCell>
                     <TableCell>{engineer.phoneNumber}</TableCell>
                     <TableCell>{engineer.email || '-'}</TableCell>
-                    <TableCell>{engineer.address || '-'}</TableCell>
                     <TableCell>
                       <div className="flex items-center">
                         {engineer.isAvailable ? (
@@ -278,7 +271,7 @@ export function SiteEngineers() {
                     <TableCell>
                       <div 
                         className="flex space-x-2"
-                        onClick={(e) => e.stopPropagation()} // Prevent row click when clicking buttons
+                        onClick={(e) => e.stopPropagation()} // منع النقر على الصف عند النقر على الأزرار
                       >
                         <Button
                           variant="outline"
@@ -339,6 +332,9 @@ export function SiteEngineers() {
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
+              <div className="text-sm text-muted-foreground mt-2 text-center">
+                إجمالي المهندسين: {totalItems}
+              </div>
             </div>
           )}
         </CardContent>

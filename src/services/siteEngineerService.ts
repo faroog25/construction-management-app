@@ -1,7 +1,8 @@
-import { SiteEngineer } from '@/types/siteEngineer';
+
+import { SiteEngineer, SiteEngineersResponse } from '@/types/siteEngineer';
 import { API_BASE_URL } from '@/config/api';
 
-const apiUrl = '/api/site-engineers';
+// بيانات وهمية للاستخدام عند فشل الاتصال بالخادم
 const mockSiteEngineers: SiteEngineer[] = [
   {
     id: 1,
@@ -115,13 +116,84 @@ const mockSiteEngineers: SiteEngineer[] = [
   }
 ];
 
-export const getSiteEngineers = async (): Promise<SiteEngineer[]> => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => resolve([...mockSiteEngineers]), 800);
-  });
+export const getSiteEngineers = async (
+  page: number = 1,
+  pageSize: number = 10,
+  searchQuery: string = '', 
+  sortColumn: string = 'fullName',
+  sortDirection: 'asc' | 'desc' = 'asc'
+): Promise<{
+  items: SiteEngineer[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  hasNextPage: boolean;
+  hasPreveiosPage: boolean;
+}> => {
+  try {
+    console.log('Fetching site engineers with params:', { page, pageSize, searchQuery, sortColumn, sortDirection });
+    
+    const queryParams = new URLSearchParams({
+      pageNumber: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+    
+    if (searchQuery) {
+      queryParams.append('search', searchQuery);
+    }
+    
+    if (sortColumn) {
+      queryParams.append('sortColumn', sortColumn);
+      queryParams.append('sortDirection', sortDirection);
+    }
+    
+    const url = `${API_BASE_URL}/SiteEngineers?${queryParams}`;
+    console.log('API URL:', url);
+    
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
+      }
+    });
+    
+    if (!response.ok) {
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      throw new Error(`فشل في جلب بيانات المهندسين: (HTTP ${response.status})`);
+    }
+    
+    const result: SiteEngineersResponse = await response.json();
+    console.log('API Response:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'فشل في جلب بيانات المهندسين');
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error in getSiteEngineers:', error);
+    
+    // استخدام البيانات الوهمية في حالة فشل الاتصال (للتجريب فقط)
+    console.warn('Using mock data instead');
+    return {
+      items: mockSiteEngineers.slice((page - 1) * pageSize, page * pageSize),
+      totalItems: mockSiteEngineers.length,
+      totalPages: Math.ceil(mockSiteEngineers.length / pageSize),
+      currentPage: page,
+      pageSize: pageSize,
+      hasNextPage: page * pageSize < mockSiteEngineers.length,
+      hasPreveiosPage: page > 1
+    };
+  }
 };
 
+// باقي الدوال الموجودة مسبقاً
 export interface SiteEngineerProject {
   id: number;
   name: string;
