@@ -1,6 +1,6 @@
 
 import { API_BASE_URL } from '@/config/api';
-import { Project, ProjectApiResponse } from '@/types/project';
+import { Project, ProjectApiResponse, PaginatedResponse } from '@/types/project';
 
 export interface Project {
   id: number;
@@ -13,6 +13,15 @@ export interface Project {
   startDate: string;
   expectedEndDate: string;
   status: number;
+  progress?: number;
+  siteEngineerName?: string;
+  clientName?: string;
+  projectStatus?: string;
+  geographicalCoordinates?: string;
+  cancellationReason?: string;
+  cancellationDate?: string;
+  completionDate?: string;
+  handoverDate?: string;
 }
 
 // Add the ProjectWithClient interface that was referenced but not defined
@@ -76,10 +85,24 @@ export async function getAllProjects(): Promise<Project[]> {
   }
 }
 
-export async function getProjects(page: number = 1, pageSize: number = 8): Promise<Project[]> {
+export interface ProjectsQueryParams {
+  page?: number;
+  pageSize?: number;
+  status?: number;
+}
+
+export async function getProjects(params: ProjectsQueryParams = {}): Promise<PaginatedResponse<Project>> {
   try {
-    console.log('Fetching projects from:', `${API_BASE_URL}/Projects?pageNumber=${page}&pageSize=${pageSize}`);
-    const response = await fetch(`${API_BASE_URL}/Projects?pageNumber=${page}&pageSize=${pageSize}`);
+    const { page = 1, pageSize = 10, status } = params;
+    
+    // بناء URL مع المعلمات المناسبة
+    let url = `${API_BASE_URL}/Projects?pageNumber=${page}&pageSize=${pageSize}`;
+    if (status !== undefined && status !== null) {
+      url += `&status=${status}`;
+    }
+    
+    console.log('Fetching projects from:', url);
+    const response = await fetch(url);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -99,22 +122,12 @@ export async function getProjects(page: number = 1, pageSize: number = 8): Promi
       throw new Error('Invalid API response structure');
     }
     
-    return result.data.items;
+    return result as PaginatedResponse<Project>;
   } catch (error) {
     console.error('Error fetching projects:', error);
     throw error;
   }
 }
-
-// export async function getProjectsByStatus(statusCode: number): Promise<Project[]> {
-//   try {
-//     const projects = await getProjects();
-//     return projects.filter(project => project.status === statusCode);
-//   } catch (error) {
-//     console.error('Error fetching projects by status:', error);
-//     throw error;
-//   }
-// }
 
 export async function getProjectById(id: number): Promise<Project> {
   try {
@@ -174,24 +187,21 @@ export async function getProjectById(id: number): Promise<Project> {
 
 // Helper function to convert status string to status code
 function getStatusCodeFromString(status: string | undefined): number {
-  if (!status) return 1; // Default to active (1)
+  if (!status) return 0; // Default to active (0)
   
   // Map Arabic status strings to status codes
   switch (status.trim().toLowerCase()) {
     case 'قيد التنفيذ':
-      return 1; // active
+      return 0; // active
+    case 'معلق':
+      return 1; // pending
     case 'مكتمل':
     case 'تم الانتهاء':
       return 2; // completed
-    case 'لم يبدأ':
-    case 'معلق':
-      return 3; // pending
-    case 'متأخر':
-      return 4; // delayed
     case 'ملغي':
-      return 5; // cancelled
+      return 3; // cancelled
     default:
-      return 1; // Default to active
+      return 0; // Default to active
   }
 }
 
@@ -212,25 +222,41 @@ export async function createProject(projectData: Project): Promise<any> {
 };
 
 // Utility to convert status code to string
-export const getStatusFromCode = (statusCode: number): 'active' | 'completed' | 'pending' | 'delayed' => {
+export const getStatusFromCode = (statusCode: number): 'active' | 'pending' | 'completed' | 'canceled' => {
   switch (statusCode) {
-    case 1:
+    case 0:
       return 'active';
+    case 1:
+      return 'pending';
     case 2:
       return 'completed';
     case 3:
-      return 'pending';
-    case 4:
-      return 'delayed';
+      return 'canceled';
     default:
       return 'active';
   }
 };
 
+// Arabic status mapping
+export const getArabicStatus = (statusCode: number): string => {
+  switch (statusCode) {
+    case 0:
+      return 'قيد التنفيذ';
+    case 1:
+      return 'معلق';
+    case 2:
+      return 'مكتمل';
+    case 3:
+      return 'ملغي';
+    default:
+      return 'قيد التنفيذ';
+  }
+};
+
 export const getProjectsByStatus = async (statusCode: number): Promise<Project[]> => {
   try {
-    const projects = await getProjects();
-    return projects.filter(project => project.status === statusCode);
+    const result = await getProjects({ status: statusCode });
+    return result.data.items;
   } catch (error) {
     console.error('Error fetching projects by status:', error);
     throw error;
