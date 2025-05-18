@@ -22,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 interface Document {
   id: number;
@@ -56,71 +57,100 @@ const DocumentCard = ({ document, onView, onDownload, onShare, onEdit, onDelete 
 
   const getStatusColor = (status: Document['status']) => {
     switch (status) {
-      case 'approved': return 'bg-green-50 border-green-200';
-      case 'pending': return 'bg-amber-50 border-amber-200';
-      case 'rejected': return 'bg-red-50 border-red-200';
-      case 'draft': return 'bg-gray-50 border-gray-200';
-      default: return 'bg-gray-50 border-gray-200';
+      case 'approved': return 'bg-green-50 border-green-200 text-green-700';
+      case 'pending': return 'bg-amber-50 border-amber-200 text-amber-700';
+      case 'rejected': return 'bg-red-50 border-red-200 text-red-700';
+      case 'draft': return 'bg-gray-50 border-gray-200 text-gray-700';
+      default: return 'bg-gray-50 border-gray-200 text-gray-700';
+    }
+  };
+
+  const getStatusName = (status: Document['status']) => {
+    switch (status) {
+      case 'approved': return 'معتمد';
+      case 'pending': return 'قيد المراجعة';
+      case 'rejected': return 'مرفوض';
+      case 'draft': return 'مسودة';
+      default: return 'معتمد';
+    }
+  };
+
+  const getCardStatusClass = (status: Document['status']) => {
+    switch (status) {
+      case 'approved': return 'border-l-4 border-l-green-500';
+      case 'pending': return 'border-l-4 border-l-amber-500';
+      case 'rejected': return 'border-l-4 border-l-red-500';
+      case 'draft': return 'border-l-4 border-l-gray-500';
+      default: return '';
     }
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card className={cn("overflow-hidden hover:shadow-md transition-shadow group", getCardStatusClass(document.status))}>
       <CardContent className="p-0">
-        <div className={`flex items-center justify-center h-32 ${getStatusColor(document.status)}`}>
+        <div className={cn("flex items-center justify-center h-32", getStatusColor(document.status))}>
           {getDocumentIcon(document.type)}
         </div>
         <div className="p-4">
           <div className="flex justify-between items-start">
             <div className="w-[80%]">
               <h3 className="font-medium text-base truncate" title={document.name}>{document.name}</h3>
-              <p className="text-muted-foreground text-xs mt-1">{document.project}</p>
+              <p className="text-muted-foreground text-xs mt-1">
+                {document.owner} • {document.dateModified}
+              </p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={onView}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View
+                <DropdownMenuItem onClick={onView} className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  عرض
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={onDownload}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
+                <DropdownMenuItem onClick={onDownload} className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  تحميل
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={onShare}>
-                  <Share className="mr-2 h-4 w-4" />
-                  Share
+                <DropdownMenuItem onClick={onShare} className="flex items-center gap-2">
+                  <Share className="h-4 w-4" />
+                  مشاركة
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onEdit}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit
+                <DropdownMenuItem onClick={onEdit} className="flex items-center gap-2">
+                  <Edit className="h-4 w-4" />
+                  تعديل
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600" onClick={onDelete}>
-                  <Trash className="mr-2 h-4 w-4" />
-                  Delete
+                <DropdownMenuItem className="text-red-600 flex items-center gap-2" onClick={onDelete}>
+                  <Trash className="h-4 w-4" />
+                  حذف
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
           <div className="flex justify-between items-center mt-3">
-            <Badge variant="outline" className="text-xs font-normal">
+            <Badge variant="outline" className={cn("text-xs font-normal", 
+              document.type === 'pdf' && "bg-red-50 text-red-700 border-red-200", 
+              document.type === 'doc' && "bg-blue-50 text-blue-700 border-blue-200",
+              document.type === 'image' && "bg-green-50 text-green-700 border-green-200",
+              document.type === 'archive' && "bg-amber-50 text-amber-700 border-amber-200"
+            )}>
               {document.type.toUpperCase()}
             </Badge>
-            <span className="text-xs text-muted-foreground">{document.size}</span>
+            <Badge variant="outline" className={cn("text-xs font-normal", getStatusColor(document.status))}>
+              {getStatusName(document.status)}
+            </Badge>
           </div>
-          <div className="flex items-center justify-between mt-3 pt-2 border-t">
-            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={onView}>
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={onView}>
               <Eye className="h-3 w-3 mr-1" />
-              View
+              عرض
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={onDownload}>
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={onDownload}>
               <Download className="h-3 w-3 mr-1" />
-              Download
+              تحميل
             </Button>
           </div>
         </div>
