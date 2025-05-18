@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import DashboardStats from '@/components/DashboardStats';
 import ProjectCard from '@/components/ProjectCard';
@@ -27,11 +28,14 @@ const getTaskIcon = (type: string) => {
 };
 
 const Index = () => {
-  const { data: projects = [], isLoading } = useQuery({
+  const { data: projectsData = { data: { items: [] } }, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => getProjects(),
   });
 
+  // Extract projects array from the paginated response
+  const projects = projectsData.data?.items || [];
+  
   // Take the first 4 projects for the dashboard display
   const recentProjects = projects.slice(0, 4);
 
@@ -132,7 +136,7 @@ const Index = () => {
                       client_name={project.clientName}
                       expected_end_date={project.expectedEndDate}
                       start_date={project.startDate}
-                      progress={36}
+                      progress={project.progress || 0}
                       status={project.status}
                       className="animate-in"
                       style={{ animationDelay: `${index * 0.05}s` }}
@@ -144,7 +148,7 @@ const Index = () => {
               <TabsContent value="active" className="space-y-4">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {recentProjects
-                    .filter(p => p.status === 1)
+                    .filter(p => p.status === 0)
                     .map((project, index) => (
                       <ProjectCard
                         key={project.id}
@@ -153,7 +157,7 @@ const Index = () => {
                         client_name={project.clientName}
                         expected_end_date={project.expectedEndDate}
                         start_date={project.startDate}
-                        progress={12}
+                        progress={project.progress || 0}
                         status={project.status}
                         className="animate-in"
                         style={{ animationDelay: `${index * 0.05}s` }}
@@ -174,7 +178,7 @@ const Index = () => {
                         client_name={project.clientName}
                         expected_end_date={project.expectedEndDate}
                         start_date={project.startDate}
-                        progress={32}
+                        progress={project.progress || 0}
                         status={project.status}
                         className="animate-in"
                         style={{ animationDelay: `${index * 0.05}s` }}
