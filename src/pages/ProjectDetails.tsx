@@ -45,12 +45,6 @@ const ProjectDetails = () => {
     enabled: !!projectId,
   });
 
-  const enhancedProject: Project | undefined = project ? {
-    ...project,
-    createdAt: project.createdAt || new Date().toISOString(),
-    updatedAt: project.updatedAt || new Date().toISOString()
-  } : undefined;
-
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success('Project link copied to clipboard');
@@ -77,7 +71,7 @@ const ProjectDetails = () => {
     );
   }
 
-  if (error || !enhancedProject) {
+  if (error || !project) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <div className="flex items-center text-destructive">
@@ -109,22 +103,22 @@ const ProjectDetails = () => {
                 Projects
               </Button>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight mt-2">{enhancedProject?.projectName}</h1>
+            <h1 className="text-3xl font-bold tracking-tight mt-2">{project?.projectName}</h1>
             <div className="flex flex-wrap gap-4 mt-2">
               <p className="text-muted-foreground flex items-center">
                 <Calendar className="w-4 h-4 mr-1" /> 
-                Project ID: {enhancedProject?.id}
+                Project ID: {project?.id}
               </p>
-              {enhancedProject?.startDate && (
+              {project?.startDate && (
                 <p className="text-muted-foreground flex items-center">
                   <Clock className="w-4 h-4 mr-1" /> 
-                  Started: {new Date(enhancedProject?.startDate).toLocaleDateString()}
+                  Started: {new Date(project?.startDate).toLocaleDateString()}
                 </p>
               )}
-              {enhancedProject?.clientName && (
+              {project?.clientName && (
                 <p className="text-muted-foreground flex items-center">
                   <Users className="w-4 h-4 mr-1" /> 
-                  Client: {enhancedProject?.clientName}
+                  Client: {project?.clientName}
                 </p>
               )}
             </div>
@@ -172,20 +166,20 @@ const ProjectDetails = () => {
           </TabsList>
           
           <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
-            <ProjectDetailsInfo project={enhancedProject} />
+            <ProjectDetailsInfo project={project} />
             <ProjectTimeline />
           </TabsContent>
           
           <TabsContent value="stages" className="space-y-6 animate-in fade-in-50">
-            <ProjectStages project={enhancedProject} />
+            <ProjectStages project={project} />
           </TabsContent>
           
           <TabsContent value="gantt" className="space-y-6 animate-in fade-in-50">
-            <GanttChart project={enhancedProject} />
+            <GanttChart project={project} />
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6 animate-in fade-in-50">
-            <Documents projectId={enhancedProject?.id} />
+            <Documents projectId={project?.id} />
           </TabsContent>
         </Tabs>
       </main>

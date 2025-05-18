@@ -217,7 +217,30 @@ export async function createProject(projectData: Project): Promise<any> {
   }
   
   return response.json();
-};
+}
+
+// Update project details
+export async function updateProject(projectId: number, projectData: Partial<Project>): Promise<any> {
+  const response = await fetch(`${API_BASE_URL}/Projects/${projectId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(projectData),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`Failed to update project. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
 
 // Utility to convert status code to string
 export const getStatusFromCode = (statusCode: number): 'active' | 'pending' | 'completed' | 'canceled' => {

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +26,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import ProjectEditForm from './ProjectEditForm';
 
 // Status configuration same as in ProjectCard for consistency
 const statusConfig = {
@@ -42,6 +42,8 @@ interface ProjectDetailsInfoProps {
 }
 
 const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  
   // Helper function to format dates
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'Not set';
@@ -79,12 +81,41 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
     return 'bg-green-500';
   };
 
-  const progressValue = project.orderId || 0;
+  const progressValue = project.progress || 0;
   const progressColor = getProgressColor(progressValue);
 
   const handleEdit = () => {
-    toast.info('Edit functionality not implemented yet');
+    setIsEditing(true);
   };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveSuccess = () => {
+    setIsEditing(false);
+  };
+
+  // If in edit mode, show the edit form
+  if (isEditing) {
+    return (
+      <div className="space-y-6">
+        <Card className="shadow-sm border overflow-hidden">
+          <CardHeader className="bg-muted/20 pb-3">
+            <CardTitle className="text-xl font-bold">Edit Project</CardTitle>
+            <CardDescription>Update project information</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <ProjectEditForm 
+              project={project} 
+              onSuccess={handleSaveSuccess} 
+              onCancel={handleCancelEdit} 
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -248,16 +279,16 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 </div>
               )}
               
-              {project.actualEndDate && (
+              {project.completionDate && (
                 <div className="flex justify-between items-center pt-2 border-t">
                   <span className="text-sm text-muted-foreground">Actual Completion</span>
-                  <span className="font-medium">{formatDate(project.actualEndDate?.toString())}</span>
+                  <span className="font-medium">{formatDate(project.completionDate?.toString())}</span>
                 </div>
               )}
             </div>
 
             <div className="mt-4 pt-4 border-t">
-              <Button variant="outline" className="w-full gap-2" onClick={handleEdit}>
+              <Button variant="outline" className="w-full gap-2" onClick={() => toast.info("Report functionality coming soon")}>
                 <FileText className="h-4 w-4" />
                 Generate Report
               </Button>
