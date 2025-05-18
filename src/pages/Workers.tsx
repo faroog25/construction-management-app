@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { TeamMembers } from '@/components/TeamMembers';
+import { Workers } from '@/components/Workers';
 
-const Workers = () => {
+const WorkersPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="h-16"></div>
@@ -15,11 +15,11 @@ const Workers = () => {
         </div>
         
         <div className="space-y-6">
-          <TeamMembers />
+          <Workers />
         </div>
       </main>
     </div>
   );
 };
 
-export default Workers;
+export default WorkersPage;

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Worker, getAllWorkers, deleteWorker } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -138,13 +139,7 @@ export function Workers() {
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead onClick={() => handleSort('nationalNumber')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    الرقم الوطني
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort('phone')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('phoneNumber')} className="cursor-pointer">
                   <div className="flex items-center">
                     رقم الهاتف
                     <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -153,12 +148,6 @@ export function Workers() {
                 <TableHead onClick={() => handleSort('email')} className="cursor-pointer">
                   <div className="flex items-center">
                     البريد الإلكتروني
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                  </div>
-                </TableHead>
-                <TableHead onClick={() => handleSort('address')} className="cursor-pointer">
-                  <div className="flex items-center">
-                    العنوان
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
@@ -189,13 +178,7 @@ export function Workers() {
                       <Skeleton className="h-4 w-[120px]" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-[180px]" />
-                    </TableCell>
-                    <TableCell>
                       <Skeleton className="h-4 w-[150px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[80px]" />
                     </TableCell>
                     <TableCell>
                       <Skeleton className="h-4 w-[80px]" />
@@ -213,7 +196,7 @@ export function Workers() {
                 ))
               ) : workers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     {searchQuery ? 
                       <div className="flex flex-col items-center justify-center p-4">
                         <Search className="h-8 w-8 opacity-30 mb-2" />
@@ -244,12 +227,10 @@ export function Workers() {
                     onClick={() => handleWorkerClick(worker.id)}
                   >
                     <TableCell>
-                      {`${worker.firstName} ${worker.secondName} ${worker.thirdName} ${worker.lastName}`}
+                      {worker.fullName}
                     </TableCell>
-                    <TableCell>{worker.nationalNumber || '-'}</TableCell>
-                    <TableCell>{worker.phoneNumber}</TableCell>
+                    <TableCell>{worker.phoneNumber || '-'}</TableCell>
                     <TableCell>{worker.email || '-'}</TableCell>
-                    <TableCell>{worker.address || '-'}</TableCell>
                     <TableCell>{worker.specialty || '-'}</TableCell>
                     <TableCell>
                       <div className="flex items-center">
@@ -341,14 +322,14 @@ export function Workers() {
 
       <NewWorkerModal
         isOpen={isNewWorkerModalOpen}
-        onOpenChange={setIsNewWorkerModalOpen}
+        onClose={() => setIsNewWorkerModalOpen(false)}
         onWorkerCreated={fetchWorkers}
       />
 
       {isEditWorkerModalOpen && selectedWorker && (
         <EditWorkerModal
           isOpen={isEditWorkerModalOpen}
-          onOpenChange={setIsEditWorkerModalOpen}
+          onClose={() => setIsEditWorkerModalOpen(false)}
           onWorkerUpdated={fetchWorkers}
           worker={selectedWorker}
         />

@@ -8,22 +8,41 @@ export interface WorkerTask {
 
 export interface Worker {
   id: number;
-  firstName: string;
-  secondName: string;
-  thirdName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   phoneNumber: string;
-  nationalNumber: string;
-  address: string;
   specialty: string;
-  isAvailable: boolean;
-  tasks: WorkerTask[];
+  isAvailable?: boolean;
+  tasks?: WorkerTask[];
+  // الحقول القديمة التي قد تكون مستخدمة في أماكن أخرى
+  firstName?: string;
+  secondName?: string;
+  thirdName?: string;
+  lastName?: string;
+  nationalNumber?: string;
+  address?: string;
 }
 
-export interface Specialty {
-  id: number;
-  name: string;
+export interface WorkersListResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: {
+    items: Worker[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+    hasNextPage: boolean;
+    hasPreveiosPage: boolean;
+  };
+}
+
+export interface WorkerResponse {
+  success: boolean;
+  message: string;
+  errors: string[];
+  data: Worker;
 }
 
 export interface CreateWorkerRequest {
@@ -36,13 +55,6 @@ export interface CreateWorkerRequest {
   email: string;
   address: string;
   specialtyId: number;
-}
-
-export interface WorkerResponse {
-  success: boolean;
-  message: string;
-  errors: string[];
-  data: Worker;
 }
 
 export interface CreateWorkerResponse {
@@ -66,6 +78,11 @@ export interface UpdateWorkerResponse {
   data: Worker;
 }
 
+export interface Specialty {
+  id: number;
+  name: string;
+}
+
 /**
  * Fetches all workers from the API
  * @throws {Error} When the API request fails or returns invalid data
@@ -85,14 +102,14 @@ export async function getAllWorkers(): Promise<Worker[]> {
       throw new Error(`فشل في جلب العمال. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
     }
     
-    const result: WorkerResponse = await response.json();
+    const result: WorkersListResponse = await response.json();
     console.log('API Response:', result);
     
     if (!result.success) {
       throw new Error(result.message || 'فشل في جلب بيانات العمال');
     }
     
-    if (!result.data?.items) {
+    if (!result.data || !result.data.items) {
       console.error('Invalid API response structure:', result);
       throw new Error('بيانات غير صالحة من الخادم');
     }
@@ -144,7 +161,7 @@ export async function createWorker(workerData: CreateWorkerRequest): Promise<Wor
     if (error instanceof Error) {
       throw new Error(`فشل في إضافة العامل: ${error.message}`);
     }
-    throw new Error('حدث خطأ غير متوقع أثناء إضافة العامل');
+    throw new Error('حد�� خطأ غير متوقع أثناء إضافة العامل');
   }
 }
 

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Worker, getAllWorkers, deleteWorker } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -49,19 +50,14 @@ export function TeamMembers() {
       setError(null);
       const data = await getAllWorkers();
 
-      // Validate the data structure
+      // التحقق من بنية البيانات
       if (!Array.isArray(data)) {
         throw new Error('Invalid data structure received from API');
       }
 
-      // Validate each worker object and ensure all name fields exist
+      // التأكد من وجود جميع الحقول المطلوبة
       const validWorkers = data.map(worker => ({
         ...worker,
-        firstName: worker.firstName || '',
-        secondName: worker.secondName || '',
-        thirdName: worker.thirdName || '',
-        lastName: worker.lastName || '',
-        specialty: worker.specialty || '',
         isAvailable: worker.isAvailable ?? true
       }));
 
@@ -87,38 +83,29 @@ export function TeamMembers() {
     }
   };
 
-  // Filter workers based on search query
+  // تصفية العمال بناءً على مصطلح البحث
   const filteredWorkers = workers.filter(worker => {
-    const fullName = [
-      worker.firstName,
-      worker.secondName,
-      worker.thirdName,
-      worker.lastName
-    ].filter(Boolean).join(' ');
-    
-    return fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           worker.specialty.toLowerCase().includes(searchQuery.toLowerCase());
+    return worker.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           (worker.specialty && worker.specialty.toLowerCase().includes(searchQuery.toLowerCase()));
   });
 
-  // Sort filtered workers
+  // ترتيب العمال المصفاة
   const sortedWorkers = [...filteredWorkers].sort((a, b) => {
     const direction = sortDirection === 'asc' ? 1 : -1;
-    const fullNameA = [a.firstName, a.secondName, a.thirdName, a.lastName].filter(Boolean).join(' ');
-    const fullNameB = [b.firstName, b.secondName, b.thirdName, b.lastName].filter(Boolean).join(' ');
     
     switch (sortColumn) {
       case 'name':
-        return direction * fullNameA.localeCompare(fullNameB);
+        return direction * (a.fullName || '').localeCompare(b.fullName || '');
       case 'specialty':
-        return direction * a.specialty.localeCompare(b.specialty);
+        return direction * (a.specialty || '').localeCompare(b.specialty || '');
       case 'status':
-        return direction * (a.isAvailable === b.isAvailable ? 0 : a.isAvailable ? -1 : 1);
+        return direction * ((a.isAvailable === b.isAvailable) ? 0 : (a.isAvailable ? -1 : 1));
       default:
         return 0;
     }
   });
 
-  // Pagination logic
+  // منطق الصفحات
   const totalPages = Math.ceil(sortedWorkers.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -128,7 +115,7 @@ export function TeamMembers() {
     setCurrentPage(pageNumber);
   };
 
-  // Generate page numbers for pagination
+  // إنشاء أرقام الصفحات للتنقل
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
@@ -145,7 +132,7 @@ export function TeamMembers() {
       setLoading(true);
       await deleteWorker(workerToDelete.id);
       toast.success('تم حذف العامل بنجاح');
-      await fetchWorkers(); // Refresh the list
+      await fetchWorkers(); // إعادة تحميل القائمة
     } catch (error) {
       console.error('Error deleting worker:', error);
       toast.error(error instanceof Error ? error.message : 'فشل في حذف العامل');
@@ -170,7 +157,7 @@ export function TeamMembers() {
       </Alert>
     );
   }
-console.log(workers);
+  
   return (
     <ErrorBoundary>
       <Card className="border shadow-sm">
@@ -211,7 +198,7 @@ console.log(workers);
             </TableHeader>
             <TableBody>
               {loading ? (
-                // Loading skeleton rows
+                // صفوف التحميل
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={index}>
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
@@ -251,7 +238,7 @@ console.log(workers);
                     onClick={() => handleWorkerClick(worker.id)}
                   >
                     <TableCell className="font-medium">
-                      {worker?.fullName}
+                      {worker.fullName}
                     </TableCell>
                     <TableCell>{worker.specialty || '-'}</TableCell>
                     <TableCell>
@@ -272,7 +259,7 @@ console.log(workers);
                     <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
                       <div 
                         className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}
-                        onClick={(e) => e.stopPropagation()} // Prevent row click when clicking buttons
+                        onClick={(e) => e.stopPropagation()} // منع تأثير النقر على الصف عند النقر على الأزرار
                       >
                         <Button 
                           variant="outline" 
@@ -353,16 +340,8 @@ console.log(workers);
           <AlertDialogHeader>
             <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف العامل {workerToDelete ? 
-                [
-                  workerToDelete.firstName,
-                  workerToDelete.secondName,
-                  workerToDelete.thirdName,
-                  workerToDelete.lastName
-                ]
-                  .filter(name => name && name.trim() !== '')
-                  .join(' ') || 'غير معروف'
-                : ''}؟ لا يمكن التراجع عن هذا الإجراء.
+              هل أنت متأكد من حذف العامل {workerToDelete ? workerToDelete.fullName || 'غير معروف' : ''}؟ 
+              لا يمكن التراجع عن هذا الإجراء.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
