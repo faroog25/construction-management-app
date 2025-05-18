@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface SiteEngineer {
@@ -206,6 +207,8 @@ export const updateEngineer = async (id: number, engineer: Partial<SiteEngineer>
 
 export const deleteEngineer = async (id: number): Promise<void> => {
   try {
+    console.log(`Deleting engineer with ID: ${id}`);
+    
     const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
       method: 'DELETE',
       headers: {
@@ -217,8 +220,12 @@ export const deleteEngineer = async (id: number): Promise<void> => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || `Failed to delete site engineer: ${response.status}`);
+      console.error('API error response for delete:', errorData);
+      throw new Error(errorData.message || `فشل في حذف مهندس الموقع: ${response.status}`);
     }
+    
+    console.log('Engineer deleted successfully');
+    return;
   } catch (error) {
     console.error('Error deleting site engineer:', error);
     throw error;

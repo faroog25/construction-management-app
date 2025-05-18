@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from 'react';
-import { getSiteEngineers, deleteSiteEngineer } from '../services/siteEngineerService';
+import { getSiteEngineers } from '../services/siteEngineerService';
 import { SiteEngineer } from '@/types/siteEngineer';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -14,6 +13,7 @@ import { NewSiteEngineerModal } from './NewSiteEngineerModal';
 import { EditSiteEngineerModal } from './EditSiteEngineerModal';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
 import { useNavigate } from 'react-router-dom';
+import { deleteEngineer } from '@/services/engineerService';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +37,7 @@ export function SiteEngineers() {
   const [selectedEngineer, setSelectedEngineer] = useState<SiteEngineer | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [engineerToDelete, setEngineerToDelete] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,25 +112,28 @@ export function SiteEngineers() {
     }
   }
 
-  const handleDeleteConfirm = async () => {
-    if (engineerToDelete !== null) {
-      try {
-        await deleteSiteEngineer(engineerToDelete);
-        toast.success('تم حذف المهندس بنجاح');
-        setIsDeleteDialogOpen(false);
-        setEngineerToDelete(null);
-        fetchEngineers();
-      } catch (error) {
-        console.error('Error deleting engineer:', error);
-        toast.error('فشل في حذف المهندس');
-      }
-    }
-  };
-
   const handleDeleteClick = (id: number, event: React.MouseEvent) => {
     event.stopPropagation();
     setEngineerToDelete(id);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (engineerToDelete !== null) {
+      try {
+        setIsDeleting(true);
+        await deleteEngineer(engineerToDelete);
+        toast.success('تم حذف المهندس بنجاح');
+        setIsDeleteDialogOpen(false);
+        setEngineerToDelete(null);
+        await fetchEngineers(); // إعادة جلب البيانات بعد الحذف
+      } catch (error) {
+        console.error('Error deleting engineer:', error);
+        toast.error(error instanceof Error ? error.message : 'فشل في حذف المهندس');
+      } finally {
+        setIsDeleting(false);
+      }
+    }
   };
 
   const handleEditEngineer = (engineer: SiteEngineer, event: React.MouseEvent) => {
@@ -357,12 +361,13 @@ export function SiteEngineers() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>إلغاء</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isDeleting}
             >
-              حذف
+              {isDeleting ? 'جاري الحذف...' : 'حذف'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
