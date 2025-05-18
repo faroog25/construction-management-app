@@ -15,8 +15,8 @@ import {
   BarChart2,
   Map,
   CalendarRange,
-  Calendar2,
-  CalendarCheck
+  CalendarCheck,
+  CalendarClock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GanttChart from '@/components/GanttChart';
@@ -115,7 +115,7 @@ const ProjectDetails = ({ project }: ProjectDetailsProps) => {
               {project.handoverDate && (
                 <div className="space-y-1">
                   <p className="text-sm flex items-center gap-2 text-muted-foreground">
-                    <Calendar2 className="h-4 w-4" />
+                    <CalendarClock className="h-4 w-4" />
                     تاريخ التسليم
                   </p>
                   <p className="font-medium">{formatDate(project.handoverDate)}</p>

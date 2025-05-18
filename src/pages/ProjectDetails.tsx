@@ -25,7 +25,7 @@ import {
   FileText,
   Package,
   LayoutGrid,
-  Gantt,
+  BarChart2,
   ClipboardList,
   Settings
 } from 'lucide-react';
@@ -92,6 +92,7 @@ const ProjectDetails = () => {
     );
   }
 
+  // Ensure required properties have default values
   const projectWithDates: Project = {
     ...project,
     createdAt: project.createdAt || new Date().toISOString(),
@@ -180,7 +181,7 @@ const ProjectDetails = () => {
               المراحل والمهام
             </TabsTrigger>
             <TabsTrigger value="gantt" className="flex items-center gap-1.5">
-              <Gantt className="h-4 w-4" />
+              <BarChart2 className="h-4 w-4" />
               مخطط جانت
             </TabsTrigger>
             <TabsTrigger value="equipment" className="flex items-center gap-1.5">
