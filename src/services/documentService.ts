@@ -19,17 +19,20 @@ export const getDocuments = async (params: DocumentsParams): Promise<Document[]>
       },
     });
 
-    // Handle 404 specifically as it might mean "no documents yet" rather than an error
-    if (response.status === 404) {
-      console.log('No documents found or documents endpoint not available yet');
-      return [];
-    }
-
+    console.log('Documents API Response Status:', response.status);
+    
     if (!response.ok) {
+      // If the response is 404, it might be a legitimate "no documents" response
+      // rather than an actual error in some APIs
+      if (response.status === 404) {
+        console.log('No documents found (404 response)');
+        return [];
+      }
       throw new Error(`Failed to fetch documents: ${response.status}`);
     }
 
     const result: DocumentsResponse = await response.json();
+    console.log('Documents API Response:', result);
     
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch documents');
@@ -48,6 +51,9 @@ export const getDocuments = async (params: DocumentsParams): Promise<Document[]>
         type = 'image';
       } else if (['zip', 'rar', '7z'].includes(fileExtension)) {
         type = 'archive';
+      } else {
+        // Default to PDF if no extension or unknown extension
+        type = 'pdf';
       }
       
       // Add an estimated size if not provided
@@ -60,6 +66,7 @@ export const getDocuments = async (params: DocumentsParams): Promise<Document[]>
     });
   } catch (error) {
     console.error('Error fetching documents:', error);
+    // Don't show toast here, let the component handle error reporting
     return [];
   }
 };

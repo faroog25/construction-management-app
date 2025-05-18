@@ -34,7 +34,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [documentType, setDocumentType] = useState<string>('all');
 
-  // Fetch documents using React Query
+  // Fetch documents using React Query with retry disabled for 404 responses
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['project-documents', project.id],
     queryFn: () => getDocuments({ 
@@ -43,18 +43,20 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
       pageSize: 20,
       ClassificationId: 1
     }),
+    retry: false // Don't retry on failure
   });
 
   useEffect(() => {
     if (data) {
+      console.log('Documents data set:', data);
       setDocuments(data);
     }
   }, [data]);
 
   useEffect(() => {
     if (error) {
-      toast.error('حدث خطأ أثناء جلب المستندات');
       console.error('Error fetching documents:', error);
+      toast.error('حدث خطأ أثناء جلب المستندات');
     }
   }, [error]);
 
@@ -95,6 +97,15 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
     return 'pdf'; // Default to PDF
   };
 
+  // Format the date
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('ar-SA');
+    } catch (e) {
+      return dateString;
+    }
+  };
+
   // Map status string to the appropriate enum value
   const mapStatus = (status?: string): 'approved' | 'pending' | 'rejected' | 'draft' => {
     if (status === 'approved') return 'approved';
@@ -120,7 +131,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
 
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden border-0 shadow-md">
+      <Card className="overflow-hidden border rounded-lg shadow-sm">
         <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 pb-3">
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl font-bold">مستندات المشروع</CardTitle>
@@ -189,7 +200,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
                     name: doc.name,
                     type: doc.type || getDocumentType(doc.name),
                     size: doc.size || '2.5 MB',
-                    dateModified: new Date(doc.createdDate).toLocaleDateString('ar-SA'),
+                    dateModified: formatDate(doc.createdDate),
                     project: doc.projectName,
                     owner: doc.taskName || 'المشروع',
                     status: mapStatus(doc.status)
