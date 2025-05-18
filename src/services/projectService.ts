@@ -48,6 +48,34 @@ export interface ProjectResponse {
   };
 }
 
+// Interface for project names response
+export interface ProjectNameResponse {
+  id: number;
+  name: string;
+}
+
+// Get all project names for dropdowns
+export async function getAllProjectNames(): Promise<ProjectNameResponse[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Projects/GetAllProjectNames`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch project names');
+    }
+    
+    return result.data || [];
+  } catch (error) {
+    console.error('Error fetching project names:', error);
+    throw error;
+  }
+}
+
 export async function getAllProjects(): Promise<Project[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/Projects`);

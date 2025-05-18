@@ -1,4 +1,3 @@
-
 export interface EquipmentItem {
   id: string;
   name: string;
@@ -13,16 +12,17 @@ export interface EquipmentItem {
 
 export interface Booking {
   id: string;
-  equipmentId: string;
+  equipmentId: number;
   equipmentName: string;
   category: string;
+  projectId?: number; // Added projectId field
+  projectName: string;
   startDate: string;
   endDate: string;
   duration: number;
-  dailyRate: number;
-  totalCost: number;
-  projectName: string;
   notes?: string;
   status: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled';
   createdAt: string;
+  dailyRate: number;
+  totalCost: number;
 }
