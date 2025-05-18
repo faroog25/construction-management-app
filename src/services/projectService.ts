@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/config/api';
-import { Project, ProjectApiResponse, PaginatedResponse } from '@/types/project';
+import { Project as ProjectType, ProjectApiResponse, PaginatedResponse } from '@/types/project';
 
 export interface Project {
   id: number;

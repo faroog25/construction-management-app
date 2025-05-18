@@ -103,18 +103,18 @@ const Projects = () => {
       pageSize: pageSize,
       status: getStatusCodeFromTab(activeTab)
     }),
-    onSuccess: (data) => {
-      console.log("Pagination data:", data);
-      // Update pagination parameters
-      if (data && data.data) {
-        setTotalPages(data.data.totalPages);
-        setTotalItems(data.data.totalItems);
-        setHasNextPage(data.data.hasNextPage);
-        setHasPreviousPage(data.data.hasPreveiosPage);
-        console.log(`Total pages: ${data.data.totalPages}, Current page: ${data.data.currentPage}`);
-      }
-    }
   });
+
+  // Update pagination state when data changes
+  useEffect(() => {
+    if (data && data.data) {
+      setTotalPages(data.data.totalPages);
+      setTotalItems(data.data.totalItems);
+      setHasNextPage(data.data.hasNextPage);
+      setHasPreviousPage(data.data.hasPreveiosPage);
+      console.log(`Total pages: ${data.data.totalPages}, Current page: ${data.data.currentPage}`);
+    }
+  }, [data]);
 
   const projectsData = data?.data?.items || [];
   
