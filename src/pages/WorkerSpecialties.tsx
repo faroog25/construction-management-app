@@ -56,7 +56,7 @@ export default function WorkerSpecialties() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 pt-20">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">تخصصات العمال</h1>
         <Button onClick={() => setIsNewModalOpen(true)}>

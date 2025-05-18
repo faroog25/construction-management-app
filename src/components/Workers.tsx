@@ -140,7 +140,7 @@ export function Workers() {
   };
 
   const handleGoToSpecialties = () => {
-    navigate('/specialties');
+    navigate('/worker-specialties');
   };
 
   // Create page numbers array for pagination
