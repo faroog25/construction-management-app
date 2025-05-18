@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Search, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle } from 'lucide-react';
 import { getProjects, Project, createProject, getClients, getSiteEngineers, Client, SiteEngineer, getStatusFromCode, getArabicStatus } from '@/services/projectService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -104,12 +104,14 @@ const Projects = () => {
       status: getStatusCodeFromTab(activeTab)
     }),
     onSuccess: (data) => {
+      console.log("Pagination data:", data);
       // Update pagination parameters
       if (data && data.data) {
         setTotalPages(data.data.totalPages);
         setTotalItems(data.data.totalItems);
         setHasNextPage(data.data.hasNextPage);
         setHasPreviousPage(data.data.hasPreveiosPage);
+        console.log(`Total pages: ${data.data.totalPages}, Current page: ${data.data.currentPage}`);
       }
     }
   });
@@ -220,7 +222,6 @@ const Projects = () => {
       form.reset();
       setFormErrors({});
     } catch (error) {
-      // console.error('Error creating project:', error);
       toast.error("Failed to create project");
     }
   };
@@ -259,6 +260,11 @@ const Projects = () => {
     }
   };
 
+  // View project details handler
+  const handleViewDetails = (projectId: number) => {
+    navigate(`/projects/${projectId}`);
+  };
+
   // Generate pagination items
   const generatePaginationItems = () => {
     const items = [];
@@ -272,6 +278,7 @@ const Projects = () => {
             <PaginationLink
               isActive={currentPage === i}
               onClick={() => handlePageChange(i)}
+              className="cursor-pointer"
             >
               {i}
             </PaginationLink>
@@ -287,6 +294,7 @@ const Projects = () => {
         <PaginationLink
           isActive={currentPage === 1}
           onClick={() => handlePageChange(1)}
+          className="cursor-pointer"
         >
           1
         </PaginationLink>
@@ -316,6 +324,7 @@ const Projects = () => {
           <PaginationLink
             isActive={currentPage === i}
             onClick={() => handlePageChange(i)}
+            className="cursor-pointer"
           >
             {i}
           </PaginationLink>
@@ -333,16 +342,19 @@ const Projects = () => {
     }
     
     // Always show last page
-    items.push(
-      <PaginationItem key={totalPages}>
-        <PaginationLink
-          isActive={currentPage === totalPages}
-          onClick={() => handlePageChange(totalPages)}
-        >
-          {totalPages}
-        </PaginationLink>
-      </PaginationItem>
-    );
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink
+            isActive={currentPage === totalPages}
+            onClick={() => handlePageChange(totalPages)}
+            className="cursor-pointer"
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
     
     return items;
   };
@@ -396,7 +408,7 @@ const Projects = () => {
                       حسب التقدم
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setSortOption('dueDate')}>
-                      حسب تاريخ ا��ستحقاق
+                      حسب تاريخ الاستحقاق
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -453,13 +465,14 @@ const Projects = () => {
                   />
                 ))}
               </div>
+              
               {filteredProjects.length === 0 && !isLoading && (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">لا توجد مشاريع</p>
                 </div>
               )}
 
-              {/* Pagination - optimized for better display */}
+              {/* Pagination - enhanced for better display */}
               {totalPages > 1 && (
                 <div className="mt-8">
                   <Pagination>
@@ -467,8 +480,7 @@ const Projects = () => {
                       <PaginationItem>
                         <PaginationPrevious 
                           onClick={() => hasPreviousPage && handlePageChange(currentPage - 1)}
-                          className={!hasPreviousPage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                          aria-disabled={!hasPreviousPage}
+                          className={!hasPreviousPage ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}
                         />
                       </PaginationItem>
                       
@@ -477,8 +489,7 @@ const Projects = () => {
                       <PaginationItem>
                         <PaginationNext 
                           onClick={() => hasNextPage && handlePageChange(currentPage + 1)}
-                          className={!hasNextPage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                          aria-disabled={!hasNextPage}
+                          className={!hasNextPage ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}
                         />
                       </PaginationItem>
                     </PaginationContent>
