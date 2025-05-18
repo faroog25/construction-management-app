@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface WorkerTask {
@@ -70,8 +69,17 @@ export interface DeleteWorkerResponse {
   message: string;
 }
 
-export interface UpdateWorkerRequest extends CreateWorkerRequest {
+export interface UpdateWorkerRequest {
   id: number;
+  firstName: string;
+  secondName: string;
+  thirdName: string;
+  lastName: string;
+  nationalNumber: string;
+  phoneNumber: string;
+  email: string;
+  address: string;
+  specialtyId: number;
 }
 
 export interface UpdateWorkerResponse {
@@ -312,7 +320,22 @@ export async function deleteWorker(id: number): Promise<void> {
  */
 export async function updateWorker(id: number, workerData: CreateWorkerRequest): Promise<Worker> {
   try {
-    console.log('Updating worker:', { id, workerData });
+    // Prepare the request body according to the API's expected format
+    const requestBody = {
+      id: id,
+      firstName: workerData.firstName,
+      secondName: workerData.secondName,
+      thirdName: workerData.thirdName,
+      lastName: workerData.lastName,
+      nationalNumber: workerData.nationalNumber,
+      phoneNumber: workerData.phoneNumber,
+      email: workerData.email,
+      address: workerData.address,
+      specialtyId: workerData.specialtyId
+    };
+    
+    console.log('Updating worker:', { id, requestBody });
+    
     const response = await fetch(`${API_BASE_URL}/Workers/${id}`, {
       method: 'PUT',
       headers: {
@@ -320,7 +343,7 @@ export async function updateWorker(id: number, workerData: CreateWorkerRequest):
         'Content-Type': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       },
-      body: JSON.stringify(workerData)
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {

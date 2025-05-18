@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { updateWorker, getSpecialties, getWorkerById, Specialty, Worker, CreateWorkerRequest } from '@/services/workerService';
+import { updateWorker, getSpecialties, getWorkerById, Specialty, Worker } from '@/services/workerService';
 import { toast } from 'sonner';
 import {
   Select,
@@ -27,7 +27,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
   const [loading, setLoading] = useState(false);
   const [fetchingWorker, setFetchingWorker] = useState(false);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
-  const [formData, setFormData] = useState<CreateWorkerRequest>({
+  const [formData, setFormData] = useState({
     firstName: '',
     secondName: '',
     thirdName: '',
@@ -93,6 +93,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
 
     setLoading(true);
     try {
+      // Pass the worker ID and formData directly to updateWorker
       await updateWorker(worker.id, formData);
       toast.success(t('workers.update_success'));
       onWorkerUpdated();
