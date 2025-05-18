@@ -10,7 +10,7 @@ import EquipmentList from '@/components/equipment/EquipmentList';
 import BookingForm from '@/components/equipment/BookingForm';
 import BookingsList from '@/components/equipment/BookingsList';
 import { AddEquipmentDialog } from '@/components/equipment/AddEquipmentDialog';
-import { EquipmentItem, Booking } from '@/types/equipment';
+import { EquipmentItem } from '@/types/equipment';
 import { Box, CalendarDays, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,7 +18,6 @@ const Equipment = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'equipment';
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentItem | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([]);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [isAddEquipmentDialogOpen, setIsAddEquipmentDialogOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -33,14 +32,13 @@ const Equipment = () => {
     setIsBookingDialogOpen(true);
   };
 
-  const handleBookingSubmit = (booking: Booking) => {
-    setBookings([...bookings, { ...booking, id: Date.now().toString() }]);
+  const handleBookingSubmit = () => {
     setIsBookingDialogOpen(false);
     setSelectedEquipment(null);
     
     toast({
       title: "Booking Confirmed",
-      description: `You've successfully booked ${booking.equipmentName} for ${booking.duration} days.`,
+      description: "Your equipment booking has been successfully submitted.",
       variant: "default",
     });
   };
@@ -114,7 +112,7 @@ const Equipment = () => {
           </TabsContent>
 
           <TabsContent value="bookings" className="space-y-6">
-            <BookingsList bookings={bookings} />
+            <BookingsList />
           </TabsContent>
         </Tabs>
 

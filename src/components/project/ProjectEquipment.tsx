@@ -11,19 +11,8 @@ interface ProjectEquipmentProps {
   project: Project;
 }
 
-interface ProjectEquipment {
-  id: number;
-  projectId: number;
-  projectName: string;
-  equipmentId: number;
-  equipmentName: string;
-  bookDate: string;
-  expectedReturnDate: string;
-  actualReturnDate: string | null;
-}
-
 const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
-  const projectId = project.id;
+  const projectId = typeof project.id === 'string' ? parseInt(project.id) : project.id;
 
   const { data: equipments, isLoading, error } = useQuery({
     queryKey: ['projectEquipment', projectId],

@@ -83,3 +83,32 @@ export async function getProjectEquipment(projectId: number): Promise<ProjectEqu
     throw new Error('حدث خطأ غير متوقع أثناء جلب بيانات المعدات');
   }
 }
+
+export async function getAllEquipmentAssignments(): Promise<ProjectEquipment[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/EquipmentAssignments/All`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`فشل في جلب بيانات الحجوزات. (HTTP ${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching equipment assignments:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في جلب بيانات الحجوزات: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء جلب بيانات الحجوزات');
+  }
+}
