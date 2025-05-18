@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Worker, getAllWorkers, deleteWorker } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -19,7 +20,7 @@ export function Workers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortColumn, setSortColumn] = useState<string>('name');
+  const [sortColumn, setSortColumn] = useState<string>('fullName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isNewWorkerModalOpen, setIsNewWorkerModalOpen] = useState(false);
   const [isEditWorkerModalOpen, setIsEditWorkerModalOpen] = useState(false);
@@ -93,6 +94,55 @@ export function Workers() {
     navigate(`/team/workers/${workerId}`);
   };
 
+  // Filter and sort workers
+  const filteredWorkers = workers
+    .filter((worker) => {
+      if (!searchQuery) return true;
+      
+      // Only search in the displayed fields
+      return (
+        worker.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        worker.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        worker.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        worker.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    })
+    .sort((a, b) => {
+      // Only sort by the displayed fields
+      if (sortColumn === 'fullName') {
+        const valueA = a.fullName || '';
+        const valueB = b.fullName || '';
+        return sortDirection === 'asc' 
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      } else if (sortColumn === 'email') {
+        const valueA = a.email || '';
+        const valueB = b.email || '';
+        return sortDirection === 'asc' 
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      } else if (sortColumn === 'phoneNumber') {
+        const valueA = a.phoneNumber || '';
+        const valueB = b.phoneNumber || '';
+        return sortDirection === 'asc' 
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      } else if (sortColumn === 'specialty') {
+        const valueA = a.specialty || '';
+        const valueB = b.specialty || '';
+        return sortDirection === 'asc' 
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      }
+      return 0;
+    });
+
+  // Paginate filtered workers
+  const paginatedWorkers = filteredWorkers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   if (error) {
     return (
       <Alert variant="destructive">
@@ -164,18 +214,10 @@ export function Workers() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={`skeleton-${index}`}>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[150px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[150px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[120px]" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[80px]" />
-                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Skeleton className="h-8 w-[60px]" />
@@ -184,7 +226,7 @@ export function Workers() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : workers.length === 0 ? (
+              ) : paginatedWorkers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
                     {searchQuery ? 
@@ -210,13 +252,13 @@ export function Workers() {
                   </TableCell>
                 </TableRow>
               ) : (
-                workers.map((worker) => (
+                paginatedWorkers.map((worker) => (
                   <TableRow 
                     key={worker.id}
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => handleWorkerClick(worker.id)}
                   >
-                    <TableCell>{worker.fullName}</TableCell>
+                    <TableCell>{worker.fullName || '-'}</TableCell>
                     <TableCell>{worker.email || '-'}</TableCell>
                     <TableCell>{worker.phoneNumber || '-'}</TableCell>
                     <TableCell>{worker.specialty || '-'}</TableCell>
@@ -251,7 +293,7 @@ export function Workers() {
             </TableBody>
           </Table>
           
-          {!loading && workers.length > 0 && (
+          {!loading && filteredWorkers.length > 0 && (
             <div className="py-4 px-2">
               <Pagination>
                 <PaginationContent>
