@@ -124,7 +124,7 @@ export async function getEquipment(pageNumber: number = 1, pageSize: number = 10
  */
 export function mapApiEquipmentToEquipmentItem(apiEquipment: ApiEquipmentItem): EquipmentItem {
   // Convert API status to our internal status format
-  let status: 'Available' | 'In Use' | 'Maintenance' = 'Available';
+  let status: 'Available' | 'In Use' | 'Maintenance' | 'Out of Service' = 'Available';
   
   // Normalize the status string by removing spaces and converting to lowercase
   const normalizedStatus = apiEquipment.status.toLowerCase().replace(/\s+/g, '');
@@ -137,8 +137,7 @@ export function mapApiEquipmentToEquipmentItem(apiEquipment: ApiEquipmentItem): 
   } else if (normalizedStatus === 'undermaintenance' || normalizedStatus === 'under-maintenance' || normalizedStatus === 'maintenance' || normalizedStatus === '2') {
     status = 'Maintenance';
   } else if (normalizedStatus === 'outofservice' || normalizedStatus === 'out-of-service' || normalizedStatus === '3') {
-    // Out of Service cases will be mapped to Maintenance for UI display purposes
-    status = 'Maintenance';
+    status = 'Out of Service';
   }
   
   console.log(`API Status: ${apiEquipment.status}, Mapped Status: ${status}`);
