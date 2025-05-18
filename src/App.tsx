@@ -19,7 +19,8 @@ import Navbar from "./components/Navbar";
 import ApiDocsPage from "./pages/ApiDocsPage";
 import ClientProfilePage from "./pages/ClientProfile";
 import { WorkerProfilePage } from "./pages/WorkerProfile";
-import  SiteEngineerProfilePage  from "./pages/SiteEngineerProfile" ;
+import SiteEngineerProfilePage from "./pages/SiteEngineerProfile";
+import WorkerSpecialties from "./pages/WorkerSpecialties"; // إضافة صفحة تخصصات العمال
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -97,6 +98,11 @@ const App = () => (
                 <Route path="/team/site-engineers/:id" element={
                   <ProtectedRoute>
                     <SiteEngineerProfilePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/worker-specialties" element={
+                  <ProtectedRoute>
+                    <WorkerSpecialties />
                   </ProtectedRoute>
                 } />
                 <Route path="/documents" element={
