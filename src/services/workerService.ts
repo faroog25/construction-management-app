@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface WorkerTask {
@@ -386,12 +387,12 @@ export async function deleteWorker(id: number): Promise<void> {
  */
 export async function updateWorker(id: number, workerData: CreateWorkerRequest): Promise<Worker> {
   try {
-    // استخدام نقطة النهاية الصحيحة للتعديل
+    // استخدام نقطة النهاية الصحيحة للتعديل ومع PUT method
     const url = `${API_BASE_URL}/Workers`;
-    console.log('Updating worker:', { id, url, workerData });
+    console.log('Updating worker using PUT method:', { id, url, workerData });
     
     const response = await fetch(url, {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
