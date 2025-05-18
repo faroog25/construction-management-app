@@ -226,171 +226,196 @@ const Projects = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Projects</h1>
+      <h1 className="text-2xl font-bold mb-4">المشاريع</h1>
       
-      <div className="mb-4 flex justify-between">
-        <div className="flex items-center space-x-2">
+      <div className="mb-4 flex flex-col sm:flex-row justify-between gap-2">
+        <div className="flex items-center">
           <Input
-            placeholder="Search projects..."
+            placeholder="البحث عن المشاريع..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-64"
+            className="w-full sm:w-64"
           />
         </div>
         <Button>
-          <Plus className="mr-2 h-4 w-4" /> Add Project
+          <Plus className="mr-2 h-4 w-4" /> إضافة مشروع
         </Button>
       </div>
       
-      {loading && <div className="flex justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>}
-      {error && <div className="text-red-500">{error}</div>}
+      {loading && <div className="flex justify-center my-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
+      {error && <div className="text-red-500 text-center py-4">{error}</div>}
       
       {!loading && !error && (
         <div>
           <Table>
-            <TableCaption>A list of projects.</TableCaption>
+            <TableCaption>قائمة المشاريع</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Start Date</TableHead>
-                <TableHead>End Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>الاسم</TableHead>
+                <TableHead>الوصف</TableHead>
+                <TableHead>تاريخ البدء</TableHead>
+                <TableHead>تاريخ الانتهاء</TableHead>
+                <TableHead>الحالة</TableHead>
+                <TableHead>الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProjects.map((project) => (
-                <TableRow key={project.id}>
-                  <TableCell className="font-medium">{project.projectName}</TableCell>
-                  <TableCell>{project.description}</TableCell>
-                  <TableCell>{project.startDate?.toString()}</TableCell>
-                  <TableCell>{project.expectedEndDate?.toString()}</TableCell>
-                  <TableCell>{project.status}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditProject(project)}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                      >
-                        <Pencil className="h-3 w-3 mr-1" />
-                        تعديل
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            حذف
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the project.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel onClick={cancelDeleteProject}>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => confirmDeleteProject()} className="bg-red-600">Delete</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewStages(project.id as number)}
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                      >
-                        <Layers className="h-3 w-3 mr-1" />
-                        المراحل
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewTasks(project.id as number)}
-                        className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                      >
-                        <ListTodo className="h-3 w-3 mr-1" />
-                        المهام
-                      </Button>
-                    </div>
+              {filteredProjects.length > 0 ? (
+                filteredProjects.map((project) => (
+                  <TableRow key={project.id}>
+                    <TableCell className="font-medium">{project.projectName}</TableCell>
+                    <TableCell>{project.description || "لا يوجد وصف"}</TableCell>
+                    <TableCell>{project.startDate || "غير محدد"}</TableCell>
+                    <TableCell>{project.expectedEndDate || "غير محدد"}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        project.projectStatus === "قيد التنفيذ" ? "bg-blue-100 text-blue-800" :
+                        project.projectStatus === "مكتمل" ? "bg-green-100 text-green-800" :
+                        project.projectStatus === "معلق" ? "bg-yellow-100 text-yellow-800" :
+                        project.projectStatus === "ملغي" ? "bg-red-100 text-red-800" :
+                        "bg-gray-100 text-gray-800"
+                      }`}>
+                        {project.projectStatus || "غير محدد"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditProject(project)}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Pencil className="h-3 w-3 ml-1" />
+                          تعديل
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-3 w-3 ml-1" />
+                              حذف
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                لا يمكن التراجع عن هذا الإجراء. سيتم حذف المشروع نهائياً.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={cancelDeleteProject}>إلغاء</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => confirmDeleteProject()} className="bg-red-600">حذف</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewStages(project.id as number)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <Layers className="h-3 w-3 ml-1" />
+                          المراحل
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewTasks(project.id as number)}
+                          className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        >
+                          <ListTodo className="h-3 w-3 ml-1" />
+                          المهام
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                    {searchQuery ? "لا توجد مشاريع تطابق بحثك" : "لا توجد مشاريع متاحة"}
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
           
-          {/* Pagination */}
-          <div className="mt-4">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    className={!hasPreviousPage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                    aria-disabled={!hasPreviousPage}
-                  />
-                </PaginationItem>
-                
-                {/* Show first page if not in view */}
-                {startPage > 1 && (
-                  <>
-                    <PaginationItem>
-                      <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
-                    </PaginationItem>
-                    {startPage > 2 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    )}
-                  </>
-                )}
-                
-                {/* Page numbers */}
-                {pageNumbers.map(number => (
-                  <PaginationItem key={number}>
-                    <PaginationLink 
-                      isActive={currentPage === number}
-                      onClick={() => handlePageChange(number)}
-                    >
-                      {number}
-                    </PaginationLink>
+          {/* Pagination - Added visibility and margin for better display */}
+          {totalPages > 1 && (
+            <div className="mt-6 border-t pt-4">
+              <Pagination className="my-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      className={!hasPreviousPage ? "opacity-50 pointer-events-none" : ""}
+                      aria-disabled={!hasPreviousPage}
+                    />
                   </PaginationItem>
-                ))}
-                
-                {/* Show last page if not in view */}
-                {endPage < totalPages && (
-                  <>
-                    {endPage < totalPages - 1 && (
+                  
+                  {/* Show first page if not in view */}
+                  {startPage > 1 && (
+                    <>
                       <PaginationItem>
-                        <PaginationEllipsis />
+                        <PaginationLink onClick={() => handlePageChange(1)}>1</PaginationLink>
                       </PaginationItem>
-                    )}
-                    <PaginationItem>
-                      <PaginationLink onClick={() => handlePageChange(totalPages)}>
-                        {totalPages}
+                      {startPage > 2 && (
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Page numbers */}
+                  {pageNumbers.map(number => (
+                    <PaginationItem key={number}>
+                      <PaginationLink 
+                        isActive={currentPage === number}
+                        onClick={() => handlePageChange(number)}
+                      >
+                        {number}
                       </PaginationLink>
                     </PaginationItem>
-                  </>
-                )}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    className={!hasNextPage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                    aria-disabled={!hasNextPage}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+                  ))}
+                  
+                  {/* Show last page if not in view */}
+                  {endPage < totalPages && (
+                    <>
+                      {endPage < totalPages - 1 && (
+                        <PaginationItem>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )}
+                      <PaginationItem>
+                        <PaginationLink onClick={() => handlePageChange(totalPages)}>
+                          {totalPages}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </>
+                  )}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      className={!hasNextPage ? "opacity-50 pointer-events-none" : ""}
+                      aria-disabled={!hasNextPage}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+              
+              {/* Pagination info */}
+              <div className="text-center text-sm text-gray-500 mt-2">
+                عرض الصفحة {currentPage} من {totalPages} (إجمالي المشاريع: {projects.length})
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
