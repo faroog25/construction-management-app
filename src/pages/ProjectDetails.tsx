@@ -9,6 +9,7 @@ import ProjectStages from '@/components/ProjectStages';
 import GanttChart from '@/components/GanttChart';
 import ProjectTimeline from '@/components/ProjectTimeline';
 import Documents from '@/pages/Documents';
+import ProjectEquipment from '@/components/project/ProjectEquipment';
 import { 
   Loader2, 
   AlertCircle, 
@@ -21,7 +22,8 @@ import {
   Printer,
   MoreHorizontal,
   Plus,
-  FileText
+  FileText,
+  Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -85,6 +87,12 @@ const ProjectDetails = () => {
       </div>
     );
   }
+
+  const projectWithDates: Project = {
+    ...project,
+    createdAt: project.createdAt || new Date().toISOString(),
+    updatedAt: project.updatedAt || new Date().toISOString()
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -158,24 +166,29 @@ const ProjectDetails = () => {
         </div>
 
         <Tabs defaultValue="details" className="space-y-6">
-          <TabsList className="w-full max-w-md grid grid-cols-4 p-1 bg-muted/30">
+          <TabsList className="w-full max-w-md grid grid-cols-5 p-1 bg-muted/30">
             <TabsTrigger value="details">Project Details</TabsTrigger>
             <TabsTrigger value="stages">Stages & Tasks</TabsTrigger>
             <TabsTrigger value="gantt">Gantt Chart</TabsTrigger>
+            <TabsTrigger value="equipment">Equipment</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
           
           <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
-            <ProjectDetailsInfo project={project} />
+            <ProjectDetailsInfo project={projectWithDates} />
             <ProjectTimeline />
           </TabsContent>
           
           <TabsContent value="stages" className="space-y-6 animate-in fade-in-50">
-            <ProjectStages project={project} />
+            <ProjectStages project={projectWithDates} />
           </TabsContent>
           
           <TabsContent value="gantt" className="space-y-6 animate-in fade-in-50">
-            <GanttChart project={project} />
+            <GanttChart project={projectWithDates} />
+          </TabsContent>
+          
+          <TabsContent value="equipment" className="space-y-6 animate-in fade-in-50">
+            <ProjectEquipment project={projectWithDates} />
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6 animate-in fade-in-50">

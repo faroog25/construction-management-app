@@ -14,6 +14,17 @@ export interface EquipmentAssignmentResponse {
   data?: any;
 }
 
+export interface ProjectEquipment {
+  id: number;
+  projectId: number;
+  projectName: string;
+  equipmentId: number;
+  equipmentName: string;
+  bookDate: string;
+  expectedReturnDate: string;
+  actualReturnDate: string | null;
+}
+
 export async function assignEquipment(assignmentData: EquipmentAssignmentRequest): Promise<EquipmentAssignmentResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/EquipmentAssignments/Assign`, {
@@ -41,5 +52,34 @@ export async function assignEquipment(assignmentData: EquipmentAssignmentRequest
       throw new Error(`فشل في حجز المعدات: ${error.message}`);
     }
     throw new Error('حدث خطأ غير متوقع أثناء حجز المعدات');
+  }
+}
+
+export async function getProjectEquipment(projectId: number): Promise<ProjectEquipment[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/EquipmentAssignments/ByProject/${projectId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`فشل في جلب بيانات المعدات. (HTTP ${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching project equipment:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في جلب بيانات المعدات: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء جلب بيانات المعدات');
   }
 }
