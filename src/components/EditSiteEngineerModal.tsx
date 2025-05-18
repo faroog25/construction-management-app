@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -73,14 +74,12 @@ export function EditSiteEngineerModal({
           setApiError(null);
           const engineerData = await getSiteEngineerById(engineer.id.toString());
           
-          // تقسيم الاسم الكامل إلى أجزاء
-          const nameParts = engineerData.fullName.split(' ').filter(part => part.trim());
-          
+          // استخدام الحقول المباشرة من الـ API بدلاً من تقسيم الاسم الكامل
           form.reset({
-            firstName: nameParts[0] || '',
-            lastName: nameParts[nameParts.length - 1] || '',
-            secondName: nameParts.length > 2 ? nameParts[1] : '',
-            thirdName: nameParts.length > 3 ? nameParts[2] : '',
+            firstName: engineerData.firstName || '',
+            secondName: engineerData.secondName || '',
+            thirdName: engineerData.thirdName || '',
+            lastName: engineerData.lastName || '',
             email: engineerData.email || '',
             phoneNumber: engineerData.phoneNumber || '',
             address: engineerData.address || '',
@@ -149,6 +148,9 @@ export function EditSiteEngineerModal({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>تعديل بيانات مهندس الموقع</DialogTitle>
+          <DialogDescription>
+            قم بتعديل بيانات مهندس الموقع واضغط على تحديث البيانات عند الانتهاء
+          </DialogDescription>
         </DialogHeader>
         
         {apiError && (
