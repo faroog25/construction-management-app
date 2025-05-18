@@ -64,7 +64,7 @@ const Projects = () => {
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [selectedEngineerId, setSelectedEngineerId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(10); // تعديل حجم الصفحة إلى 10 مشاريع لكل صفحة
+  const [pageSize] = useState(10); 
   const [newProject, setNewProject] = useState({
     projectName: '',
     siteAddress: '',
@@ -73,7 +73,7 @@ const Projects = () => {
     description: '',
     startDate: '',
     expectedEndDate: '',
-    status: 0, // تعديل الحالة الافتراضية إلى 0
+    status: 0,
     clientId: 0,
     geographicalCoordinates: '',
     siteEngineerId: 0
@@ -95,7 +95,7 @@ const Projects = () => {
     return statusCode === -1 ? undefined : statusCode;
   };
 
-  // استخدام React Query لجلب المشاريع مع معلمات الترقيم الصفحي
+  // Use React Query to fetch projects with pagination parameters
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['projects', currentPage, pageSize, activeTab],
     queryFn: () => getProjects({
@@ -103,10 +103,8 @@ const Projects = () => {
       pageSize: pageSize,
       status: getStatusCodeFromTab(activeTab)
     }),
-    staleTime: 1000 * 60 * 5,
-    retry: 2,
     onSuccess: (data) => {
-      // تحديث معلمات الترقيم الصفحي
+      // Update pagination parameters
       if (data && data.data) {
         setTotalPages(data.data.totalPages);
         setTotalItems(data.data.totalItems);
@@ -117,7 +115,7 @@ const Projects = () => {
   });
 
   const projectsData = data?.data?.items || [];
-
+  
   const { data: client, isLoading: isLoadingClients } = useQuery({
     queryKey: ['clients'],
     queryFn: getClients,
@@ -181,7 +179,7 @@ const Projects = () => {
     }
   }, [selectedClientId, clients]);
 
-  // عند تغير علامة التبويب، نعود إلى الصفحة الأولى
+  // When tab changes, return to first page
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab]);
@@ -227,7 +225,7 @@ const Projects = () => {
     }
   };
 
-  // تحويل المشاريع إلى تنسيق ProjectAdapter
+  // Convert projects to ProjectAdapter format
   const adaptedProjects: ProjectAdapter[] = projectsData.map(project => ({
     id: project.id as number,
     name: project.projectName,
@@ -245,7 +243,7 @@ const Projects = () => {
     return 0;
   });
 
-  // التصفية على أساس استعلام البحث
+  // Filter based on search query
   const filteredProjects = adaptedProjects.filter(project => 
     project.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -253,7 +251,7 @@ const Projects = () => {
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      // تمرير للأعلى بعد تغيير الصفحة
+      // Scroll to top after page change
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
@@ -261,20 +259,12 @@ const Projects = () => {
     }
   };
 
-  const handleViewDetails = async (projectId: number) => {
-    try {
-      navigate(`/projects/${projectId}`);
-    } catch (error) {
-      toast.error('Failed to navigate to project details');
-    }
-  };
-
-  // توليد أرقام الصفحات
+  // Generate pagination items
   const generatePaginationItems = () => {
     const items = [];
     const maxPagesToShow = 5;
     
-    // إذا كان عدد الصفحات أقل من أو يساوي الحد الأقصى، عرض جميع الصفحات
+    // If total pages is less than or equal to max pages to show, show all pages
     if (totalPages <= maxPagesToShow) {
       for (let i = 1; i <= totalPages; i++) {
         items.push(
@@ -291,7 +281,7 @@ const Projects = () => {
       return items;
     }
     
-    // عرض أول صفحة دائمًا
+    // Always show first page
     items.push(
       <PaginationItem key={1}>
         <PaginationLink
@@ -310,7 +300,7 @@ const Projects = () => {
       startPage = Math.max(totalPages - maxPagesToShow + 2, 2);
     }
     
-    // إضافة القطع إذا كانت الصفحة الأولى غير متاخمة للصفحة التالية
+    // Add ellipsis if first page is not adjacent to next page
     if (startPage > 2) {
       items.push(
         <PaginationItem key="ellipsis1">
@@ -319,7 +309,7 @@ const Projects = () => {
       );
     }
     
-    // إضافة الصفحات المتوسطة
+    // Add middle pages
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -333,7 +323,7 @@ const Projects = () => {
       );
     }
     
-    // إضافة القطع إذا كانت الصفحة الأخيرة غير متاخمة للصفحة السابقة
+    // Add ellipsis if last page is not adjacent to previous page
     if (endPage < totalPages - 1) {
       items.push(
         <PaginationItem key="ellipsis2">
@@ -342,7 +332,7 @@ const Projects = () => {
       );
     }
     
-    // عرض آخر صفحة دائمًا
+    // Always show last page
     items.push(
       <PaginationItem key={totalPages}>
         <PaginationLink
@@ -469,7 +459,7 @@ const Projects = () => {
                 </div>
               )}
 
-              {/* الترقيم الصفحي - مُحسّن لعرض أفضل */}
+              {/* Pagination - optimized for better display */}
               {totalPages > 1 && (
                 <div className="mt-8">
                   <Pagination>
