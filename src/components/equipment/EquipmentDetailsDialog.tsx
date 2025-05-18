@@ -219,6 +219,53 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
     return status.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
   };
 
+  // Determine which status options to show based on current status
+  const renderStatusOptions = () => {
+    if (!equipment) return null;
+    
+    const currentStatus = equipment.status.toLowerCase();
+    
+    // If status is "In Use", don't show any status change options
+    if (currentStatus === 'in use' || currentStatus === 'inuse' || currentStatus === '1') {
+      return (
+        <DropdownMenuItem disabled className="text-muted-foreground">
+          Cannot change status while equipment is in use
+        </DropdownMenuItem>
+      );
+    }
+    
+    // If status is "Available", show "Under Maintenance" and "Out of Service" options
+    if (currentStatus === 'available' || currentStatus === '0') {
+      return (
+        <>
+          <DropdownMenuItem 
+            onClick={() => handleStatusChange(2)}
+            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+          >
+            Under Maintenance
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem 
+            onClick={() => handleStatusChange(3)}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            Out of Service
+          </DropdownMenuItem>
+        </>
+      );
+    }
+    
+    // If status is "Under Maintenance" or "Out of Service", show "Available" option
+    return (
+      <DropdownMenuItem 
+        onClick={() => handleStatusChange(0)}
+        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+      >
+        Available
+      </DropdownMenuItem>
+    );
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={() => onClose()}>
@@ -305,31 +352,7 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusChange(0)}
-                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                    >
-                      Available
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusChange(1)}
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    >
-                      In Use
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusChange(2)}
-                      className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                    >
-                      Under Maintenance
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => handleStatusChange(3)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      Out of Service
-                    </DropdownMenuItem>
+                    {renderStatusOptions()}
                   </DropdownMenuContent>
                 </DropdownMenu>
                 
