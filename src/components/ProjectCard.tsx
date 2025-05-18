@@ -7,21 +7,23 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   Clock3, 
-  Users,
   Building,
   ChevronRight,
   BarChart2,
-  User
+  User,
+  XCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ProjectCardProps } from '@/types/project';
 
+// تكوين معلومات الحالة بناءً على رمز الحالة
 const statusConfig = {
-  1: { label: 'Active', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2 },
-  2: { label: 'Completed', className: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2 },
-  3: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock3 },
-  4: { label: 'Delayed', className: 'bg-red-100 text-red-800 border-red-200', icon: AlertTriangle },
+  0: { label: 'قيد التنفيذ', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2 },
+  1: { label: 'معلق', className: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock3 },
+  2: { label: 'مكتمل', className: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2 },
+  3: { label: 'ملغي', className: 'bg-red-100 text-red-800 border-red-200', icon: XCircle },
+  4: { label: 'متأخر', className: 'bg-orange-100 text-orange-800 border-orange-200', icon: AlertTriangle },
 };
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -47,10 +49,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     }
   };
 
-  const statusInfo = statusConfig[status as keyof typeof statusConfig] || statusConfig[1];
+  // استخدام معلومات الحالة من التكوين أو استخدام الإعدادات الافتراضية
+  const statusInfo = statusConfig[status as keyof typeof statusConfig] || statusConfig[0];
   const StatusIcon = statusInfo.icon;
 
-  // Get color based on progress
+  // الحصول على اللون بناءً على التقدم
   const getProgressColor = (progress: number) => {
     if (progress < 25) return 'bg-red-500';
     if (progress < 50) return 'bg-orange-500';
@@ -90,16 +93,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         </h3>
         
         <div className="space-y-2">
-          {/* Client information */}
+          {/* معلومات العميل */}
           <div className="flex items-center gap-2 text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg">
             <Building className="h-4 w-4" />
-            <p className="text-sm font-medium">{client_name || 'No client assigned'}</p>
+            <p className="text-sm font-medium">{client_name || 'لم يتم تعيين عميل'}</p>
           </div>
           
-          {/* Site Engineer information */}
+          {/* معلومات مهندس الموقع */}
           <div className="flex items-center gap-2 text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg">
             <User className="h-4 w-4" />
-            <p className="text-sm font-medium">{site_engineer_name || 'No site engineer assigned'}</p>
+            <p className="text-sm font-medium">{site_engineer_name || 'لم يتم تعيين مهندس'}</p>
           </div>
         </div>
         
@@ -108,7 +111,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
                 <BarChart2 className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Progress</span>
+                <span className="text-sm font-medium">التقدم</span>
               </div>
               <span className="text-sm font-bold">{progress}%</span>
             </div>
@@ -128,8 +131,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           className="w-full hover:bg-primary hover:text-white transition-all duration-300 group border-2" 
           onClick={handleClick}
         >
-          View Details
-          <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          عرض التفاصيل
+          <ChevronRight className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Button>
       </CardFooter>
     </Card>

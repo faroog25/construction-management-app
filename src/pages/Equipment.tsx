@@ -5,11 +5,14 @@ import { useSearchParams } from 'react-router-dom';
 import { Container } from '@/components/ui/container';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import EquipmentList from '@/components/equipment/EquipmentList';
 import BookingForm from '@/components/equipment/BookingForm';
 import BookingsList from '@/components/equipment/BookingsList';
+import { AddEquipmentDialog } from '@/components/equipment/AddEquipmentDialog';
 import { EquipmentItem, Booking } from '@/types/equipment';
-import { Box, Clipboard, CalendarDays } from 'lucide-react';
+import { Box, CalendarDays, PlusCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Equipment = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,6 +20,9 @@ const Equipment = () => {
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentItem | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
+  const [isAddEquipmentDialogOpen, setIsAddEquipmentDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { toast } = useToast();
 
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value });
@@ -31,6 +37,28 @@ const Equipment = () => {
     setBookings([...bookings, { ...booking, id: Date.now().toString() }]);
     setIsBookingDialogOpen(false);
     setSelectedEquipment(null);
+    
+    toast({
+      title: "Booking Confirmed",
+      description: `You've successfully booked ${booking.equipmentName} for ${booking.duration} days.`,
+      variant: "default",
+    });
+  };
+
+  const handleEquipmentAdded = () => {
+    // Refresh equipment list by updating the key
+    setRefreshKey(prevKey => prevKey + 1);
+    
+    toast({
+      title: "Equipment Added",
+      description: "New equipment has been added successfully.",
+      variant: "default",
+    });
+  };
+
+  const handleEquipmentRefresh = () => {
+    // Refresh equipment list by updating the key
+    setRefreshKey(prevKey => prevKey + 1);
   };
 
   return (
@@ -40,11 +68,23 @@ const Equipment = () => {
       </Helmet>
       
       <Container className="py-8 mt-16">
-        <div className="mb-8 space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight text-primary">Equipment Management</h1>
-          <p className="text-lg text-muted-foreground">
-            Browse available equipment, make bookings, and manage your equipment reservations efficiently.
-          </p>
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight text-primary">Equipment Management</h1>
+            <p className="text-lg text-muted-foreground">
+              Browse available equipment, make bookings, and manage your equipment reservations efficiently.
+            </p>
+          </div>
+          
+          {activeTab === 'equipment' && (
+            <Button 
+              className="bg-primary hover:bg-primary/90 gap-2" 
+              onClick={() => setIsAddEquipmentDialogOpen(true)}
+            >
+              <PlusCircle className="h-5 w-5" />
+              Add Equipment
+            </Button>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
@@ -66,7 +106,11 @@ const Equipment = () => {
           </TabsList>
 
           <TabsContent value="equipment" className="space-y-6">
-            <EquipmentList onSelectEquipment={handleSelectEquipment} />
+            <EquipmentList 
+              onSelectEquipment={handleSelectEquipment} 
+              onRefresh={handleEquipmentRefresh}
+              key={refreshKey} // This forces a re-render when refreshKey changes
+            />
           </TabsContent>
 
           <TabsContent value="bookings" className="space-y-6">
@@ -88,6 +132,13 @@ const Equipment = () => {
             />
           </DialogContent>
         </Dialog>
+        
+        {/* Add Equipment Dialog */}
+        <AddEquipmentDialog 
+          isOpen={isAddEquipmentDialogOpen}
+          onClose={() => setIsAddEquipmentDialogOpen(false)}
+          onSuccess={handleEquipmentAdded}
+        />
       </Container>
     </>
   );

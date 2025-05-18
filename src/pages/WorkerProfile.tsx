@@ -1,12 +1,12 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getWorkerById } from '../services/workerService';
+import { getTasksForWorker, WorkerAssignment } from '../services/taskService';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { CheckCircle2, XCircle, User, Mail, Phone, MapPin, Briefcase, Calendar, ListTodo, ArrowLeft } from 'lucide-react';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
@@ -18,14 +18,23 @@ export function WorkerProfilePage() {
   const navigate = useNavigate();
   const workerId = parseInt(id || '0');
 
-  const { data: worker, isLoading, error } = useQuery({
+  const { data: worker, isLoading: isWorkerLoading, error: workerError } = useQuery({
     queryKey: ['worker', workerId],
     queryFn: () => getWorkerById(workerId),
+  });
+
+  const { data: workerTasks, isLoading: isTasksLoading, error: tasksError } = useQuery({
+    queryKey: ['workerTasks', workerId],
+    queryFn: () => getTasksForWorker(workerId),
+    enabled: !!workerId, // Only fetch tasks if workerId is valid
   });
 
   const handleGoBack = () => {
     navigate('/team');
   };
+
+  const isLoading = isWorkerLoading || isTasksLoading;
+  const error = workerError || tasksError;
 
   if (isLoading) {
     return (
@@ -73,7 +82,11 @@ export function WorkerProfilePage() {
   }
 
   if (error) {
-    toast.error("حدث خطأ أثناء تحميل بيانات العامل");
+    toast({
+      title: "خطأ", 
+      description: "حدث خطأ أثناء تحميل بيانات العامل",
+      variant: "destructive"
+    });
     return (
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
         <div className="h-16"></div> {/* Spacer for navbar */}
@@ -99,7 +112,11 @@ export function WorkerProfilePage() {
   }
 
   if (!worker) {
-    toast.error("لم يتم العثور على العامل");
+    toast({
+      title: "خطأ",
+      description: "لم يتم العثور على العامل",
+      variant: "destructive"
+    });
     return (
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
         <div className="h-16"></div> {/* Spacer for navbar */}
@@ -124,6 +141,9 @@ export function WorkerProfilePage() {
 
   const fullName = `${worker.firstName} ${worker.secondName} ${worker.thirdName} ${worker.lastName}`;
   const initials = `${worker.firstName?.charAt(0) || ''}${worker.lastName?.charAt(0) || ''}`.toUpperCase();
+
+  // Use workerTasks from the API instead of worker.tasks
+  const tasks = workerTasks || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
@@ -237,23 +257,28 @@ export function WorkerProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              {worker.tasks.length === 0 ? (
+              {tasks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-lg">
                   <ListTodo className="mx-auto h-12 w-12 mb-3 text-muted-foreground/50" />
                   <p>لا توجد مهام مسندة</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {worker.tasks.map((task) => (
+                  {tasks.map((task: WorkerAssignment) => (
                     <div 
-                      key={task.id} 
+                      key={task.taskId} 
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors"
                     >
                       <div>
-                        <h4 className="font-medium">{task.name}</h4>
-                        <p className="text-sm text-muted-foreground mt-1">{task.projectName}</p>
+                        <h4 className="font-medium">{task.taskName}</h4>
+                        <p className="text-sm text-muted-foreground mt-1">تاريخ التعيين: {new Date(task.assignedDate).toLocaleDateString('ar-SA')}</p>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-primary">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-primary"
+                        onClick={() => navigate(`/projects/tasks/${task.taskId}`)}
+                      >
                         عرض التفاصيل
                       </Button>
                     </div>
