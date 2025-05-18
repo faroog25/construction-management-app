@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { EquipmentItem } from '@/types/equipment';
 
@@ -53,6 +52,22 @@ export interface EquipmentDetailResponse {
     purchaseDate: string;
     notes: string;
   };
+}
+
+export interface UpdateEquipmentRequest {
+  id: number;
+  name: string;
+  model: string;
+  serialNumber: string;
+  purchaseDate: string;
+  notes: string;
+}
+
+export interface UpdateEquipmentResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data?: ApiEquipmentItem;
 }
 
 export interface DeleteEquipmentResponse {
@@ -210,6 +225,46 @@ export async function getEquipmentById(id: number): Promise<EquipmentDetailRespo
     return result;
   } catch (error) {
     console.error('Error fetching equipment details:', error);
+    throw error;
+  }
+}
+
+/**
+ * Updates an existing equipment item
+ * @param equipment The equipment data to update
+ * @returns API response with the updated equipment
+ */
+export async function updateEquipment(equipment: UpdateEquipmentRequest): Promise<UpdateEquipmentResponse> {
+  try {
+    console.log('Updating equipment:', equipment);
+    const response = await fetch(`${API_BASE_URL}/Equipment`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(equipment),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: UpdateEquipmentResponse = await response.json();
+    console.log('API Response - Update Equipment:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to update equipment');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error updating equipment:', error);
     throw error;
   }
 }

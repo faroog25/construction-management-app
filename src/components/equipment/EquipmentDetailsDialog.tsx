@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Info, Box, Tag, AlertTriangle, Trash2 } from 'lucide-react';
+import { Loader2, Calendar, Info, Box, Tag, AlertTriangle, Trash2, PencilIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { getEquipmentById, EquipmentDetailResponse, deleteEquipment } from '@/services/equipmentService';
 import { Separator } from '@/components/ui/separator';
@@ -19,12 +18,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { EditEquipmentDialog } from './EditEquipmentDialog';
 
 interface EquipmentDetailsDialogProps {
   equipmentId: number | null;
   isOpen: boolean;
   onClose: () => void;
   onEquipmentDeleted?: () => void;
+  onEquipmentUpdated?: () => void;
 }
 
 interface EquipmentDetails {
@@ -41,12 +42,14 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
   equipmentId, 
   isOpen, 
   onClose,
-  onEquipmentDeleted
+  onEquipmentDeleted,
+  onEquipmentUpdated
 }) => {
   const [equipment, setEquipment] = useState<EquipmentDetails | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
@@ -101,6 +104,20 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
       });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleEditSuccess = () => {
+    // Refresh equipment details
+    if (equipmentId) {
+      getEquipmentById(equipmentId).then(response => {
+        setEquipment(response.data);
+        
+        // Notify parent component to refresh equipment list
+        if (onEquipmentUpdated) {
+          onEquipmentUpdated();
+        }
+      });
     }
   };
 
@@ -209,7 +226,15 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
                 </div>
               )}
               
-              <div className="flex justify-end">
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  variant="outline" 
+                  className="gap-2" 
+                  onClick={() => setIsEditDialogOpen(true)}
+                >
+                  <PencilIcon className="h-4 w-4" />
+                  Edit Equipment
+                </Button>
                 <Button 
                   variant="destructive" 
                   className="gap-2" 
@@ -228,6 +253,7 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
         </DialogContent>
       </Dialog>
       
+      {/* Delete Alert Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -268,6 +294,16 @@ const EquipmentDetailsDialog: React.FC<EquipmentDetailsDialogProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Equipment Dialog */}
+      {equipment && (
+        <EditEquipmentDialog
+          equipmentId={equipment.id}
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </>
   );
 };
