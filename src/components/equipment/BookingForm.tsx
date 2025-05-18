@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar } from 'react-date-range';
 import 'react-date-range/dist/styles.css'; // main style file
@@ -8,12 +9,14 @@ import { addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CalendarDays } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { CalendarDays, Loader2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { assignEquipment } from '@/services/equipmentAssignmentService';
 import { useToast } from '@/hooks/use-toast';
 import { EquipmentItem } from '@/types/equipment';
+import { getAllProjectNames, ProjectNameResponse } from '@/services/projectService';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface BookingFormProps {
   selectedEquipment: EquipmentItem | null;
@@ -28,6 +31,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
   const [duration, setDuration] = useState(0);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [projects, setProjects] = useState<ProjectNameResponse[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const { toast } = useToast();
 
   const [date, setDate] = React.useState<DateRange[]>([
@@ -51,6 +56,38 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
     }
   }, [date]);
 
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      setIsLoadingProjects(true);
+      const projectsList = await getAllProjectNames();
+      setProjects(projectsList);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load projects. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingProjects(false);
+    }
+  };
+
+  const handleProjectChange = (value: string) => {
+    const selectedProjectId = value;
+    setProjectId(selectedProjectId);
+    
+    // Find the project name based on the selected ID
+    const selectedProject = projects.find(project => project.id.toString() === selectedProjectId);
+    if (selectedProject) {
+      setProjectName(selectedProject.name);
+    }
+  };
+
   const handleBookNow = async () => {
     if (!selectedEquipment) {
       toast({
@@ -64,7 +101,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
     if (!projectId || !projectName) {
       toast({
         title: "Error",
-        description: "Project ID and Project Name are required.",
+        description: "Please select a project for this booking.",
         variant: "destructive",
       });
       return;
@@ -84,7 +121,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
       
       // Book the equipment using the API
       const response = await assignEquipment({
-        equipmentId: Number(selectedEquipment.id),  // Convert string to number
+        equipmentId: Number(selectedEquipment.id),
         projectId: parseInt(projectId),
         expectedReturnDate: endDate
       });
@@ -135,27 +172,27 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
 
   return (
     <div className="grid gap-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="projectId">Project ID</Label>
-          <Input
-            id="projectId"
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-            placeholder="Enter project ID"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="projectName">Project Name</Label>
-          <Input
-            id="projectName"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            placeholder="Enter project name"
-            required
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="project">Project</Label>
+        {isLoadingProjects ? (
+          <div className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm text-muted-foreground">Loading projects...</span>
+          </div>
+        ) : (
+          <Select value={projectId} onValueChange={handleProjectChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a project" />
+            </SelectTrigger>
+            <SelectContent>
+              {projects.map((project) => (
+                <SelectItem key={project.id} value={project.id.toString()}>
+                  {project.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -165,7 +202,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
             <Button
               variant={"outline"}
               className={cn(
-                "w-[240px] justify-start text-left font-normal",
+                "w-full justify-start text-left font-normal",
                 !date ? "text-muted-foreground" : undefined
               )}
             >
