@@ -2,22 +2,31 @@
 export interface Document {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   taskId?: number;
   taskName?: string;
   projectId: number;
   projectName: string;
-  classificationId: number;
-  classificationName: string;
+  classificationId?: number;
+  classificationName?: string;
   createdDate: string;
-  type?: string; // File type (pdf, doc, etc.)
-  size?: string; // File size
-  status?: 'approved' | 'pending' | 'rejected' | 'draft';
+  type?: string; // Added for UI display
+  size?: string; // Added for UI display
+  status?: string; // Added for UI display
+}
+
+export interface DocumentsParams {
+  projectId?: number;
+  taskId?: number;
+  pageNumber?: number;
+  pageSize?: number;
+  ClassificationId?: number;
 }
 
 export interface DocumentsResponse {
   success: boolean;
   message: string;
+  errors?: string[];
   data: {
     items: Document[];
     totalItems: number;
@@ -27,11 +36,4 @@ export interface DocumentsResponse {
     hasNextPage: boolean;
     hasPreveiosPage: boolean;
   };
-}
-
-export interface DocumentsParams {
-  projectId?: number;
-  pageNumber?: number;
-  pageSize?: number;
-  ClassificationId?: number;
 }

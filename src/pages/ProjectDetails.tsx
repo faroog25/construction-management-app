@@ -10,6 +10,7 @@ import GanttChart from '@/components/GanttChart';
 import ProjectTimeline from '@/components/ProjectTimeline';
 import Documents from '@/pages/Documents';
 import ProjectEquipment from '@/components/project/ProjectEquipment';
+import ProjectDocuments from '@/components/ProjectDocuments';
 import { 
   Loader2, 
   AlertCircle, 
@@ -93,7 +94,7 @@ const ProjectDetails = () => {
   }
 
   // Ensure required properties have default values
-  const projectWithDates: Project = {
+  const projectWithDefaults = {
     ...project,
     createdAt: project.createdAt || new Date().toISOString(),
     updatedAt: project.updatedAt || new Date().toISOString()
@@ -195,20 +196,21 @@ const ProjectDetails = () => {
           </TabsList>
           
           <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
-            <ProjectDetailsInfo project={projectWithDates} />
+            <ProjectDetailsInfo project={projectWithDefaults} />
+            <ProjectDocuments project={{ id: projectId, projectName: project.projectName }} />
             <ProjectTimeline />
           </TabsContent>
           
           <TabsContent value="stages" className="space-y-6 animate-in fade-in-50">
-            <ProjectStages project={projectWithDates} />
+            <ProjectStages project={projectWithDefaults} />
           </TabsContent>
           
           <TabsContent value="gantt" className="space-y-6 animate-in fade-in-50">
-            <GanttChart project={projectWithDates} />
+            <GanttChart project={projectWithDefaults} />
           </TabsContent>
           
           <TabsContent value="equipment" className="space-y-6 animate-in fade-in-50">
-            <ProjectEquipment project={projectWithDates} />
+            <ProjectEquipment project={projectWithDefaults} />
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6 animate-in fade-in-50">
