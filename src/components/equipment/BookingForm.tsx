@@ -1,18 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar } from 'react-date-range';
 import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import { format } from 'date-fns';
 import { DateRange } from 'react-date-range';
 import { addDays } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CalendarDays, Loader2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { assignEquipment } from '@/services/equipmentAssignmentService';
+import { reserveEquipment } from '@/services/equipmentAssignmentService';
 import { useToast } from '@/hooks/use-toast';
 import { EquipmentItem } from '@/types/equipment';
 import { getAllProjectNames, ProjectNameResponse } from '@/services/projectService';
@@ -27,9 +25,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
   const [projectId, setProjectId] = useState('');
   const [projectName, setProjectName] = useState('');
   const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState('');
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [formattedEndDate, setFormattedEndDate] = useState('');
   const [duration, setDuration] = useState(0);
-  const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projects, setProjects] = useState<ProjectNameResponse[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
@@ -46,9 +44,10 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
   useEffect(() => {
     if (date[0].startDate && date[0].endDate) {
       setStartDate(date[0].startDate);
+      setEndDate(date[0].endDate);
       
       const formattedEndDate = format(date[0].endDate, 'yyyy-MM-dd');
-      setEndDate(formattedEndDate);
+      setFormattedEndDate(formattedEndDate);
       
       const timeDiff = date[0].endDate.getTime() - date[0].startDate.getTime();
       const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
@@ -119,18 +118,23 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
     try {
       setIsSubmitting(true);
       
-      // Book the equipment using the API
-      const response = await assignEquipment({
+      // Format dates for the API request
+      const formattedStartDate = format(startDate, 'yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'');
+      const formattedEndDate = format(endDate, 'yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'');
+      
+      // Book the equipment using the new API
+      const response = await reserveEquipment({
         equipmentId: Number(selectedEquipment.id),
         projectId: parseInt(projectId),
-        expectedReturnDate: endDate
+        startDate: formattedStartDate,
+        endDate: formattedEndDate
       });
 
       if (response.success) {
         toast({
           title: "Booking Request Sent",
           description: `Your booking request for ${selectedEquipment.name} has been sent.`,
-          variant: "success",
+          variant: "default",
         });
 
         // Prepare booking details for local submission
@@ -141,9 +145,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
           projectId: parseInt(projectId),
           projectName: projectName,
           startDate: format(startDate, 'yyyy-MM-dd'),
-          endDate: endDate,
+          endDate: format(endDate, 'yyyy-MM-dd'),
           duration: duration,
-          notes: notes,
           status: 'Pending', // Assuming initial status is pending
           createdAt: new Date().toISOString(),
           dailyRate: 100, // Example rate
@@ -226,16 +229,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ selectedEquipment, onBookingS
             />
           </PopoverContent>
         </Popover>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Input
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add any notes for the booking"
-        />
       </div>
 
       <Button onClick={handleBookNow} disabled={isSubmitting} className="w-full">

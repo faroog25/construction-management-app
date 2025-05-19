@@ -1,9 +1,17 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface EquipmentAssignmentRequest {
   equipmentId: number;
   projectId: number;
   expectedReturnDate: string;
+}
+
+export interface EquipmentReservationRequest {
+  equipmentId: number;
+  projectId: number;
+  startDate: string;
+  endDate: string;
 }
 
 export interface EquipmentAssignmentResponse {
@@ -47,6 +55,36 @@ export async function assignEquipment(assignmentData: EquipmentAssignmentRequest
     return await response.json();
   } catch (error) {
     console.error('Error assigning equipment:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في حجز المعدات: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء حجز المعدات');
+  }
+}
+
+export async function reserveEquipment(reservationData: EquipmentReservationRequest): Promise<EquipmentAssignmentResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/EquipmentReservations/Reserve`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reservationData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`فشل في حجز المعدات. (HTTP ${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error reserving equipment:', error);
     if (error instanceof Error) {
       throw new Error(`فشل في حجز المعدات: ${error.message}`);
     }
