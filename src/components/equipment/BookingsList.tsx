@@ -50,12 +50,14 @@ const BookingsList: React.FC = () => {
           </Badge>
         );
       case ReservationStatus.Started:
-        <Badge variant="outline" className="bg-amber-500">
-          <div className="flex items-center gap-1">
-            <AlertCircle className="h-3 w-3" />
-            <span>In Progress</span>
-          </div>
-        </Badge>
+        return (
+          <Badge variant="outline" className="bg-amber-500">
+            <div className="flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              <span>Started</span>
+            </div>
+          </Badge>
+        );
       case ReservationStatus.Completed:
         return (
           <Badge variant="default" className="bg-green-500">
