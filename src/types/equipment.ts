@@ -4,7 +4,7 @@ export interface EquipmentItem {
   name: string;
   category: string;
   description: string;
-  status: 'Available' | 'In Use' | 'Maintenance' | 'Out of Service';
+  status: 'Available' | 'Reserved' | 'Maintenance' | 'Out of Service';
   imageUrl?: string;
   featured: boolean;
   purchaseDate?: string;

@@ -86,8 +86,8 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
     switch(status) {
       case 'Available':
         return <Badge className="bg-green-500 hover:bg-green-600">{status}</Badge>;
-      case 'In Use':
-        return <Badge className="bg-blue-500 hover:bg-blue-600">{status}</Badge>;
+      case 'Reserved':
+        return <Badge className="bg-red-500 hover:bg-red-600">{status}</Badge>;
       case 'Maintenance':
         return <Badge className="bg-amber-500 hover:bg-amber-600">{status}</Badge>;
       case 'Out of Service':
