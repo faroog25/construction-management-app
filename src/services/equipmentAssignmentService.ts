@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface EquipmentAssignmentRequest {
@@ -26,9 +27,12 @@ export interface ProjectEquipment {
   projectName: string;
   equipmentId: number;
   equipmentName: string;
-  bookDate: string;
-  expectedReturnDate: string;
-  actualReturnDate: string | null;
+  bookDate?: string;
+  expectedReturnDate?: string;
+  actualReturnDate?: string | null;
+  startDate?: string;
+  endDate?: string;
+  reservationStatus?: ReservationStatus;
 }
 
 export interface EquipmentReservation {
@@ -110,7 +114,7 @@ export async function reserveEquipment(reservationData: EquipmentReservationRequ
 
 export async function getProjectEquipment(projectId: number): Promise<ProjectEquipment[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/EquipmentAssignments/ByProject/${projectId}`, {
+    const response = await fetch(`${API_BASE_URL}/EquipmentReservations/ByProject/${projectId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
