@@ -103,10 +103,7 @@ const ProjectHeader = ({ project, onEdit }: ProjectHeaderProps) => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button className="flex-1 sm:flex-none">
-          <Plus className="h-4 w-4 ml-1.5" />
-          إضافة مهمة
-        </Button>
+        
       </div>
     </div>
   );

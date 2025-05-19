@@ -11,11 +11,10 @@ export interface Project {
   clientId: number;
   startDate: string;
   expectedEndDate: string;
-  status: number;
+  projectStatus: string;
   progress?: number;
   siteEngineerName?: string;
   clientName?: string;
-  projectStatus?: string;
   cancellationReason?: string;
   cancellationDate?: string;
   completionDate?: string;
@@ -203,7 +202,7 @@ export async function getProjectById(id: number): Promise<Project> {
       startDate: result.data.startDate,
       expectedEndDate: result.data.expectedEndDate,
       projectStatus: result.data.projectStatus,
-      status: getStatusCodeFromString(result.data.projectStatus),
+      progress: result.data.progress,
       cancellationReason: result.data.cancellationReason,
       cancellationDate: result.data.cancellationDate,
       completionDate: result.data.completionDate,

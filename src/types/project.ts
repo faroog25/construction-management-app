@@ -39,6 +39,7 @@ export interface ProjectApiResponse {
     projectStatus: string;
     siteEngineerName: string;
     clientName: string;
+    progress: number;
     startDate: string;
     expectedEndDate: string;
     cancellationReason?: string;
@@ -103,9 +104,9 @@ export interface ProjectCardProps {
   name: string;
   client_name: string;
   expected_end_date?: string;
-  start_date?: string;
+  start_date?: Date | string;
   progress: number;
-  status: number;
+  projectStatus?: string;
   site_engineer_name?: string;
   onViewDetails?: () => void;
   className?: string;
