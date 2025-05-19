@@ -112,11 +112,10 @@ const ProjectDetails = () => {
     geographicalCoordinates: project.geographicalCoordinates
   };
 
-  // Ensure required properties have default values for display
+  // تعديل: إعداد كائن المشروع للعرض بدون استخدام createdAt و updatedAt
   const projectWithDefaults = {
     ...project,
-    createdAt: project.createdAt || new Date().toISOString(),
-    updatedAt: project.updatedAt || new Date().toISOString()
+    // نزيل الإشارات إلى createdAt و updatedAt التي تسبب أخطاء
   };
 
   return (
@@ -219,20 +218,20 @@ const ProjectDetails = () => {
           </TabsList>
           
           <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
-            <ProjectDetailsInfo project={projectWithDefaults} />
+            <ProjectDetailsInfo project={project} />
             <ProjectTimeline />
           </TabsContent>
           
           <TabsContent value="stages" className="space-y-6 animate-in fade-in-50">
-            <ProjectStages project={projectWithDefaults} />
+            <ProjectStages project={project} />
           </TabsContent>
           
           <TabsContent value="gantt" className="space-y-6 animate-in fade-in-50">
-            <GanttChart project={projectWithDefaults} />
+            <GanttChart project={project} />
           </TabsContent>
           
           <TabsContent value="equipment" className="space-y-6 animate-in fade-in-50">
-            <ProjectEquipment project={projectWithDefaults} />
+            <ProjectEquipment project={project} />
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6 animate-in fade-in-50">

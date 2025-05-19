@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import ProjectDetails from '@/components/ProjectDetails';
 import { Project } from '@/types/project';
 
@@ -11,12 +11,10 @@ interface ProjectDetailsModalProps {
 }
 
 const ProjectDetailsModal = ({ project, isOpen, onOpenChange }: ProjectDetailsModalProps) => {
-  // Add default values for required properties that might be missing
+  // أزلنا إضافة القيم الافتراضية التي تسبب أخطاء
   const enhancedProject: Project = {
-    ...project,
-    // Ensure required properties have default values
-    createdAt: project.createdAt || new Date().toISOString(),
-    updatedAt: project.updatedAt || new Date().toISOString()
+    ...project
+    // لا نضيف createdAt و updatedAt إذا لم تكن موجودة بالفعل
   };
   
   return (
@@ -24,6 +22,7 @@ const ProjectDetailsModal = ({ project, isOpen, onOpenChange }: ProjectDetailsMo
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>تفاصيل المشروع</DialogTitle>
+          <DialogDescription>عرض تفاصيل المشروع وبياناته</DialogDescription>
         </DialogHeader>
         <ProjectDetails project={enhancedProject} />
       </DialogContent>

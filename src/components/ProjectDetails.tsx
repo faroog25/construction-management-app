@@ -19,7 +19,6 @@ import {
   CalendarClock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import GanttChart from '@/components/GanttChart';
 
 // Status configuration same as in ProjectCard for consistency
 const statusConfig = {
@@ -42,8 +41,9 @@ const ProjectDetails = ({ project }: ProjectDetailsProps) => {
     return date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  // Get progress from project or default to 0
-  const projectProgress = project.progress || project.orderId || 0;
+  // تصحيح: استخدم قيمة progress مباشرة من كائن المشروع
+  // تأكد من أن القيمة موجودة أو استخدم الصفر كقيمة افتراضية
+  const projectProgress = typeof project.progress === 'number' ? project.progress : 0;
   
   // Get status info based on project status
   const statusInfo = statusConfig[project.status as keyof typeof statusConfig] || statusConfig[0];
