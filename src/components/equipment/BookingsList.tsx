@@ -7,21 +7,21 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { format, parseISO } from 'date-fns';
-import { FileText, Calendar, Clock, Info, Filter, CalendarDays, Check, X } from 'lucide-react';
+import { FileText, Calendar, Clock, Info, Filter, CalendarDays, Check, X, AlertCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getAllEquipmentAssignments, ProjectEquipment } from '@/services/equipmentAssignmentService';
+import { getAllEquipmentReservations, EquipmentReservation, ReservationStatus } from '@/services/equipmentAssignmentService';
 import { Loader2 } from 'lucide-react';
 
 const BookingsList: React.FC = () => {
-  const [selectedBooking, setSelectedBooking] = useState<ProjectEquipment | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<EquipmentReservation | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const { data: bookings, isLoading, error, refetch } = useQuery({
-    queryKey: ['equipmentAssignments'],
-    queryFn: getAllEquipmentAssignments,
+    queryKey: ['equipmentReservations'],
+    queryFn: getAllEquipmentReservations,
   });
 
-  const handleViewDetails = (booking: ProjectEquipment) => {
+  const handleViewDetails = (booking: EquipmentReservation) => {
     setSelectedBooking(booking);
   };
 
@@ -38,10 +38,50 @@ const BookingsList: React.FC = () => {
     }
   };
 
+  const getStatusBadge = (status: ReservationStatus) => {
+    switch (status) {
+      case ReservationStatus.NotStarted:
+        return (
+          <Badge variant="outline" className="bg-blue-500">
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>Not Started</span>
+            </div>
+          </Badge>
+        );
+      case ReservationStatus.Started:
+        <Badge variant="outline" className="bg-amber-500">
+          <div className="flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            <span>In Progress</span>
+          </div>
+        </Badge>
+      case ReservationStatus.Completed:
+        return (
+          <Badge variant="default" className="bg-green-500">
+            <div className="flex items-center gap-1">
+              <Check className="h-3 w-3" />
+              <span>Completed</span>
+            </div>
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline">
+            <div className="flex items-center gap-1">
+              <X className="h-3 w-3" />
+              <span>Unknown</span>
+            </div>
+          </Badge>
+        );
+    }
+  };
+
   const filteredBookings = bookings?.filter(booking => {
     if (statusFilter === 'all') return true;
-    if (statusFilter === 'returned') return booking.actualReturnDate !== null;
-    if (statusFilter === 'not-returned') return booking.actualReturnDate === null;
+    if (statusFilter === 'not-started') return booking.reservationStatus === ReservationStatus.NotStarted;
+    if (statusFilter === 'in-progress') return booking.reservationStatus === ReservationStatus.Started;
+    if (statusFilter === 'completed') return booking.reservationStatus === ReservationStatus.Completed;
     return true;
   });
 
@@ -97,8 +137,9 @@ const BookingsList: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Bookings</SelectItem>
-                <SelectItem value="returned">Returned</SelectItem>
-                <SelectItem value="not-returned">Not Returned</SelectItem>
+                <SelectItem value="not-started">Not Started</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -120,9 +161,8 @@ const BookingsList: React.FC = () => {
                   <TableRow>
                     <TableHead>Equipment</TableHead>
                     <TableHead>Project</TableHead>
-                    <TableHead>Reservation Date</TableHead>
-                    <TableHead>Expected Return</TableHead>
-                    <TableHead>Actual Return</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
@@ -134,30 +174,10 @@ const BookingsList: React.FC = () => {
                         {booking.equipmentName}
                       </TableCell>
                       <TableCell>{booking.projectName}</TableCell>
-                      <TableCell>{formatDate(booking.bookDate)}</TableCell>
-                      <TableCell>{formatDate(booking.expectedReturnDate)}</TableCell>
+                      <TableCell>{formatDate(booking.startDate)}</TableCell>
+                      <TableCell>{formatDate(booking.endDate)}</TableCell>
                       <TableCell>
-                        {booking.actualReturnDate ? formatDate(booking.actualReturnDate) : "Not returned yet"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={booking.actualReturnDate ? 'default' : 'outline'}
-                          className={booking.actualReturnDate ? 'bg-green-500' : 'bg-blue-500'}
-                        >
-                          <div className="flex items-center gap-1">
-                            {booking.actualReturnDate ? (
-                              <>
-                                <Check className="h-3 w-3" />
-                                <span>Returned</span>
-                              </>
-                            ) : (
-                              <>
-                                <X className="h-3 w-3" />
-                                <span>Not Returned</span>
-                              </>
-                            )}
-                          </div>
-                        </Badge>
+                        {getStatusBadge(booking.reservationStatus)}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
@@ -191,24 +211,7 @@ const BookingsList: React.FC = () => {
               <div className="bg-muted/30 p-4 rounded-lg">
                 <h3 className="font-medium text-lg mb-3">{selectedBooking.equipmentName}</h3>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge 
-                    variant={selectedBooking.actualReturnDate ? 'default' : 'outline'}
-                    className={selectedBooking.actualReturnDate ? 'bg-green-500' : 'bg-blue-500'}
-                  >
-                    <div className="flex items-center gap-1">
-                      {selectedBooking.actualReturnDate ? (
-                        <>
-                          <Check className="h-3 w-3" />
-                          <span>Returned</span>
-                        </>
-                      ) : (
-                        <>
-                          <X className="h-3 w-3" />
-                          <span>Not Returned</span>
-                        </>
-                      )}
-                    </div>
-                  </Badge>
+                  {getStatusBadge(selectedBooking.reservationStatus)}
                 </div>
               </div>
               
@@ -216,25 +219,16 @@ const BookingsList: React.FC = () => {
                 <div className="flex items-start gap-2">
                   <Calendar className="h-4 w-4 text-primary mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium">Book Date</p>
-                    <p className="text-sm text-muted-foreground">{formatDate(selectedBooking.bookDate)}</p>
+                    <p className="text-sm font-medium">Start Date</p>
+                    <p className="text-sm text-muted-foreground">{formatDate(selectedBooking.startDate)}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Calendar className="h-4 w-4 text-primary mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium">Expected Return Date</p>
+                    <p className="text-sm font-medium">End Date</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatDate(selectedBooking.expectedReturnDate)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Calendar className="h-4 w-4 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">Actual Return Date</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedBooking.actualReturnDate ? formatDate(selectedBooking.actualReturnDate) : 'Not returned yet'}
+                      {formatDate(selectedBooking.endDate)}
                     </p>
                   </div>
                 </div>

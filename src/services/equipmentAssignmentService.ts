@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface EquipmentAssignmentRequest {
@@ -30,6 +29,23 @@ export interface ProjectEquipment {
   bookDate: string;
   expectedReturnDate: string;
   actualReturnDate: string | null;
+}
+
+export interface EquipmentReservation {
+  id: number;
+  projectId: number;
+  projectName: string;
+  equipmentId: number;
+  equipmentName: string;
+  startDate: string;
+  endDate: string;
+  reservationStatus: ReservationStatus;
+}
+
+export enum ReservationStatus {
+  NotStarted = 0,
+  Started = 1,
+  Completed = 2
 }
 
 export async function assignEquipment(assignmentData: EquipmentAssignmentRequest): Promise<EquipmentAssignmentResponse> {
@@ -143,6 +159,35 @@ export async function getAllEquipmentAssignments(): Promise<ProjectEquipment[]> 
     return await response.json();
   } catch (error) {
     console.error('Error fetching equipment assignments:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في جلب بيانات الحجوزات: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء جلب بيانات الحجوزات');
+  }
+}
+
+export async function getAllEquipmentReservations(): Promise<EquipmentReservation[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/EquipmentReservations/All`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`فشل في جلب بيانات الحجوزات. (HTTP ${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching equipment reservations:', error);
     if (error instanceof Error) {
       throw new Error(`فشل في جلب بيانات الحجوزات: ${error.message}`);
     }
