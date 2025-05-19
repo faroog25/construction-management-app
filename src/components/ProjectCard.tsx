@@ -20,11 +20,11 @@ import { ProjectCardProps } from '@/types/project';
 
 // تكوين معلومات الحالة بناءً على رمز الحالة - Updated status configuration
 const statusConfig = {
-  0: { label: 'قيد التنفيذ', className: 'bg-blue-100 text-blue-800 border-blue-200', icon: Clock3 },
-  1: { label: 'معلق', className: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Pause },
-  2: { label: 'مكتمل', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2 },
-  3: { label: 'ملغي', className: 'bg-red-100 text-red-800 border-red-200', icon: XCircle },
-  4: { label: 'متأخر', className: 'bg-orange-100 text-orange-800 border-orange-200', icon: AlertTriangle },
+  'قيد التنفيذ': { label: 'قيد التنفيذ', className: 'bg-blue-100 text-blue-800 border-blue-200', icon: Clock3 },
+  'معلق': { label: 'معلق', className: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Pause },
+  'مكتمل': { label: 'مكتمل', className: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2 },
+  'ملغي': { label: 'ملغي', className: 'bg-red-100 text-red-800 border-red-200', icon: XCircle },
+  'متأخر': { label: 'متأخر', className: 'bg-orange-100 text-orange-800 border-orange-200', icon: AlertTriangle },
 };
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -34,7 +34,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   expected_end_date,
   start_date,
   progress,
-  status,
+  projectStatus,
   site_engineer_name,
   onViewDetails,
   className,
@@ -51,7 +51,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   // استخدام معلومات الحالة من التكوين أو استخدام الإعدادات الافتراضية
-  const statusInfo = statusConfig[status as keyof typeof statusConfig] || statusConfig[0];
+  const statusInfo = statusConfig[projectStatus as keyof typeof statusConfig] || statusConfig['قيد التنفيذ'];
   const StatusIcon = statusInfo.icon;
 
   // الحصول على اللون بناءً على التقدم
@@ -81,7 +81,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             "flex items-center gap-1.5 font-medium px-3 py-1.5 rounded-full border"
           )}>
             <StatusIcon className="h-4 w-4" />
-            {statusInfo.label}
+            {projectStatus}
           </Badge>
           <span className="text-xs text-muted-foreground font-medium bg-muted/50 px-2.5 py-1 rounded-full">ID: {id}</span>
         </div>
