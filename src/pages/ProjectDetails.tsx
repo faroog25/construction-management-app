@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getProjectById } from '@/services/projectService';
+import { getProjectById, UpdateProjectBasicInfo } from '@/services/projectService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProjectDetailsInfo from '@/components/ProjectDetailsInfo';
 import ProjectStages from '@/components/ProjectStages';
@@ -10,6 +10,7 @@ import GanttChart from '@/components/GanttChart';
 import ProjectTimeline from '@/components/ProjectTimeline';
 import ProjectEquipment from '@/components/project/ProjectEquipment';
 import ProjectDocuments from '@/components/ProjectDocuments';
+import ProjectBasicEditDialog from '@/components/ProjectBasicEditDialog';
 import { 
   Loader2, 
   AlertCircle, 
@@ -27,7 +28,8 @@ import {
   LayoutGrid,
   BarChart2,
   ClipboardList,
-  Settings
+  Settings,
+  Edit
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -44,8 +46,9 @@ const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
   const projectId = parseInt(id || '0', 10);
   const navigate = useNavigate();
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const { data: project, isLoading, error } = useQuery({
+  const { data: project, isLoading, error, refetch } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => getProjectById(projectId),
     enabled: !!projectId,
@@ -66,6 +69,14 @@ const ProjectDetails = () => {
 
   const handleGoBack = () => {
     navigate('/projects');
+  };
+
+  const handleEdit = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    refetch();
   };
 
   if (isLoading) {
@@ -92,7 +103,16 @@ const ProjectDetails = () => {
     );
   }
 
-  // Ensure required properties have default values
+  // بيانات المشروع للتعديل
+  const projectForEdit: UpdateProjectBasicInfo = {
+    id: project.id,
+    projectName: project.projectName,
+    description: project.description,
+    siteAddress: project.siteAddress || '',
+    geographicalCoordinates: project.geographicalCoordinates
+  };
+
+  // Ensure required properties have default values for display
   const projectWithDefaults = {
     ...project,
     createdAt: project.createdAt || new Date().toISOString(),
@@ -141,6 +161,10 @@ const ProjectDetails = () => {
             <Button variant="outline" size="sm" onClick={handleShare} className="flex-1 sm:flex-none">
               <Share2 className="h-4 w-4 ml-1.5" />
               مشاركة
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleEdit} className="flex-1 sm:flex-none">
+              <Edit className="h-4 w-4 ml-1.5" />
+              تعديل
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -216,6 +240,14 @@ const ProjectDetails = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* حوار تعديل بيانات المشروع الأساسية */}
+      <ProjectBasicEditDialog 
+        project={projectForEdit}
+        isOpen={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 };

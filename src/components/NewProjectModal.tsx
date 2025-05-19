@@ -42,6 +42,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
       clientName: '',
       projectStatus: 'Active',
       description: '',
+      status: 1,
     },
   });
 
@@ -49,6 +50,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
     try {
       // Ensure all required fields are included and properly typed
       const project = {
+        id: 0, // سيتم تجاهله من قبل API
         projectName: data.projectName,
         siteAddress: data.siteAddress,
         clientName: data.clientName,
@@ -57,10 +59,10 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
         startDate: data.startDate ? format(data.startDate, 'yyyy-MM-dd') : '',
         expectedEndDate: data.expectedEndDate ? format(data.expectedEndDate, 'yyyy-MM-dd') : '',
         actualEndDate: null,
-        status: 1, // Active
+        status: data.status || 1, // Active
         orderId: null,
-        siteEngineerId: null,
-        clientId: null,
+        siteEngineerId: data.siteEngineerId || null,
+        clientId: data.clientId || null,
         stageId: null,
       };
 
@@ -171,12 +173,12 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                   <FormItem>
                     <FormLabel>تاريخ البدء</FormLabel>
                     <FormControl>
-              <Calendar
-                mode="single"
+                      <Calendar
+                        mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                className="rounded-md border"
-              />
+                        className="rounded-md border"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,11 +192,11 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                   <FormItem>
                     <FormLabel>تاريخ الانتهاء المتوقع</FormLabel>
                     <FormControl>
-              <Calendar
-                mode="single"
+                      <Calendar
+                        mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                className="rounded-md border"
+                        className="rounded-md border"
                       />
                     </FormControl>
                     <FormMessage />

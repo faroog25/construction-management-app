@@ -22,6 +22,15 @@ export interface Project {
   handoverDate?: string;
 }
 
+// إضافة واجهة لتحديث المشروع المبسط
+export interface UpdateProjectBasicInfo {
+  id: number;
+  projectName: string;
+  description?: string;
+  siteAddress: string;
+  geographicalCoordinates?: string;
+}
+
 // Add the ProjectWithClient interface that was referenced but not defined
 export interface ProjectWithClient {
   id: number;
@@ -231,7 +240,7 @@ function getStatusCodeFromString(status: string | undefined): number {
   }
 }
 
-export async function createProject(projectData: Project): Promise<any> {
+export async function createProject(projectData: Partial<Project>): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/Projects`, {
     method: 'POST',
     headers: {
@@ -265,6 +274,31 @@ export async function updateProject(projectId: number, projectData: Partial<Proj
       body: errorText
     });
     throw new Error(`Failed to update project. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
+
+// تحديث المشروع بالمعلومات الأساسية فقط
+export async function updateProjectBasicInfo(projectData: UpdateProjectBasicInfo): Promise<any> {
+  console.log('Updating project basic info:', projectData);
+  
+  const response = await fetch(`${API_BASE_URL}/Projects`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(projectData),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response for basic info update:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`Failed to update project basic info. (HTTP ${response.status})`);
   }
   
   return response.json();
