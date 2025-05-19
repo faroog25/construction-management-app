@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Worker } from '@/services/workerService';
-import { assignWorkersToTask, getWorkersForTask } from '@/services/taskService';
+import { assignWorkersToTask, getWorkersForTask, unassignWorkersFromTask } from '@/services/taskService';
 import { toast } from '@/hooks/use-toast';
 
 export function useTaskWorkers(taskId: number) {
@@ -19,7 +19,7 @@ export function useTaskWorkers(taskId: number) {
         
         // Use the new API endpoint to fetch workers assigned to this task
         const workers = await getWorkersForTask(taskId);
-        setAssignedWorkers(workers);
+        setAssignedWorkers(workers as unknown as Worker[]);
       } catch (error) {
         console.error('Error fetching assigned workers:', error);
         setAssignedWorkers([]);
@@ -78,23 +78,19 @@ export function useTaskWorkers(taskId: number) {
     try {
       setIsAssigning(true);
       
-      // Filter out the worker to be removed
-      const updatedWorkers = assignedWorkers.filter(worker => worker.id !== workerId);
-      const workerIds = updatedWorkers.map(worker => worker.id);
-      
       console.log('Removing worker', workerId, 'from task', taskId);
-      console.log('Updated worker IDs:', workerIds);
       
-      // Make the API request with the updated worker list
-      const result = await assignWorkersToTask({
+      // استخدام API إلغاء التعيين الجديد
+      const result = await unassignWorkersFromTask({
         taskId,
-        workerIds
+        workerIds: [workerId]
       });
       
-      // Update the local state with the remaining workers
+      // تحديث الحالة المحلية بإزالة العامل
+      const updatedWorkers = assignedWorkers.filter(worker => worker.id !== workerId);
       setAssignedWorkers(updatedWorkers);
       
-      // Show a success toast
+      // إظهار رسالة نجاح
       toast({
         title: "تم إزالة العامل",
         description: "تم إزالة العامل من المهمة بنجاح",
@@ -103,7 +99,7 @@ export function useTaskWorkers(taskId: number) {
       return true;
     } catch (error) {
       console.error('Error removing worker:', error);
-      // Show an error toast
+      // إظهار رسالة خطأ
       toast({
         title: "فشل إزالة العامل",
         description: error instanceof Error ? error.message : "حدث خطأ أثناء إزالة العامل من المهمة",

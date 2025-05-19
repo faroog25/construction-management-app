@@ -7,7 +7,7 @@ import GanttChart from '@/components/GanttChart';
 import ProjectTimeline from '@/components/ProjectTimeline';
 import ProjectEquipment from '@/components/project/ProjectEquipment';
 import ProjectDocuments from '@/components/ProjectDocuments';
-import { Project } from '@/types/project';
+import { Project } from '@/services/projectService';
 
 interface ProjectTabsContentProps {
   project: Project;
