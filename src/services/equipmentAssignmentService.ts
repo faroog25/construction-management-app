@@ -223,3 +223,32 @@ export async function returnEquipment(assignmentId: number): Promise<EquipmentAs
     throw new Error('حدث خطأ غير متوقع أثناء إعادة المعدات');
   }
 }
+
+export async function cancelReservation(reservationId: number): Promise<EquipmentAssignmentResponse> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/EquipmentReservations/RemoveReservation/${reservationId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`فشل في الغاء الحجز. (HTTP ${response.status})`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error canceling reservation:', error);
+    if (error instanceof Error) {
+      throw new Error(`فشل في الغاء الحجز: ${error.message}`);
+    }
+    throw new Error('حدث خطأ غير متوقع أثناء الغاء الحجز');
+  }
+}

@@ -7,14 +7,33 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { format, parseISO } from 'date-fns';
-import { FileText, Calendar, Clock, Info, Filter, CalendarDays, Check, X, AlertCircle } from 'lucide-react';
+import { FileText, Calendar, Clock, Info, Filter, CalendarDays, Check, X, AlertCircle, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getAllEquipmentReservations, EquipmentReservation, ReservationStatus } from '@/services/equipmentAssignmentService';
-import { Loader2 } from 'lucide-react';
+import { 
+  getAllEquipmentReservations, 
+  EquipmentReservation, 
+  ReservationStatus, 
+  cancelReservation 
+} from '@/services/equipmentAssignmentService';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const BookingsList: React.FC = () => {
   const [selectedBooking, setSelectedBooking] = useState<EquipmentReservation | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState<EquipmentReservation | null>(null);
+  const { toast } = useToast();
 
   const { data: bookings, isLoading, error, refetch } = useQuery({
     queryKey: ['equipmentReservations'],
@@ -27,6 +46,41 @@ const BookingsList: React.FC = () => {
 
   const handleCloseDialog = () => {
     setSelectedBooking(null);
+  };
+
+  const openCancelDialog = (booking: EquipmentReservation, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setBookingToCancel(booking);
+    setCancelDialogOpen(true);
+  };
+
+  const handleCancelReservation = async () => {
+    if (!bookingToCancel) return;
+    
+    try {
+      setIsCancelling(true);
+      await cancelReservation(bookingToCancel.id);
+      
+      toast({
+        title: "Reservation Cancelled",
+        description: `The booking for ${bookingToCancel.equipmentName} has been successfully cancelled.`,
+        variant: "default",
+      });
+      
+      // Close the dialog and refresh bookings list
+      setCancelDialogOpen(false);
+      setBookingToCancel(null);
+      refetch();
+    } catch (error) {
+      console.error('Failed to cancel reservation:', error);
+      toast({
+        title: "Cancellation Failed",
+        description: error instanceof Error ? error.message : "Unable to cancel the reservation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   const formatDate = (dateString: string | null) => {
@@ -181,7 +235,7 @@ const BookingsList: React.FC = () => {
                       <TableCell>
                         {getStatusBadge(booking.reservationStatus)}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right space-x-2">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -189,6 +243,16 @@ const BookingsList: React.FC = () => {
                         >
                           Details
                         </Button>
+                        {(booking.reservationStatus === ReservationStatus.NotStarted || 
+                         booking.reservationStatus === ReservationStatus.Started) && (
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={(e) => openCancelDialog(booking, e)}
+                          >
+                            Cancel
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -199,6 +263,7 @@ const BookingsList: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Booking Details Dialog */}
       {selectedBooking && (
         <Dialog open={!!selectedBooking} onOpenChange={handleCloseDialog}>
           <DialogContent className="max-w-md">
@@ -246,11 +311,62 @@ const BookingsList: React.FC = () => {
             </div>
             
             <DialogFooter>
+              {(selectedBooking.reservationStatus === ReservationStatus.NotStarted || 
+                selectedBooking.reservationStatus === ReservationStatus.Started) && (
+                <Button 
+                  variant="destructive" 
+                  onClick={(e) => {
+                    handleCloseDialog();
+                    openCancelDialog(selectedBooking, e as unknown as React.MouseEvent);
+                  }}
+                >
+                  Cancel Reservation
+                </Button>
+              )}
               <Button onClick={handleCloseDialog}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Cancel Reservation Dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Reservation</AlertDialogTitle>
+            <AlertDialogDescription>
+              {bookingToCancel ? (
+                <>
+                  Are you sure you want to cancel the reservation for <span className="font-medium">{bookingToCancel.equipmentName}</span>?
+                  This action cannot be undone.
+                </>
+              ) : (
+                'Are you sure you want to cancel this reservation? This action cannot be undone.'
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCancelling}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault();
+                handleCancelReservation();
+              }}
+              disabled={isCancelling}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isCancelling ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                'Yes, Cancel Reservation'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
