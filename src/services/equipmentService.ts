@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 import { EquipmentItem } from '@/types/equipment';
 
@@ -86,12 +87,20 @@ export interface SetEquipmentStatusResponse {
  * Fetches equipment list with pagination
  * @param pageNumber The current page number
  * @param pageSize Number of items per page
+ * @param status Optional status filter (0=Available, 1=Reserved)
  * @returns API response with equipment data
  */
-export async function getEquipment(pageNumber: number = 1, pageSize: number = 10): Promise<EquipmentResponse> {
+export async function getEquipment(pageNumber: number = 1, pageSize: number = 10, status?: number): Promise<EquipmentResponse> {
   try {
-    console.log(`Fetching equipment: page ${pageNumber}, size ${pageSize}`);
-    const response = await fetch(`${API_BASE_URL}/Equipment?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+    let url = `${API_BASE_URL}/Equipment?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+    
+    // Add status parameter if provided
+    if (status !== undefined) {
+      url += `&status=${status}`;
+    }
+    
+    console.log(`Fetching equipment: ${url}`);
+    const response = await fetch(url);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -127,12 +136,15 @@ export function mapApiEquipmentToEquipmentItem(apiEquipment: ApiEquipmentItem): 
   let status: 'Available' | 'In Use' | 'Maintenance' | 'Out of Service' = 'Available';
   
   // Normalize the status string by removing spaces and converting to lowercase
-  const normalizedStatus = apiEquipment.status.toLowerCase().replace(/\s+/g, '');
+  const normalizedStatus = typeof apiEquipment.status === 'string' 
+    ? apiEquipment.status.toLowerCase().replace(/\s+/g, '') 
+    : String(apiEquipment.status).toLowerCase();
   
   // Map status values correctly
-  if (normalizedStatus === 'available' || normalizedStatus === '0') {
+  // Available=0, Reserved=1 as per new requirements
+  if (normalizedStatus === 'available' || normalizedStatus === '0' || normalizedStatus === 0) {
     status = 'Available';
-  } else if (normalizedStatus === 'inuse' || normalizedStatus === 'in-use' || normalizedStatus === '1') {
+  } else if (normalizedStatus === 'reserved' || normalizedStatus === 'inuse' || normalizedStatus === 'in-use' || normalizedStatus === '1' || normalizedStatus === 1) {
     status = 'In Use';
   } else if (normalizedStatus === 'undermaintenance' || normalizedStatus === 'under-maintenance' || normalizedStatus === 'maintenance' || normalizedStatus === '2') {
     status = 'Maintenance';

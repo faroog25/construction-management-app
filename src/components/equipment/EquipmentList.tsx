@@ -22,18 +22,19 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<number | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchEquipment();
-  }, [currentPage]);
+  }, [currentPage, statusFilter]);
 
   const fetchEquipment = async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      const response = await getEquipment(currentPage);
+      const response = await getEquipment(currentPage, 10, statusFilter);
       
       if (response.success && response.data) {
         const mappedEquipment = response.data.items.map(item => 
