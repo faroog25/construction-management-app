@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -81,7 +82,8 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
     return 'bg-green-500';
   };
 
-  const progressValue = project.progress || 0;
+  // Fix: Directly use the progress value from the API response
+  const progressValue = typeof project.progress === 'number' ? project.progress : 0;
   const progressColor = getProgressColor(progressValue);
 
   const handleEdit = () => {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -112,11 +111,8 @@ const ProjectDetails = () => {
     geographicalCoordinates: project.geographicalCoordinates
   };
 
-  // تعديل: إعداد كائن المشروع للعرض بدون استخدام createdAt و updatedAt
-  const projectWithDefaults = {
-    ...project,
-    // نزيل الإشارات إلى createdAt و updatedAt التي تسبب أخطاء
-  };
+  // No need to add createdAt and updatedAt as they're now optional in the Project interface
+  // We'll just use the project data directly as received from the API
 
   return (
     <div className="flex flex-col min-h-screen">

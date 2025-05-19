@@ -65,8 +65,8 @@ export interface Project {
   actualEndDate?: string;
   stages?: ApiStage[];
   tasks?: ApiTask[];
-  createdAt: Date | string; // Added explicitly
-  updatedAt: Date | string; // Added explicitly
+  createdAt?: Date | string; // Made optional to avoid errors
+  updatedAt?: Date | string; // Made optional to avoid errors
   clientId?: number;
   geographicalCoordinates?: string;
   projectStatus?: string;

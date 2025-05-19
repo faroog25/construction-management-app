@@ -11,10 +11,10 @@ interface ProjectDetailsModalProps {
 }
 
 const ProjectDetailsModal = ({ project, isOpen, onOpenChange }: ProjectDetailsModalProps) => {
-  // أزلنا إضافة القيم الافتراضية التي تسبب أخطاء
+  // We're no longer adding createdAt and updatedAt as they cause errors
   const enhancedProject: Project = {
     ...project
-    // لا نضيف createdAt و updatedAt إذا لم تكن موجودة بالفعل
+    // No need to add default values for createdAt and updatedAt
   };
   
   return (
