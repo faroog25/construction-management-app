@@ -141,9 +141,9 @@ export function mapApiEquipmentToEquipmentItem(apiEquipment: ApiEquipmentItem): 
   
   // Map status values correctly
   // Available=0, Reserved=1 as per new requirements
-  if (normalizedStatus === 'available' || normalizedStatus === '0' || normalizedStatus === 0) {
+  if (normalizedStatus === 'available' || normalizedStatus === '0' || normalizedStatus === '0') {
     status = 'Available';
-  } else if (normalizedStatus === 'reserved' || normalizedStatus === 'inuse' || normalizedStatus === 'in-use' || normalizedStatus === '1' || normalizedStatus === 1) {
+  } else if (normalizedStatus === 'reserved' || normalizedStatus === 'inuse' || normalizedStatus === 'in-use' || normalizedStatus === '1' || normalizedStatus === '1') {
     status = 'Reserved';
   } else if (normalizedStatus === 'undermaintenance' || normalizedStatus === 'under-maintenance' || normalizedStatus === 'maintenance' || normalizedStatus === '2') {
     status = 'Maintenance';
