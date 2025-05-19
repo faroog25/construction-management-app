@@ -1103,16 +1103,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                       </div>
                                       
                                       <div className="flex items-center gap-3 w-full md:w-auto">
-                                        {!loading && workers.length > 0 && (
-                                          <WorkerMultiSelect
-                                            workers={workers}
-                                            selectedWorkers={task.assignedWorkers || []}
-                                            onSelectionChange={(selectedWorkers) => handleWorkerSelection(task.id, selectedWorkers)}
-                                            placeholder="Assign workers..."
-                                            className="w-64"
-                                          />
-                                        )}
-                                        
+                                       
                                         {overdueDays > 0 && !isCompleted && (
                                           <Badge variant="destructive" className="h-6 px-2 text-xs">
                                             متأخر {overdueDays} يوم
