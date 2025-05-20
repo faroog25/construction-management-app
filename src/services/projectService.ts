@@ -308,7 +308,7 @@ export async function cancelProject(projectId: number, reason: string): Promise<
   console.log(`Cancelling project ${projectId} with reason: ${reason}`);
   
   const response = await fetch(`${API_BASE_URL}/Projects/Cancel/${projectId}`, {
-    method: 'PUT',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -333,7 +333,7 @@ export async function pendProject(projectId: number): Promise<any> {
   console.log(`Pending project ${projectId}`);
   
   const response = await fetch(`${API_BASE_URL}/Projects/Pend/${projectId}`, {
-    method: 'PUT',
+    method: 'POST',
   });
   
   if (!response.ok) {
@@ -354,7 +354,7 @@ export async function activateProject(projectId: number): Promise<any> {
   console.log(`Activating project ${projectId}`);
   
   const response = await fetch(`${API_BASE_URL}/Projects/Activate/${projectId}`, {
-    method: 'PUT',
+    method: 'POST',
   });
   
   if (!response.ok) {
