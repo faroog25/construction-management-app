@@ -1,19 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Document } from '@/types/document';
-import { FileText, Download, Info, Calendar, File, ExternalLink } from 'lucide-react';
+import { FileText, Download, Info, Calendar, File, ExternalLink, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { downloadDocument, getDocument } from '@/services/documentService';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { API_BASE_URL } from '@/config/api';
+import { EditDocumentDialog } from './EditDocumentDialog';
 
 interface TaskDocumentListProps {
   documents: Document[];
   isLoading: boolean;
+  onDocumentUpdated?: () => void;
 }
 
-export function TaskDocumentList({ documents, isLoading }: TaskDocumentListProps) {
+export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: TaskDocumentListProps) {
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
   const handleDownload = async (document: Document) => {
     try {
       toast.promise(
@@ -46,7 +51,7 @@ export function TaskDocumentList({ documents, isLoading }: TaskDocumentListProps
     }
   };
 
-  // New function to open the document in a new tab
+  // Function to open the document in a new tab
   const handleOpenDocument = async (document: Document) => {
     try {
       toast.loading('جاري تحميل المستند...');
@@ -66,6 +71,19 @@ export function TaskDocumentList({ documents, isLoading }: TaskDocumentListProps
       console.error('Error opening document:', error);
       toast.dismiss();
       toast.error('فشل في فتح المستند');
+    }
+  };
+
+  // New function to handle document editing
+  const handleEditDocument = (document: Document) => {
+    setSelectedDocument(document);
+    setEditDialogOpen(true);
+  };
+
+  // Handle edit success
+  const handleDocumentEdited = () => {
+    if (onDocumentUpdated) {
+      onDocumentUpdated();
     }
   };
 
@@ -118,70 +136,92 @@ export function TaskDocumentList({ documents, isLoading }: TaskDocumentListProps
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4">
-      {documents.map((doc) => (
-        <div 
-          key={doc.id}
-          className="border rounded-lg p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors group cursor-pointer"
-          onClick={() => handleOpenDocument(doc)}
-        >
-          <div className="flex items-start gap-4">
-            <div className="h-14 w-14 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-              {getDocumentIcon(doc.type)}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                <h4 className="font-semibold text-lg truncate">{doc.name}</h4>
-                <Badge variant="outline" className="shrink-0 sm:ml-2">
-                  {doc.type === 'pdf' ? 'PDF' : 
-                   doc.type === 'doc' ? 'Word' :
-                   doc.type === 'image' ? 'صورة' :
-                   doc.type === 'archive' ? 'ملف مضغوط' : 'مستند'}
-                </Badge>
+    <>
+      <div className="grid grid-cols-1 gap-4">
+        {documents.map((doc) => (
+          <div 
+            key={doc.id}
+            className="border rounded-lg p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors group cursor-pointer"
+            onClick={() => handleOpenDocument(doc)}
+          >
+            <div className="flex items-start gap-4">
+              <div className="h-14 w-14 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                {getDocumentIcon(doc.type)}
               </div>
               
-              {doc.description && (
-                <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{doc.description}</p>
-              )}
-              
-              <div className="flex items-center flex-wrap gap-2 mt-2">
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <Calendar className="inline h-3.5 w-3.5 mr-1" />
-                  <span>{formatDate(doc.createdDate)}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                  <h4 className="font-semibold text-lg truncate">{doc.name}</h4>
+                  <Badge variant="outline" className="shrink-0 sm:ml-2">
+                    {doc.type === 'pdf' ? 'PDF' : 
+                     doc.type === 'doc' ? 'Word' :
+                     doc.type === 'image' ? 'صورة' :
+                     doc.type === 'archive' ? 'ملف مضغوط' : 'مستند'}
+                  </Badge>
+                </div>
+                
+                {doc.description && (
+                  <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{doc.description}</p>
+                )}
+                
+                <div className="flex items-center flex-wrap gap-2 mt-2">
+                  <div className="flex items-center text-xs text-muted-foreground">
+                    <Calendar className="inline h-3.5 w-3.5 mr-1" />
+                    <span>{formatDate(doc.createdDate)}</span>
+                  </div>
                 </div>
               </div>
             </div>
+            
+            <div className="mt-3 pt-3 border-t flex justify-end gap-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="text-xs h-8"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  handleOpenDocument(doc);
+                }}
+              >
+                <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                فتح
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="text-xs h-8"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  handleEditDocument(doc);
+                }}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                تعديل
+              </Button>
+              <Button 
+                size="sm" 
+                variant="secondary"
+                className="text-xs h-8"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  handleDownload(doc);
+                }}
+              >
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                تحميل
+              </Button>
+            </div>
           </div>
-          
-          <div className="mt-3 pt-3 border-t flex justify-end gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              className="text-xs h-8"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the parent onClick
-                handleOpenDocument(doc);
-              }}
-            >
-              <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-              فتح
-            </Button>
-            <Button 
-              size="sm" 
-              variant="secondary"
-              className="text-xs h-8"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the parent onClick
-                handleDownload(doc);
-              }}
-            >
-              <Download className="h-3.5 w-3.5 mr-1.5" />
-              تحميل
-            </Button>
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      {/* Edit Document Dialog */}
+      <EditDocumentDialog
+        isOpen={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        document={selectedDocument}
+        onDocumentUpdated={handleDocumentEdited}
+      />
+    </>
   );
 }

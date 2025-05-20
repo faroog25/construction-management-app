@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getTaskById, TaskDetailResponse, completeTask, uncheckTask, getWorkersForTask } from '@/services/taskService';
 import { toast } from '@/components/ui/use-toast';
@@ -119,6 +118,13 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
 
   // Handle document upload success
   const handleDocumentUploaded = () => {
+    if (taskId) {
+      fetchTaskDocuments(taskId);
+    }
+  };
+
+  // Handle document update success
+  const handleDocumentUpdated = () => {
     if (taskId) {
       fetchTaskDocuments(taskId);
     }
@@ -369,6 +375,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                       <TaskDocumentList 
                         documents={taskDocuments}
                         isLoading={loadingDocuments}
+                        onDocumentUpdated={handleDocumentUpdated}
                       />
                     </div>
                   </CardContent>

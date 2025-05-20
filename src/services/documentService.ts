@@ -185,7 +185,7 @@ export const uploadTaskDocument = async (
   }
 };
 
-// New function to get a single document
+// Get a single document
 export const getDocument = async (documentId: string): Promise<{ success: boolean; message: string; data: any }> => {
   try {
     console.log('Fetching document with ID:', documentId);
@@ -210,7 +210,56 @@ export const getDocument = async (documentId: string): Promise<{ success: boolea
     console.error('Error fetching document:', error);
     return { 
       success: false, 
-      message: error instanceof Error ? error.message : 'Error fetching document' 
+      message: error instanceof Error ? error.message : 'Error fetching document',
+      data: null
+    };
+  }
+};
+
+// New function to edit a document
+export const editDocument = async (
+  documentId: string,
+  data: { name: string; description: string }
+): Promise<{ success: boolean; message: string; data?: any }> => {
+  try {
+    console.log('Editing document with ID:', documentId, 'Data:', data);
+    
+    const response = await fetch(`${API_BASE_URL}/Documents`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: documentId,
+        name: data.name,
+        description: data.description,
+      }),
+    });
+
+    console.log('Document Edit API Response Status:', response.status);
+    
+    if (!response.ok) {
+      // Try to parse the error response
+      let errorData = null;
+      try {
+        errorData = await response.json();
+        console.error('Document edit error:', errorData);
+      } catch (e) {
+        console.error('Failed to parse error response');
+      }
+      
+      throw new Error(errorData?.message || `Failed to edit document: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Document Edit API Response:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('Error editing document:', error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Error editing document' 
     };
   }
 };
