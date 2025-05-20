@@ -23,10 +23,9 @@ interface TaskDocumentListProps {
   documents: Document[];
   isLoading: boolean;
   onDocumentUpdated?: () => void;
-  readOnly?: boolean;
 }
 
-export function TaskDocumentList({ documents, isLoading, onDocumentUpdated, readOnly = false }: TaskDocumentListProps) {
+export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: TaskDocumentListProps) {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -176,9 +175,7 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated, read
         <FileText className="h-16 w-16 text-muted-foreground/30 mb-4" />
         <h3 className="text-lg font-medium mb-1">لا توجد مستندات</h3>
         <p className="text-muted-foreground max-w-md">
-          {readOnly 
-            ? 'لا توجد مستندات متاحة للعرض.'
-            : 'لم يتم إضافة أي مستندات بعد. استخدم زر "رفع مستند جديد" لإضافة مستندات.'}
+          لم يتم إضافة أي مستندات لهذه المهمة بعد. استخدم زر "رفع مستند جديد" لإضافة مستندات.
         </p>
       </div>
     );
@@ -235,36 +232,30 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated, read
                 <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
                 فتح
               </Button>
-              
-              {!readOnly && (
-                <>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="text-xs h-8"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering the parent onClick
-                      handleEditDocument(doc);
-                    }}
-                  >
-                    <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                    تعديل
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="text-xs h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering the parent onClick
-                      handleDeleteConfirm(doc);
-                    }}
-                  >
-                    <Trash className="h-3.5 w-3.5 mr-1.5" />
-                    حذف
-                  </Button>
-                </>
-              )}
-              
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="text-xs h-8"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  handleEditDocument(doc);
+                }}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                تعديل
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="text-xs h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  handleDeleteConfirm(doc);
+                }}
+              >
+                <Trash className="h-3.5 w-3.5 mr-1.5" />
+                حذف
+              </Button>
               <Button 
                 size="sm" 
                 variant="secondary"
@@ -283,48 +274,44 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated, read
       </div>
 
       {/* Edit Document Dialog */}
-      {!readOnly && (
-        <EditDocumentDialog
-          isOpen={editDialogOpen}
-          onClose={() => setEditDialogOpen(false)}
-          document={selectedDocument}
-          onDocumentUpdated={handleDocumentEdited}
-        />
-      )}
+      <EditDocumentDialog
+        isOpen={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        document={selectedDocument}
+        onDocumentUpdated={handleDocumentEdited}
+      />
       
       {/* Delete Document Confirmation Dialog */}
-      {!readOnly && (
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent className="max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-right">تأكيد حذف المستند</AlertDialogTitle>
-              <AlertDialogDescription className="text-right">
-                هل أنت متأكد من رغبتك في حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex-row-reverse gap-2 sm:justify-start">
-              <AlertDialogAction
-                onClick={handleDeleteDocument}
-                className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <>
-                    <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
-                    جاري الحذف...
-                  </>
-                ) : (
-                  <>
-                    <Trash className="h-4 w-4 mr-2" />
-                    نعم، حذف المستند
-                  </>
-                )}
-              </AlertDialogAction>
-              <AlertDialogCancel className="sm:mr-2">إلغاء</AlertDialogCancel>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right">تأكيد حذف المستند</AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              هل أنت متأكد من رغبتك في حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2 sm:justify-start">
+            <AlertDialogAction
+              onClick={handleDeleteDocument}
+              className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
+                  جاري الحذف...
+                </>
+              ) : (
+                <>
+                  <Trash className="h-4 w-4 mr-2" />
+                  نعم، حذف المستند
+                </>
+              )}
+            </AlertDialogAction>
+            <AlertDialogCancel className="sm:mr-2">إلغاء</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

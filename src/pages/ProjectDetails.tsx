@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getProjectById, UpdateProjectBasicInfo, cancelProject, pendProject, activateProject } from '@/services/projectService';
+import { getProjectById, UpdateProjectBasicInfo, cancelProject } from '@/services/projectService';
 import { Tabs } from '@/components/ui/tabs';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,8 +30,6 @@ const ProjectDetails = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
-  const [isPending, setIsPending] = useState(false);
-  const [isActivating, setIsActivating] = useState(false);
 
   const { data: project, isLoading, error, refetch } = useQuery({
     queryKey: ['project', projectId],
@@ -68,34 +66,6 @@ const ProjectDetails = () => {
     }
   };
 
-  const handlePendProject = async () => {
-    try {
-      setIsPending(true);
-      await pendProject(projectId);
-      toast.success("تم تعليق المشروع بنجاح");
-      refetch(); // إعادة تحميل بيانات المشروع بعد التعليق
-    } catch (error) {
-      console.error("فشل في تعليق المشروع:", error);
-      toast.error("حدث خطأ أثناء محاولة تعليق المشروع");
-    } finally {
-      setIsPending(false);
-    }
-  };
-
-  const handleActivateProject = async () => {
-    try {
-      setIsActivating(true);
-      await activateProject(projectId);
-      toast.success("تم تفعيل المشروع بنجاح");
-      refetch(); // إعادة تحميل بيانات المشروع بعد التفعيل
-    } catch (error) {
-      console.error("فشل في تفعيل المشروع:", error);
-      toast.error("حدث خطأ أثناء محاولة تفعيل المشروع");
-    } finally {
-      setIsActivating(false);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center py-20">
@@ -128,15 +98,8 @@ const ProjectDetails = () => {
     geographicalCoordinates: project.geographicalCoordinates
   };
 
-  // تحديد حالة المشروع
+  // تحقق مما إذا كان المشروع ملغياً بالفعل
   const isProjectCancelled = project.projectStatus?.toLowerCase() === 'ملغي';
-  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ';
-  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق';
-  
-  // تحديد أي الأزرار التي يجب عرضها
-  const showCancelButton = !isProjectCancelled && !isProjectPending;
-  const showPendButton = isProjectActive;
-  const showActivateButton = isProjectPending;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -146,11 +109,7 @@ const ProjectDetails = () => {
           project={project} 
           onEdit={handleEdit} 
           onCancel={() => setCancelDialogOpen(true)}
-          onPend={handlePendProject}
-          onActivate={handleActivateProject}
-          showCancelButton={showCancelButton}
-          showPendButton={showPendButton}
-          showActivateButton={showActivateButton}
+          showCancelButton={!isProjectCancelled}
         />
 
         <Tabs defaultValue="details" className="space-y-6">

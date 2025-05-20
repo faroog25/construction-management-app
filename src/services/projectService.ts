@@ -308,7 +308,7 @@ export async function cancelProject(projectId: number, reason: string): Promise<
   console.log(`Cancelling project ${projectId} with reason: ${reason}`);
   
   const response = await fetch(`${API_BASE_URL}/Projects/Cancel/${projectId}`, {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -323,48 +323,6 @@ export async function cancelProject(projectId: number, reason: string): Promise<
       body: errorText
     });
     throw new Error(`فشل في إلغاء المشروع. (HTTP ${response.status})`);
-  }
-  
-  return response.json();
-}
-
-// تعليق المشروع
-export async function pendProject(projectId: number): Promise<any> {
-  console.log(`Pending project ${projectId}`);
-  
-  const response = await fetch(`${API_BASE_URL}/Projects/Pend/${projectId}`, {
-    method: 'POST',
-  });
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('API Error Response for project pending:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText
-    });
-    throw new Error(`فشل في تعليق المشروع. (HTTP ${response.status})`);
-  }
-  
-  return response.json();
-}
-
-// تفعيل المشروع
-export async function activateProject(projectId: number): Promise<any> {
-  console.log(`Activating project ${projectId}`);
-  
-  const response = await fetch(`${API_BASE_URL}/Projects/Activate/${projectId}`, {
-    method: 'POST',
-  });
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('API Error Response for project activation:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText
-    });
-    throw new Error(`فشل في تفعيل المشروع. (HTTP ${response.status})`);
   }
   
   return response.json();
@@ -448,24 +406,4 @@ export const getSiteEngineers = async () => {
     console.error('Error fetching site engineers:', error);
     throw error;
   }
-};
-
-// Utility function to check if project is editable (not canceled or pending)
-export const isProjectEditable = (project: Project | ProjectType | null | undefined): boolean => {
-  if (!project) return false;
-  
-  // Check projectStatus string first
-  if (project.projectStatus) {
-    const status = project.projectStatus.trim().toLowerCase();
-    return status !== 'ملغي' && status !== 'معلق';
-  }
-  
-  // If projectStatus is not available, check status code if available
-  if (typeof project.status === 'number') {
-    // Status codes: 0 = active, 1 = pending, 2 = completed, 3 = canceled
-    return project.status !== 1 && project.status !== 3;
-  }
-  
-  // Default to true if we can't determine the status
-  return true;
 };

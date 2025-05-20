@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Share2, ChevronLeft, Edit, Download, Printer, MoreHorizontal, Ban, PauseCircle, PlayCircle } from 'lucide-react';
+import { Share2, ChevronLeft, Edit, Download, Printer, MoreHorizontal, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Project } from '@/services/projectService';
+import { Project } from '@/types/project';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -17,23 +17,10 @@ interface ProjectHeaderProps {
   project: Project;
   onEdit: () => void;
   onCancel?: () => void;
-  onPend?: () => void;
-  onActivate?: () => void;
   showCancelButton?: boolean;
-  showPendButton?: boolean;
-  showActivateButton?: boolean;
 }
 
-const ProjectHeader = ({ 
-  project, 
-  onEdit, 
-  onCancel, 
-  onPend, 
-  onActivate, 
-  showCancelButton = true, 
-  showPendButton = false,
-  showActivateButton = false 
-}: ProjectHeaderProps) => {
+const ProjectHeader = ({ project, onEdit, onCancel, showCancelButton = true }: ProjectHeaderProps) => {
   const navigate = useNavigate();
 
   const handleShare = () => {
@@ -97,31 +84,6 @@ const ProjectHeader = ({
           <Edit className="h-4 w-4 ml-1.5" />
           تعديل
         </Button>
-        
-        {showPendButton && onPend && (
-          <Button 
-            variant="warning"
-            size="sm" 
-            onClick={onPend} 
-            className="flex-1 sm:flex-none"
-          >
-            <PauseCircle className="h-4 w-4 ml-1.5" />
-            تعليق المشروع
-          </Button>
-        )}
-        
-        {showActivateButton && onActivate && (
-          <Button 
-            variant="success"
-            size="sm" 
-            onClick={onActivate}
-            className="flex-1 sm:flex-none"
-          >
-            <PlayCircle className="h-4 w-4 ml-1.5" />
-            تفعيل المشروع
-          </Button>
-        )}
-        
         {showCancelButton && onCancel && (
           <Button 
             variant="destructive" 
@@ -133,7 +95,6 @@ const ProjectHeader = ({
             إلغاء المشروع
           </Button>
         )}
-        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
