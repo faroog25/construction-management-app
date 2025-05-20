@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -58,6 +57,13 @@ export function UploadDocumentDialog({
       return;
     }
 
+    // Validate projectId
+    if (!projectId || projectId === 0) {
+      setError('معرف المشروع غير صالح');
+      console.error("Invalid project ID:", projectId);
+      return;
+    }
+
     setIsUploading(true);
 
     try {
@@ -68,6 +74,14 @@ export function UploadDocumentDialog({
       formData.append('Description', documentDescription);
       formData.append('TaskId', taskId.toString());
       formData.append('ProjectId', projectId.toString());
+      
+      // Log what we're sending (for debugging)
+      console.log("Uploading document with:", {
+        fileName: documentFile.name, 
+        documentName,
+        taskId,
+        projectId
+      });
       
       const result = await uploadTaskDocument(formData);
       

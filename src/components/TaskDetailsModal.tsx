@@ -181,8 +181,11 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
 
   if (!taskId) return null;
 
-  // The project ID needed for document upload
+  // Get the projectId from taskData for document upload
   const projectId = taskData?.data?.projectId || 0;
+  
+  // Check if projectId is available for debugging
+  console.log("Task Details - Project ID:", projectId);
 
   return (
     <>

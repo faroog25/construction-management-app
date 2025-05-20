@@ -141,6 +141,13 @@ export const uploadTaskDocument = async (
   try {
     console.log('Uploading document...');
     
+    // Log formData for debugging (do not log the file contents)
+    const formDataEntries = Array.from(formData.entries())
+      .filter(([key]) => key !== 'File') // Skip logging the file content
+      .map(([key, value]) => `${key}: ${value}`);
+    
+    console.log('Form data being sent:', formDataEntries);
+    
     const response = await fetch(`${API_BASE_URL}/Documents`, {
       method: 'POST',
       body: formData,
@@ -150,7 +157,16 @@ export const uploadTaskDocument = async (
     console.log('Document Upload API Response Status:', response.status);
     
     if (!response.ok) {
-      throw new Error(`Failed to upload document: ${response.status}`);
+      // Try to parse the error response
+      let errorData = null;
+      try {
+        errorData = await response.json();
+        console.error('Document upload error:', errorData);
+      } catch (e) {
+        console.error('Failed to parse error response');
+      }
+      
+      throw new Error(errorData?.message || `Failed to upload document: ${response.status}`);
     }
 
     const result = await response.json();
