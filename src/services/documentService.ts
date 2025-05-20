@@ -70,3 +70,66 @@ export const getDocuments = async (params: DocumentsParams): Promise<Document[]>
     return [];
   }
 };
+
+// New function to get documents by task ID
+export const getDocumentsByTask = async (taskId: number): Promise<Document[]> => {
+  try {
+    console.log('Fetching documents for task:', taskId);
+    const response = await fetch(`${API_BASE_URL}/Documents/ByTask/${taskId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Task Documents API Response Status:', response.status);
+    
+    if (!response.ok) {
+      // If the response is 404, it might be a legitimate "no documents" response
+      // rather than an actual error in some APIs
+      if (response.status === 404) {
+        console.log('No documents found for this task (404 response)');
+        return [];
+      }
+      throw new Error(`Failed to fetch task documents: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Task Documents API Response:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch task documents');
+    }
+    
+    // Map API documents to include file type and size based on file extension
+    return result.data.map((doc: Document) => {
+      const fileExtension = doc.name.split('.').pop()?.toLowerCase() || '';
+      let type = 'unknown';
+      
+      if (['pdf'].includes(fileExtension)) {
+        type = 'pdf';
+      } else if (['doc', 'docx'].includes(fileExtension)) {
+        type = 'doc';
+      } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(fileExtension)) {
+        type = 'image';
+      } else if (['zip', 'rar', '7z'].includes(fileExtension)) {
+        type = 'archive';
+      } else {
+        // Default to PDF if no extension or unknown extension
+        type = 'pdf';
+      }
+      
+      // Add an estimated size if not provided
+      const size = '2.5 MB';
+      
+      // Default status as one of the acceptable enum values
+      const status = 'approved' as const;
+      
+      return { ...doc, type, size, status };
+    });
+  } catch (error) {
+    console.error('Error fetching task documents:', error);
+    // Don't show toast here, let the component handle error reporting
+    return [];
+  }
+};

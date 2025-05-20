@@ -19,14 +19,7 @@ export function useTaskWorkers(taskId: number) {
         
         // Use the new API endpoint to fetch workers assigned to this task
         const workers = await getWorkersForTask(taskId);
-        const typedWorkers: Worker[] = workers.map(worker => ({
-          id: worker.id,
-          fullName: worker.fullName,
-          email: worker.email || "",
-          phoneNumber: worker.phoneNumber || "",
-          specialty: worker.specialty || ""
-        }));
-        setAssignedWorkers(typedWorkers);
+        setAssignedWorkers(workers);
       } catch (error) {
         console.error('Error fetching assigned workers:', error);
         setAssignedWorkers([]);
