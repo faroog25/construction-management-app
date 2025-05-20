@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import { FileUp, Loader2, File, X, CheckCircle2 } from 'lucide-react';
 interface UploadDocumentDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  taskId: number;
+  taskId: number; // 0 means project document (not associated with a specific task)
   projectId: number;
   onUploadSuccess: () => void;
 }
@@ -72,14 +73,19 @@ export function UploadDocumentDialog({
       formData.append('File', documentFile);
       formData.append('Name', documentName);
       formData.append('Description', documentDescription);
-      formData.append('TaskId', taskId.toString());
+      
+      // Only append taskId if it's not 0 (meaning it's a task document)
+      if (taskId > 0) {
+        formData.append('TaskId', taskId.toString());
+      }
+      
       formData.append('ProjectId', projectId.toString());
       
       // Log what we're sending (for debugging)
       console.log("Uploading document with:", {
         fileName: documentFile.name, 
         documentName,
-        taskId,
+        taskId: taskId > 0 ? taskId : "none (project document)",
         projectId
       });
       
@@ -115,16 +121,20 @@ export function UploadDocumentDialog({
     onClose();
   };
 
+  // Determine dialog title based on whether it's a task document or project document
+  const dialogTitle = taskId > 0 ? 'رفع مستند للمهمة' : 'رفع مستند للمشروع';
+  const dialogDescription = taskId > 0 ? 'قم برفع مستند جديد لهذه المهمة' : 'قم برفع مستند جديد لهذا المشروع';
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileUp className="h-5 w-5" />
-            رفع مستند جديد
+            {dialogTitle}
           </DialogTitle>
           <DialogDescription>
-            قم برفع مستند جديد لهذه المهمة
+            {dialogDescription}
           </DialogDescription>
         </DialogHeader>
         
