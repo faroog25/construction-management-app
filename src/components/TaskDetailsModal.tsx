@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -46,7 +45,7 @@ export function TaskDetailsModal({ isOpen, onClose, taskId, readOnly = false }: 
       if (!taskId) return [];
       try {
         const result = await getTaskDocuments(taskId);
-        return result.data || [];
+        return result || [];
       } catch (error) {
         console.error('Error fetching task documents:', error);
         toast.error('فشل في جلب مستندات المهمة');

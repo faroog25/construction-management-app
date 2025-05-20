@@ -133,6 +133,9 @@ export const getDocumentsByTask = async (taskId: number): Promise<Document[]> =>
   }
 };
 
+// Export with the name that TaskDetailsModal is expecting
+export const getTaskDocuments = getDocumentsByTask;
+
 // Upload a document for a task
 export const uploadTaskDocument = async (
   formData: FormData
