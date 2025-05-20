@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { getStageTasks, completeTask, ApiTask } from '@/services/taskService';
+import { getTasks, updateTask, completeTask, ApiTask } from '@/services/taskService';
 import { Loader2, CheckCircle, Users, CalendarRange, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -25,13 +25,13 @@ export function TaskDetailsModal({ isOpen, onClose, taskId, readOnly = false }: 
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [taskDetails, setTaskDetails] = useState<ApiTask | null>(null);
 
-  // Get task details - using getStageTasks instead of getTasks since getTasks is not exported
+  // Get task details
   const { 
     data: tasks,
     isLoading: isLoadingTask 
   } = useQuery({
     queryKey: ['tasks'],
-    queryFn: () => getStageTasks(0), // Get all tasks from stage 0 (will get all tasks)
+    queryFn: () => getTasks(0), // Get all tasks
     enabled: isOpen && taskId !== null
   });
 
@@ -46,7 +46,7 @@ export function TaskDetailsModal({ isOpen, onClose, taskId, readOnly = false }: 
       if (!taskId) return [];
       try {
         const result = await getTaskDocuments(taskId);
-        return result || [];
+        return result.data || [];
       } catch (error) {
         console.error('Error fetching task documents:', error);
         toast.error('فشل في جلب مستندات المهمة');
@@ -165,7 +165,7 @@ export function TaskDetailsModal({ isOpen, onClose, taskId, readOnly = false }: 
               <CalendarRange className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm text-muted-foreground">تاريخ النهاية المتوقع:</p>
-                <p>{formatDate(taskDetails?.endDate)}</p>
+                <p>{formatDate(taskDetails?.expectedEndDate)}</p>
               </div>
             </div>
           </div>
