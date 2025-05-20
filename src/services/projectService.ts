@@ -303,6 +303,31 @@ export async function updateProjectBasicInfo(projectData: UpdateProjectBasicInfo
   return response.json();
 }
 
+// إلغاء المشروع
+export async function cancelProject(projectId: number, reason: string): Promise<any> {
+  console.log(`Cancelling project ${projectId} with reason: ${reason}`);
+  
+  const response = await fetch(`${API_BASE_URL}/Projects/Cancel/${projectId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(reason),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response for project cancellation:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`فشل في إلغاء المشروع. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
+
 // Utility to convert status code to string
 export const getStatusFromCode = (statusCode: number): 'active' | 'pending' | 'completed' | 'canceled' => {
   switch (statusCode) {

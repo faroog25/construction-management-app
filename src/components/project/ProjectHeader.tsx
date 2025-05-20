@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Share2, ChevronLeft, Edit, Download, Printer, MoreHorizontal, Plus } from 'lucide-react';
+import { Share2, ChevronLeft, Edit, Download, Printer, MoreHorizontal, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Project } from '@/types/project';
 import { toast } from 'sonner';
@@ -16,9 +16,11 @@ import {
 interface ProjectHeaderProps {
   project: Project;
   onEdit: () => void;
+  onCancel?: () => void;
+  showCancelButton?: boolean;
 }
 
-const ProjectHeader = ({ project, onEdit }: ProjectHeaderProps) => {
+const ProjectHeader = ({ project, onEdit, onCancel, showCancelButton = true }: ProjectHeaderProps) => {
   const navigate = useNavigate();
 
   const handleShare = () => {
@@ -82,6 +84,17 @@ const ProjectHeader = ({ project, onEdit }: ProjectHeaderProps) => {
           <Edit className="h-4 w-4 ml-1.5" />
           تعديل
         </Button>
+        {showCancelButton && onCancel && (
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            onClick={onCancel} 
+            className="flex-1 sm:flex-none"
+          >
+            <Ban className="h-4 w-4 ml-1.5" />
+            إلغاء المشروع
+          </Button>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
@@ -103,7 +116,6 @@ const ProjectHeader = ({ project, onEdit }: ProjectHeaderProps) => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        
       </div>
     </div>
   );
