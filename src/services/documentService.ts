@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { Document, DocumentsParams, DocumentsResponse } from '@/types/document';
 import { toast } from 'sonner';
@@ -131,5 +130,45 @@ export const getDocumentsByTask = async (taskId: number): Promise<Document[]> =>
     console.error('Error fetching task documents:', error);
     // Don't show toast here, let the component handle error reporting
     return [];
+  }
+};
+
+// New function to upload a document for a task
+export const uploadTaskDocument = async (taskId: number, file: File, name: string, description: string): Promise<{ success: boolean; message: string; data?: any }> => {
+  try {
+    console.log('Uploading document for task:', taskId);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('name', name);
+    formData.append('description', description);
+    formData.append('taskId', taskId.toString());
+    
+    const response = await fetch(`${API_BASE_URL}/Documents/Upload`, {
+      method: 'POST',
+      body: formData,
+      // Don't set Content-Type header when using FormData
+    });
+
+    console.log('Document Upload API Response Status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to upload document: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Document Upload API Response:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to upload document');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error uploading document:', error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Error uploading document' 
+    };
   }
 };
