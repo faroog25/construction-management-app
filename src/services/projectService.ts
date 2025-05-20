@@ -328,6 +328,48 @@ export async function cancelProject(projectId: number, reason: string): Promise<
   return response.json();
 }
 
+// تعليق المشروع
+export async function pendProject(projectId: number): Promise<any> {
+  console.log(`Pending project ${projectId}`);
+  
+  const response = await fetch(`${API_BASE_URL}/Projects/Pend/${projectId}`, {
+    method: 'PUT',
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response for project pending:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`فشل في تعليق المشروع. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
+
+// تفعيل المشروع
+export async function activateProject(projectId: number): Promise<any> {
+  console.log(`Activating project ${projectId}`);
+  
+  const response = await fetch(`${API_BASE_URL}/Projects/Activate/${projectId}`, {
+    method: 'PUT',
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response for project activation:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`فشل في تفعيل المشروع. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
+
 // Utility to convert status code to string
 export const getStatusFromCode = (statusCode: number): 'active' | 'pending' | 'completed' | 'canceled' => {
   switch (statusCode) {
