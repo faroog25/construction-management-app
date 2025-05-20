@@ -1,13 +1,23 @@
 
 import React, { useState } from 'react';
 import { Document } from '@/types/document';
-import { FileText, Download, Info, Calendar, File, ExternalLink, Pencil } from 'lucide-react';
+import { FileText, Download, Info, Calendar, File, ExternalLink, Pencil, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { downloadDocument, getDocument } from '@/services/documentService';
+import { downloadDocument, getDocument, deleteDocument } from '@/services/documentService';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { API_BASE_URL } from '@/config/api';
 import { EditDocumentDialog } from './EditDocumentDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TaskDocumentListProps {
   documents: Document[];
@@ -18,6 +28,8 @@ interface TaskDocumentListProps {
 export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: TaskDocumentListProps) {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDownload = async (document: Document) => {
     try {
@@ -74,10 +86,44 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
     }
   };
 
-  // New function to handle document editing
+  // Function to handle document editing
   const handleEditDocument = (document: Document) => {
     setSelectedDocument(document);
     setEditDialogOpen(true);
+  };
+
+  // Function to handle document deletion confirmation
+  const handleDeleteConfirm = (document: Document) => {
+    setSelectedDocument(document);
+    setDeleteDialogOpen(true);
+  };
+
+  // Function to handle document deletion
+  const handleDeleteDocument = async () => {
+    if (!selectedDocument) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      const result = await deleteDocument(selectedDocument.id);
+      
+      if (result.success) {
+        toast.success('تم حذف المستند بنجاح');
+        setDeleteDialogOpen(false);
+        
+        // Refresh documents list
+        if (onDocumentUpdated) {
+          onDocumentUpdated();
+        }
+      } else {
+        toast.error(result.message || 'فشل في حذف المستند');
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast.error('فشل في حذف المستند');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Handle edit success
@@ -200,6 +246,18 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
               </Button>
               <Button 
                 size="sm" 
+                variant="outline"
+                className="text-xs h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  handleDeleteConfirm(doc);
+                }}
+              >
+                <Trash className="h-3.5 w-3.5 mr-1.5" />
+                حذف
+              </Button>
+              <Button 
+                size="sm" 
                 variant="secondary"
                 className="text-xs h-8"
                 onClick={(e) => {
@@ -222,6 +280,38 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
         document={selectedDocument}
         onDocumentUpdated={handleDocumentEdited}
       />
+      
+      {/* Delete Document Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right">تأكيد حذف المستند</AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              هل أنت متأكد من رغبتك في حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2 sm:justify-start">
+            <AlertDialogAction
+              onClick={handleDeleteDocument}
+              className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
+                  جاري الحذف...
+                </>
+              ) : (
+                <>
+                  <Trash className="h-4 w-4 mr-2" />
+                  نعم، حذف المستند
+                </>
+              )}
+            </AlertDialogAction>
+            <AlertDialogCancel className="sm:mr-2">إلغاء</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

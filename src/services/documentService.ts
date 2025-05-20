@@ -216,7 +216,7 @@ export const getDocument = async (documentId: string): Promise<{ success: boolea
   }
 };
 
-// New function to edit a document
+// Edit a document
 export const editDocument = async (
   documentId: string,
   data: { name: string; description: string }
@@ -260,6 +260,46 @@ export const editDocument = async (
     return { 
       success: false, 
       message: error instanceof Error ? error.message : 'Error editing document' 
+    };
+  }
+};
+
+// Delete a document
+export const deleteDocument = async (documentId: string): Promise<{ success: boolean; message: string }> => {
+  try {
+    console.log('Deleting document with ID:', documentId);
+    
+    const response = await fetch(`${API_BASE_URL}/Documents/${documentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Document Delete API Response Status:', response.status);
+    
+    if (!response.ok) {
+      // Try to parse the error response
+      let errorData = null;
+      try {
+        errorData = await response.json();
+        console.error('Document delete error:', errorData);
+      } catch (e) {
+        console.error('Failed to parse error response');
+      }
+      
+      throw new Error(errorData?.message || `Failed to delete document: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Document Delete API Response:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('Error deleting document:', error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Error deleting document' 
     };
   }
 };
