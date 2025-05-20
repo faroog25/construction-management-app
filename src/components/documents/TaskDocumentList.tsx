@@ -21,16 +21,16 @@ export function TaskDocumentList({ documents, isLoading }: TaskDocumentListProps
           const url = window.URL.createObjectURL(blob);
           
           // Create a temporary link element
-          const link = document.createElement('a');
+          const link = window.document.createElement('a');
           link.href = url;
           link.download = document.name || 'document';
           
           // Trigger download
-          document.body.appendChild(link);
+          window.document.body.appendChild(link);
           link.click();
           
           // Clean up
-          document.body.removeChild(link);
+          window.document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
         }),
         {

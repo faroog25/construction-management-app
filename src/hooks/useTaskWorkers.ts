@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Worker } from '@/services/workerService';
 import { assignWorkersToTask, getWorkersForTask, unassignWorkersFromTask } from '@/services/taskService';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export function useTaskWorkers(taskId: number) {
   const [isAssigning, setIsAssigning] = useState(false);
@@ -19,7 +19,7 @@ export function useTaskWorkers(taskId: number) {
         
         // Use the new API endpoint to fetch workers assigned to this task
         const workers = await getWorkersForTask(taskId);
-        setAssignedWorkers(workers);
+        setAssignedWorkers(workers as Worker[]);
       } catch (error) {
         console.error('Error fetching assigned workers:', error);
         setAssignedWorkers([]);
@@ -52,20 +52,13 @@ export function useTaskWorkers(taskId: number) {
       setAssignedWorkers(selectedWorkers);
       
       // Show a success toast
-      toast({
-        title: "تم تعيين العمال",
-        description: result.message || "تم تعيين العمال للمهمة بنجاح",
-      });
+      toast.success("تم تعيين العمال للمهمة بنجاح");
       
       return true;
     } catch (error) {
       console.error('Error assigning workers:', error);
       // Show an error toast
-      toast({
-        title: "فشل تعيين العمال",
-        description: error instanceof Error ? error.message : "حدث خطأ أثناء تعيين العمال للمهمة",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "حدث خطأ أثناء تعيين العمال للمهمة");
       return false;
     } finally {
       setIsAssigning(false);
@@ -80,7 +73,7 @@ export function useTaskWorkers(taskId: number) {
       
       console.log('Removing worker', workerId, 'from task', taskId);
       
-      // استخدام API إلغاء التعيين الجديد
+      // استخدام المسار الصحيح للAPI لإلغاء التعيين
       const result = await unassignWorkersFromTask({
         taskId,
         workerIds: [workerId]
@@ -91,20 +84,13 @@ export function useTaskWorkers(taskId: number) {
       setAssignedWorkers(updatedWorkers);
       
       // إظهار رسالة نجاح
-      toast({
-        title: "تم إزالة العامل",
-        description: "تم إزالة العامل من المهمة بنجاح",
-      });
+      toast.success("تم إزالة العامل من المهمة بنجاح");
       
       return true;
     } catch (error) {
       console.error('Error removing worker:', error);
       // إظهار رسالة خطأ
-      toast({
-        title: "فشل إزالة العامل",
-        description: error instanceof Error ? error.message : "حدث خطأ أثناء إزالة العامل من المهمة",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "حدث خطأ أثناء إزالة العامل من المهمة");
       return false;
     } finally {
       setIsAssigning(false);
