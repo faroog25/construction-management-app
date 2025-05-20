@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 import { Document, DocumentsParams, DocumentsResponse } from '@/types/document';
 import { toast } from 'sonner';
@@ -70,7 +71,7 @@ export const getDocuments = async (params: DocumentsParams): Promise<Document[]>
   }
 };
 
-// New function to get documents by task ID
+// Get documents by task ID
 export const getDocumentsByTask = async (taskId: number): Promise<Document[]> => {
   try {
     console.log('Fetching documents for task:', taskId);
@@ -133,18 +134,14 @@ export const getDocumentsByTask = async (taskId: number): Promise<Document[]> =>
   }
 };
 
-// New function to upload a document for a task
-export const uploadTaskDocument = async (taskId: number, file: File, name: string, description: string): Promise<{ success: boolean; message: string; data?: any }> => {
+// Upload a document for a task
+export const uploadTaskDocument = async (
+  formData: FormData
+): Promise<{ success: boolean; message: string; data?: any }> => {
   try {
-    console.log('Uploading document for task:', taskId);
+    console.log('Uploading document...');
     
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('name', name);
-    formData.append('description', description);
-    formData.append('taskId', taskId.toString());
-    
-    const response = await fetch(`${API_BASE_URL}/Documents/Upload`, {
+    const response = await fetch(`${API_BASE_URL}/Documents`, {
       method: 'POST',
       body: formData,
       // Don't set Content-Type header when using FormData
@@ -170,5 +167,23 @@ export const uploadTaskDocument = async (taskId: number, file: File, name: strin
       success: false, 
       message: error instanceof Error ? error.message : 'Error uploading document' 
     };
+  }
+};
+
+// Download a document
+export const downloadDocument = async (documentId: string): Promise<Blob> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Documents/Download/${documentId}`, {
+      method: 'GET',
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to download document: ${response.status}`);
+    }
+    
+    return await response.blob();
+  } catch (error) {
+    console.error('Error downloading document:', error);
+    throw error;
   }
 };

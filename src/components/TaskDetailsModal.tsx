@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Calendar, Clock, CalendarClock, ListTodo, Users, 
   CheckCircle, AlertCircle, X, Pencil, FileText, 
-  Upload, Download, FileUp, Plus, Loader2 
+  Upload, FileUp, Plus, Loader2 
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -25,9 +25,8 @@ import { EditTaskModal } from './EditTaskModal';
 import { Document } from '@/types/document';
 import { Badge } from '@/components/ui/badge';
 import { getDocumentsByTask } from '@/services/documentService';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { TaskDocumentList } from '@/components/documents/TaskDocumentList';
+import { UploadDocumentDialog } from '@/components/documents/UploadDocumentDialog';
 
 interface TaskDetailsModalProps {
   isOpen: boolean;
@@ -37,22 +36,19 @@ interface TaskDetailsModalProps {
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetailsModalProps) {
   const [taskData, setTaskData] = useState<TaskDetailResponse | null>(null);
-  const [assignedWorkers, setAssignedWorkers] = useState<any[]>([]); // Changed type to any[] to resolve TypeScript error
+  const [assignedWorkers, setAssignedWorkers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [loadingWorkers, setLoadingWorkers] = useState(false);
   const [taskDocuments, setTaskDocuments] = useState<Document[]>([]);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
-  const [uploadingDocument, setUploadingDocument] = useState(false);
-  const [documentFile, setDocumentFile] = useState<File | null>(null);
-  const [documentName, setDocumentName] = useState('');
-  const [documentDescription, setDocumentDescription] = useState('');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const fetchTaskDetails = async () => {
     if (!taskId) return;
@@ -62,7 +58,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
       const data = await getTaskById(taskId);
       setTaskData(data);
       
-      // Fetch assigned workers separately using the new API endpoint
+      // Fetch assigned workers separately using the API endpoint
       await fetchAssignedWorkers(taskId);
       await fetchTaskDocuments(taskId);
     } catch (error) {
@@ -81,7 +77,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
     try {
       setLoadingWorkers(true);
       const workers = await getWorkersForTask(taskId);
-      setAssignedWorkers(workers); // Using any[] type to avoid type mismatch
+      setAssignedWorkers(workers);
     } catch (error) {
       console.error('Error fetching assigned workers:', error);
       setAssignedWorkers([]);
@@ -119,6 +115,13 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
   // Handler when task is successfully edited
   const handleTaskUpdated = () => {
     fetchTaskDetails();
+  };
+
+  // Handle document upload success
+  const handleDocumentUploaded = () => {
+    if (taskId) {
+      fetchTaskDocuments(taskId);
+    }
   };
 
   // Handle task completion or unchecking
@@ -176,70 +179,10 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
     }
   };
 
-  // Handle document file change
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      setDocumentFile(file);
-      // If no name is provided, use the file name
-      if (!documentName) {
-        setDocumentName(file.name);
-      }
-    }
-  };
-
-  // Handle document upload
-  const handleDocumentUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!taskId || !documentFile) {
-      toast({
-        title: "خطأ",
-        description: "يرجى اختيار ملف للرفع",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setUploadingDocument(true);
-
-    try {
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append('file', documentFile);
-      formData.append('name', documentName || documentFile.name);
-      formData.append('description', documentDescription || '');
-      formData.append('taskId', taskId.toString());
-      
-      // Simulate API call for document upload (replace with actual API)
-      // This is a placeholder - you'll need to implement the actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast({
-        title: "تم بنجاح",
-        description: "تم رفع المستند بنجاح"
-      });
-
-      // Reset form
-      setDocumentFile(null);
-      setDocumentName('');
-      setDocumentDescription('');
-      
-      // Refresh documents list
-      fetchTaskDocuments(taskId);
-    } catch (error) {
-      console.error('Error uploading document:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في رفع المستند",
-        variant: "destructive"
-      });
-    } finally {
-      setUploadingDocument(false);
-    }
-  };
-
   if (!taskId) return null;
+
+  // The project ID needed for document upload
+  const projectId = taskData?.data?.projectId || 0;
 
   return (
     <>
@@ -403,135 +346,27 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
               <TabsContent value="documents" className="space-y-6">
                 <Card className="border shadow-sm">
                   <CardContent className="p-8">
-                    <div className="flex flex-col lg:flex-row gap-10">
-                      {/* Upload Document Form */}
-                      <div className="flex-1">
-                        <h4 className="text-xl font-semibold mb-6 flex items-center text-gray-800">
-                          <Upload className="mr-3 h-6 w-6 text-primary" /> رفع مستند جديد
-                        </h4>
-                        
-                        <form onSubmit={handleDocumentUpload} className="space-y-5 p-6 bg-gray-50 rounded-xl border border-gray-100">
-                          <div className="space-y-2">
-                            <Label htmlFor="document-name">اسم المستند</Label>
-                            <Input 
-                              id="document-name"
-                              placeholder="أدخل اسم المستند" 
-                              value={documentName}
-                              onChange={e => setDocumentName(e.target.value)}
-                              className="bg-white"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="document-description">وصف المستند (اختياري)</Label>
-                            <Textarea 
-                              id="document-description"
-                              placeholder="أدخل وصفًا مختصرًا للمستند" 
-                              value={documentDescription}
-                              onChange={e => setDocumentDescription(e.target.value)}
-                              rows={3}
-                              className="bg-white"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="document-file">اختر الملف</Label>
-                            <div className="flex items-center justify-center w-full">
-                              <label htmlFor="document-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-white border-blue-100 hover:bg-blue-50 transition-colors">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                  <FileUp className="w-10 h-10 mb-3 text-blue-400" />
-                                  <p className="mb-2 text-sm text-blue-500">
-                                    <span className="font-semibold">اضغط للاختيار</span> أو اسحب الملف هنا
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    PDF, DOC, DOCX, PNG, JPG
-                                  </p>
-                                </div>
-                                <Input 
-                                  id="document-file" 
-                                  type="file" 
-                                  className="hidden" 
-                                  onChange={handleFileChange}
-                                />
-                              </label>
-                            </div>
-                            {documentFile && (
-                              <p className="text-sm text-green-600 flex items-center gap-2 mt-2">
-                                <CheckCircle className="h-4 w-4" />
-                                {documentFile.name}
-                              </p>
-                            )}
-                          </div>
-                          
-                          <Button 
-                            type="submit" 
-                            className="w-full" 
-                            disabled={!documentFile || uploadingDocument}
-                          >
-                            {uploadingDocument ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                جاري الرفع...
-                              </>
-                            ) : (
-                              <>
-                                <Upload className="mr-2 h-4 w-4" />
-                                رفع المستند
-                              </>
-                            )}
-                          </Button>
-                        </form>
-                      </div>
-
-                      {/* Documents List */}
-                      <div className="flex-1">
-                        <h4 className="text-xl font-semibold mb-6 flex items-center text-gray-800">
+                    <div className="flex flex-col space-y-6">
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <h4 className="text-xl font-semibold flex items-center text-gray-800">
                           <FileText className="mr-3 h-6 w-6 text-primary" /> مستندات المهمة
                         </h4>
                         
-                        {loadingDocuments ? (
-                          <div className="flex justify-center py-12">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                          </div>
-                        ) : taskDocuments.length > 0 ? (
-                          <div className="grid grid-cols-1 gap-4">
-                            {taskDocuments.map((document) => (
-                              <div 
-                                key={document.id} 
-                                className="border rounded-xl p-5 hover:border-primary/50 hover:bg-blue-50/30 transition-colors cursor-pointer relative group"
-                              >
-                                <div className="flex items-start gap-4">
-                                  <div className="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <FileText className="h-6 w-6 text-blue-600" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <h5 className="font-semibold text-base mb-1">{document.name}</h5>
-                                    <p className="text-sm text-gray-500 mb-2">
-                                      {document.description || 'لا يوجد وصف'}
-                                    </p>
-                                    <p className="text-xs text-gray-400">
-                                      تاريخ الرفع: {new Date(document.createdDate).toLocaleDateString('ar-SA')}
-                                    </p>
-                                  </div>
-                                </div>
-                                
-                                <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-full">
-                                    <Download className="h-4 w-4 text-gray-500" />
-                                    <span className="sr-only">تحميل المستند</span>
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="py-12 text-center bg-gray-50 rounded-xl border border-dashed">
-                            <FileText className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                            <p className="text-gray-500 font-medium">لا توجد مستندات مرتبطة بهذه المهمة</p>
-                            <p className="text-sm text-gray-400 mt-2">قم برفع المستندات باستخدام النموذج المجاور</p>
-                          </div>
-                        )}
+                        <Button 
+                          onClick={() => setUploadDialogOpen(true)}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          <FileUp className="mr-2 h-4 w-4" />
+                          رفع مستند جديد
+                        </Button>
                       </div>
+                      
+                      <Separator className="my-2" />
+                      
+                      <TaskDocumentList 
+                        documents={taskDocuments}
+                        isLoading={loadingDocuments}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -545,6 +380,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
         </DialogContent>
       </Dialog>
 
+      {/* Edit Task Modal */}
       {taskData && (
         <EditTaskModal
           isOpen={editModalOpen}
@@ -555,6 +391,17 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
             name: taskData.data.name,
             description: taskData.data.description || '',
           }}
+        />
+      )}
+
+      {/* Upload Document Dialog */}
+      {taskId && (
+        <UploadDocumentDialog
+          isOpen={uploadDialogOpen}
+          onClose={() => setUploadDialogOpen(false)}
+          taskId={taskId}
+          projectId={projectId}
+          onUploadSuccess={handleDocumentUploaded}
         />
       )}
     </>
