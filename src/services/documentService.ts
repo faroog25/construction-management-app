@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { Document, DocumentsParams, DocumentsResponse } from '@/types/document';
 import { toast } from 'sonner';
@@ -182,6 +181,36 @@ export const uploadTaskDocument = async (
     return { 
       success: false, 
       message: error instanceof Error ? error.message : 'Error uploading document' 
+    };
+  }
+};
+
+// New function to get a single document
+export const getDocument = async (documentId: string): Promise<{ success: boolean; message: string; data: any }> => {
+  try {
+    console.log('Fetching document with ID:', documentId);
+    const response = await fetch(`${API_BASE_URL}/Documents/${documentId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Document API Response Status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch document: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Document API Response:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('Error fetching document:', error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Error fetching document' 
     };
   }
 };

@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { Document } from '@/types/document';
-import { FileText, Download, Info, Calendar, File } from 'lucide-react';
+import { FileText, Download, Info, Calendar, File, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { downloadDocument } from '@/services/documentService';
+import { downloadDocument, getDocument } from '@/services/documentService';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { API_BASE_URL } from '@/config/api';
 
 interface TaskDocumentListProps {
   documents: Document[];
@@ -42,6 +43,29 @@ export function TaskDocumentList({ documents, isLoading }: TaskDocumentListProps
     } catch (error) {
       console.error('Error downloading document:', error);
       toast.error('فشل في تحميل المستند');
+    }
+  };
+
+  // New function to open the document in a new tab
+  const handleOpenDocument = async (document: Document) => {
+    try {
+      toast.loading('جاري تحميل المستند...');
+      
+      const result = await getDocument(document.id);
+      
+      if (result.success && result.data && result.data.fileUrl) {
+        // Open the file URL in a new tab
+        window.open(result.data.fileUrl, '_blank');
+        toast.dismiss();
+        toast.success('تم فتح المستند بنجاح');
+      } else {
+        toast.dismiss();
+        toast.error('فشل في فتح المستند');
+      }
+    } catch (error) {
+      console.error('Error opening document:', error);
+      toast.dismiss();
+      toast.error('فشل في فتح المستند');
     }
   };
 
@@ -98,7 +122,8 @@ export function TaskDocumentList({ documents, isLoading }: TaskDocumentListProps
       {documents.map((doc) => (
         <div 
           key={doc.id}
-          className="border rounded-lg p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors group"
+          className="border rounded-lg p-4 hover:border-primary/50 hover:bg-primary/5 transition-colors group cursor-pointer"
+          onClick={() => handleOpenDocument(doc)}
         >
           <div className="flex items-start gap-4">
             <div className="h-14 w-14 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -129,12 +154,27 @@ export function TaskDocumentList({ documents, isLoading }: TaskDocumentListProps
             </div>
           </div>
           
-          <div className="mt-3 pt-3 border-t flex justify-end">
+          <div className="mt-3 pt-3 border-t flex justify-end gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="text-xs h-8"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the parent onClick
+                handleOpenDocument(doc);
+              }}
+            >
+              <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+              فتح
+            </Button>
             <Button 
               size="sm" 
               variant="secondary"
               className="text-xs h-8"
-              onClick={() => handleDownload(doc)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the parent onClick
+                handleDownload(doc);
+              }}
             >
               <Download className="h-3.5 w-3.5 mr-1.5" />
               تحميل
