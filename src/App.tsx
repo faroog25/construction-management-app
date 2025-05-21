@@ -10,17 +10,19 @@ import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Documents from "./pages/Documents";
 import Team from "./pages/Team";
-import SiteEngineersPage from "./pages/SiteEngineers"; // صفحة المهندسين
-import ClientsPage from "./pages/Clients"; // صفحة العملاء
+import SiteEngineersPage from "./pages/SiteEngineers";
+import ClientsPage from "./pages/Clients";
 import Equipment from "./pages/Equipment";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Welcome from "./pages/Welcome";
 import Navbar from "./components/Navbar";
 import ApiDocsPage from "./pages/ApiDocsPage";
 import ClientProfilePage from "./pages/ClientProfile";
 import { WorkerProfilePage } from "./pages/WorkerProfile";
 import SiteEngineerProfilePage from "./pages/SiteEngineerProfile";
-import WorkerSpecialties from "./pages/WorkerSpecialties"; // إضافة صفحة تخصصات العمال
+import WorkerSpecialties from "./pages/WorkerSpecialties";
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -33,7 +35,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/welcome" replace />;
   }
 
   return (
@@ -54,7 +56,9 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
+                <Route path="/welcome" element={<Welcome />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 <Route path="/" element={
                   <ProtectedRoute>
                     <Index />
@@ -105,11 +109,6 @@ const App = () => (
                     <WorkerSpecialties />
                   </ProtectedRoute>
                 } />
-                {/* <Route path="/documents" element={
-                  <ProtectedRoute>
-                    <Documents />
-                  </ProtectedRoute>
-                } /> */}
                 <Route path="/equipment" element={
                   <ProtectedRoute>
                     <Equipment />
@@ -121,7 +120,7 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={<Navigate to="/welcome" replace />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
