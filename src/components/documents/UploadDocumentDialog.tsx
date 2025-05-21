@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -55,13 +54,6 @@ export function UploadDocumentDialog({
 
     if (!documentName.trim()) {
       setError('يرجى إدخال اسم للمستند');
-      return;
-    }
-
-    // Validate projectId
-    if (!projectId || projectId === 0) {
-      setError('معرف المشروع غير صالح');
-      console.error("Invalid project ID:", projectId);
       return;
     }
 
