@@ -60,9 +60,9 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/" element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
+                 
+                    <Welcome />
+                  
                 } />
                 <Route path="/projects" element={
                   <ProtectedRoute>
