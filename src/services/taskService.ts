@@ -323,7 +323,7 @@ export async function assignWorkersToTask(assignData: AssignWorkersRequest): Pro
 export async function unassignWorkersFromTask(unassignData: UnassignWorkersRequest): Promise<UnassignWorkersResponse> {
   try {
     console.log('Unassigning workers from task:', unassignData);
-    const response = await fetch(`${API_BASE_URL}/task-assignments/unassign`, {
+    const response = await fetch(`${API_BASE_URL}/TaskAssignments/unassign`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
