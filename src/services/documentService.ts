@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 import { Document, DocumentsParams, DocumentsResponse } from '@/types/document';
 import { toast } from 'sonner';
@@ -135,7 +136,8 @@ export const getDocumentsByTask = async (taskId: number): Promise<Document[]> =>
 
 // Upload a document for a task
 export const uploadTaskDocument = async (
-  formData: FormData
+  formData: FormData,
+  taskId?: number
 ): Promise<{ success: boolean; message: string; data?: any }> => {
   try {
     console.log('Uploading document...');
@@ -147,7 +149,20 @@ export const uploadTaskDocument = async (
     
     console.log('Form data being sent:', formDataEntries);
     
-    const response = await fetch(`${API_BASE_URL}/Documents`, {
+    let url = `${API_BASE_URL}/Documents`;
+    
+    // If taskId is provided, use the new endpoint for uploading to a specific task
+    if (taskId && taskId > 0) {
+      url = `${API_BASE_URL}/Documents/uploadToTask/${taskId}`;
+      console.log(`Using task-specific upload endpoint: ${url}`);
+      
+      // For the new API, we don't need to include taskId in the formData
+      if (formData.has('TaskId')) {
+        formData.delete('TaskId');
+      }
+    }
+    
+    const response = await fetch(url, {
       method: 'POST',
       body: formData,
       // Don't set Content-Type header when using FormData
