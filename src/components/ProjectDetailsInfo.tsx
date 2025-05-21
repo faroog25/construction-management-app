@@ -158,10 +158,10 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <CardTitle className="text-xl font-bold">Project Overview</CardTitle>
                 <CardDescription>Key information about this project</CardDescription>
               </div>
-              <Button size="sm" variant="outline" className="gap-1" onClick={handleEdit}>
+              {/* <Button size="sm" variant="outline" className="gap-1" onClick={handleEdit}>
                 <Edit className="h-3.5 w-3.5" />
                 Edit
-              </Button>
+              </Button> */}
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">

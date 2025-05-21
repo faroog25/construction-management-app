@@ -105,11 +105,11 @@ const App = () => (
                     <WorkerSpecialties />
                   </ProtectedRoute>
                 } />
-                <Route path="/documents" element={
+                {/* <Route path="/documents" element={
                   <ProtectedRoute>
                     <Documents />
                   </ProtectedRoute>
-                } />
+                } /> */}
                 <Route path="/equipment" element={
                   <ProtectedRoute>
                     <Equipment />
