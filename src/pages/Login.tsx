@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Eye, EyeOff, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from '@/config/api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
 
@@ -30,13 +31,13 @@ const Login = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // For demo purposes, accept any non-empty credentials
-      if (formData.username && formData.password) {
+      if (formData.email && formData.password) {
         localStorage.setItem('isAuthenticated', 'true');
         toast({
           title: "Success",
           description: "You have been successfully logged in.",
         });
-        navigate('/');
+        navigate('/projects');
       } else {
         throw new Error('Invalid credentials');
       }
@@ -44,7 +45,7 @@ const Login = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Invalid username or password. Please try again.",
+        description: "Invalid email or password. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -78,16 +79,16 @@ const Login = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">{t('Username')}</Label>
+              <Label htmlFor="email">{t('Email')}</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  placeholder={t('Enter your username')}
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder={t('Enter your email')}
                   className="pl-10"
-                  value={formData.username}
+                  value={formData.email}
                   onChange={handleChange}
                   required
                   disabled={isLoading}
@@ -125,19 +126,11 @@ const Login = () => {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                {/* <input
-                  type="checkbox"
-                  id="remember"
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                  disabled={isLoading}
-                /> */}
-                {/* <Label htmlFor="remember" className="text-sm">
-                  {t('login.remember_me')}
-                </Label> */}
+                {/* Optional: Remember me checkbox */}
               </div>
-              {/* <Button variant="link" className="px-0 text-sm" disabled={isLoading}>
-                {t('login.forgot_password')}
-              </Button> */}
+              <Button variant="link" className="px-0 text-sm" disabled={isLoading}>
+                {t('Forgot Password?')}
+              </Button>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? t('Signing in...') : t('Login')}

@@ -1,3 +1,4 @@
+
 const translations = {
   // General
   'app.name': 'كونستركت برو',
@@ -54,19 +55,60 @@ const translations = {
   'search.add_first_client': 'أضف أول عميل',
   'search.clients': 'بحث عن العملاء...',
 
-  login: {
-    welcome_back: "مرحباً بعودتك",
-    enter_credentials: "أدخل بيانات الدخول للوصول إلى حسابك",
-    username: "اسم المستخدم",
-    username_placeholder: "أدخل اسم المستخدم",
-    password: "كلمة المرور",
-    password_placeholder: "أدخل كلمة المرور",
-    remember_me: "تذكرني",
-    forgot_password: "نسيت كلمة المرور؟",
-    sign_in: "تسجيل الدخول",
-    no_account: "ليس لديك حساب؟",
-    sign_up: "إنشاء حساب",
-  },
+  // Login and Registration
+  'Welcome to Construction Pro': 'مرحبًا بك في كونستركت برو',
+  'Enter your credentials to login': 'أدخل بيانات تسجيل الدخول الخاصة بك',
+  'Email': 'البريد الإلكتروني',
+  'Enter your email': 'أدخل بريدك الإلكتروني',
+  'Password': 'كلمة المرور',
+  'Enter your password': 'أدخل كلمة المرور',
+  'Forgot Password?': 'نسيت كلمة المرور؟',
+  'Login': 'تسجيل الدخول',
+  'Signing in...': 'جاري تسجيل الدخول...',
+  'No account?': 'ليس لديك حساب؟',
+  'Sign Up': 'إنشاء حساب',
+  'Back to Home': 'العودة إلى الصفحة الرئيسية',
+  
+  // Registration
+  'Create an Account': 'إنشاء حساب',
+  'Enter your information to create your account': 'أدخل معلوماتك لإنشاء حساب',
+  'Full Name': 'الاسم الكامل',
+  'Enter your full name': 'أدخل اسمك الكامل',
+  'Phone Number': 'رقم الهاتف',
+  'Enter your phone number': 'أدخل رقم هاتفك',
+  'Create a password': 'أنشئ كلمة مرور',
+  'Confirm Password': 'تأكيد كلمة المرور',
+  'Confirm your password': 'تأكيد كلمة المرور',
+  'Password must be at least 8 characters long': 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل',
+  'Create Account': 'إنشاء حساب',
+  'Creating Account...': 'جاري إنشاء الحساب...',
+  'Already have an account?': 'هل لديك حساب بالفعل؟',
+  
+  // Registration Success
+  'Registration Successful': 'تم التسجيل بنجاح',
+  'Please check your email to verify your account': 'يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك',
+  'We have sent a verification link to your email address. Please click on the link to activate your account.': 'لقد أرسلنا رابط التحقق إلى عنوان بريدك الإلكتروني. يرجى النقر على الرابط لتنشيط حسابك.',
+  'If you do not receive the email within a few minutes, please check your spam folder.': 'إذا لم تستلم البريد الإلكتروني في غضون دقائق قليلة، يرجى التحقق من مجلد الرسائل غير المرغوب فيها.',
+  'Go to Login': 'الذهاب إلى تسجيل الدخول',
+  
+  // Welcome Page
+  'Build Better': 'ابنِ مشاريع',
+  'Together': 'أفضل معًا',
+  'Streamline your construction projects with our comprehensive management platform. Monitor progress, manage resources, and collaborate efficiently.': 'قم بتبسيط مشاريع البناء الخاصة بك مع منصة إدارة شاملة. راقب التقدم، وأدر الموارد، وتعاون بكفاءة.',
+  'Get Started': 'ابدأ الآن',
+  'Project Tracking': 'تتبع المشاريع',
+  'Monitor your projects in real-time with comprehensive dashboards and analytics.': 'راقب مشاريعك في الوقت الفعلي مع لوحات تحكم وتحليلات شاملة.',
+  'Team Management': 'إدارة الفريق',
+  'Manage workers, site engineers, and clients all in one place with efficient tools.': 'أدر العمال والمهندسين والعملاء في مكان واحد باستخدام أدوات فعالة.',
+  'Document Management': 'إدارة المستندات',
+  'Store, organize, and share project documents securely with your team and stakeholders.': 'قم بتخزين وتنظيم ومشاركة مستندات المشروع بشكل آمن مع فريقك وأصحاب المصلحة.',
+  'All rights reserved.': 'جميع الحقوق محفوظة.',
+  
+  // Error messages
+  'Error': 'خطأ',
+  'Failed to create account. Please try again.': 'فشل في إنشاء الحساب. يرجى المحاولة مرة أخرى.',
+  'Success': 'تم بنجاح',
+  'Your account has been created successfully.': 'تم إنشاء حسابك بنجاح.',
 };
 
 export default translations;

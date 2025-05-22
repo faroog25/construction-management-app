@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Eye, EyeOff, Lock, Mail, User, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, UserPlus, Phone } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from '@/config/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -16,11 +17,13 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phoneNumber: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,17 +36,33 @@ const Register = () => {
         throw new Error('Passwords do not match');
       }
       
-      // TODO: Replace with actual API call
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Make API call to register endpoint
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          phoneNumber: formData.phoneNumber
+        }),
+      });
 
-      // For demo purposes, accept registration
-      localStorage.setItem('isAuthenticated', 'true');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Registration failed');
+      }
+
+      // Set registration success state
+      setRegistrationSuccess(true);
+      
       toast({
         title: t('Success'),
         description: t('Your account has been created successfully.'),
       });
-      navigate('/');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -62,6 +81,53 @@ const Register = () => {
       [name]: value
     }));
   };
+
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-center mb-4">
+              <div className="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+            <CardTitle className="text-2xl text-center font-bold">
+              {t('Registration Successful')}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {t('Please check your email to verify your account')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center py-6">
+            <p className="mb-6 text-gray-600 dark:text-gray-300">
+              {t('We have sent a verification link to your email address. Please click on the link to activate your account.')}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('If you do not receive the email within a few minutes, please check your spam folder.')}
+            </p>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <Button 
+              className="w-full" 
+              onClick={() => navigate('/login')}
+            >
+              {t('Go to Login')}
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => navigate('/welcome')}
+            >
+              {t('Back to Home')}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">
@@ -82,16 +148,16 @@ const Register = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">{t('Full Name')}</Label>
+              <Label htmlFor="name">{t('Full Name')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="fullName"
-                  name="fullName"
+                  id="name"
+                  name="name"
                   type="text"
                   placeholder={t('Enter your full name')}
                   className="pl-10"
-                  value={formData.fullName}
+                  value={formData.name}
                   onChange={handleChange}
                   required
                   disabled={isLoading}
@@ -110,6 +176,24 @@ const Register = () => {
                   placeholder={t('Enter your email')}
                   className="pl-10"
                   value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">{t('Phone Number')}</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  placeholder={t('Enter your phone number')}
+                  className="pl-10"
+                  value={formData.phoneNumber}
                   onChange={handleChange}
                   required
                   disabled={isLoading}
@@ -177,6 +261,9 @@ const Register = () => {
                   )}
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t('Password must be at least 8 characters long')}
+              </p>
             </div>
             
             <Button type="submit" className="w-full mt-6" disabled={isLoading}>
@@ -197,6 +284,14 @@ const Register = () => {
               {t('Login')}
             </Button>
           </div>
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={() => navigate('/welcome')}
+            disabled={isLoading}
+          >
+            {t('Back to Home')}
+          </Button>
         </CardFooter>
       </Card>
     </div>

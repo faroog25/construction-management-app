@@ -1,3 +1,4 @@
+
 const translations = {
   // General
   'app.name': 'ConstructPro',
@@ -54,19 +55,60 @@ const translations = {
   'search.add_first_client': 'Add your first client',
   'search.clients': 'Search clients...',
 
-  login: {
-    welcome_back: "Welcome back",
-    enter_credentials: "Enter your credentials to access your account",
-    username: "Username",
-    username_placeholder: "Enter your username",
-    password: "Password",
-    password_placeholder: "Enter your password",
-    remember_me: "Remember me",
-    forgot_password: "Forgot password?",
-    sign_in: "Sign In",
-    no_account: "Don't have an account?",
-    sign_up: "Sign up",
-  },
+  // Login and Registration
+  'Welcome to Construction Pro': 'Welcome to Construction Pro',
+  'Enter your credentials to login': 'Enter your credentials to login',
+  'Email': 'Email',
+  'Enter your email': 'Enter your email',
+  'Password': 'Password',
+  'Enter your password': 'Enter your password',
+  'Forgot Password?': 'Forgot Password?',
+  'Login': 'Login',
+  'Signing in...': 'Signing in...',
+  'No account?': 'No account?',
+  'Sign Up': 'Sign Up',
+  'Back to Home': 'Back to Home',
+  
+  // Registration
+  'Create an Account': 'Create an Account',
+  'Enter your information to create your account': 'Enter your information to create your account',
+  'Full Name': 'Full Name',
+  'Enter your full name': 'Enter your full name',
+  'Phone Number': 'Phone Number',
+  'Enter your phone number': 'Enter your phone number',
+  'Create a password': 'Create a password',
+  'Confirm Password': 'Confirm Password',
+  'Confirm your password': 'Confirm your password',
+  'Password must be at least 8 characters long': 'Password must be at least 8 characters long',
+  'Create Account': 'Create Account',
+  'Creating Account...': 'Creating Account...',
+  'Already have an account?': 'Already have an account?',
+  
+  // Registration Success
+  'Registration Successful': 'Registration Successful',
+  'Please check your email to verify your account': 'Please check your email to verify your account',
+  'We have sent a verification link to your email address. Please click on the link to activate your account.': 'We have sent a verification link to your email address. Please click on the link to activate your account.',
+  'If you do not receive the email within a few minutes, please check your spam folder.': 'If you do not receive the email within a few minutes, please check your spam folder.',
+  'Go to Login': 'Go to Login',
+  
+  // Welcome Page
+  'Build Better': 'Build Better',
+  'Together': 'Together',
+  'Streamline your construction projects with our comprehensive management platform. Monitor progress, manage resources, and collaborate efficiently.': 'Streamline your construction projects with our comprehensive management platform. Monitor progress, manage resources, and collaborate efficiently.',
+  'Get Started': 'Get Started',
+  'Project Tracking': 'Project Tracking',
+  'Monitor your projects in real-time with comprehensive dashboards and analytics.': 'Monitor your projects in real-time with comprehensive dashboards and analytics.',
+  'Team Management': 'Team Management',
+  'Manage workers, site engineers, and clients all in one place with efficient tools.': 'Manage workers, site engineers, and clients all in one place with efficient tools.',
+  'Document Management': 'Document Management',
+  'Store, organize, and share project documents securely with your team and stakeholders.': 'Store, organize, and share project documents securely with your team and stakeholders.',
+  'All rights reserved.': 'All rights reserved.',
+  
+  // Error messages
+  'Error': 'Error',
+  'Failed to create account. Please try again.': 'Failed to create account. Please try again.',
+  'Success': 'Success',
+  'Your account has been created successfully.': 'Your account has been created successfully.',
 };
 
 export default translations;
