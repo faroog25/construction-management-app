@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -46,13 +45,22 @@ const Login = () => {
     }
   });
 
-  // نموذج "نسيت كلمة المرور"
+  // نموذج "نسيت كلمة المرور" - ضمان أنه دائمًا يبدأ بحقل فارغ
   const forgotPasswordForm = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: ""
     }
   });
+
+  // إعادة تعيين نموذج نسيت كلمة المرور عند فتح الحوار
+  const handleOpenForgotPasswordDialog = () => {
+    // تأكد من إعادة تعيين الحقل عند فتح الحوار
+    forgotPasswordForm.reset({
+      email: ""
+    });
+    setShowForgotPasswordDialog(true);
+  };
 
   const handleSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -247,7 +255,7 @@ const Login = () => {
                   disabled={isLoading}
                   onClick={(e) => {
                     e.preventDefault();
-                    setShowForgotPasswordDialog(true);
+                    handleOpenForgotPasswordDialog();
                   }}
                 >
                   {t('Forgot Password?')}
