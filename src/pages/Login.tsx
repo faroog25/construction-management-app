@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -36,21 +37,32 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
 
-  // استخدام React Hook Form مع مخطط التحقق Zod
+  // Always reset form values when component mounts to ensure email is never pre-filled
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: ""
-    }
+    },
+    // Add this to prevent browser auto-fill
+    shouldUnregister: true,
   });
+
+  // Reset login form when the component mounts
+  React.useEffect(() => {
+    form.reset({
+      email: "",
+      password: ""
+    });
+  }, [form]);
 
   // نموذج "نسيت كلمة المرور" - ضمان أنه دائمًا يبدأ بحقل فارغ
   const forgotPasswordForm = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: ""
-    }
+    },
+    shouldUnregister: true,
   });
 
   // إعادة تعيين نموذج نسيت كلمة المرور عند فتح الحوار
@@ -201,6 +213,7 @@ const Login = () => {
                           placeholder={t('Enter your email')}
                           className="pl-10"
                           disabled={isLoading}
+                          autoComplete="off"
                           {...field}
                         />
                       </FormControl>
@@ -224,6 +237,7 @@ const Login = () => {
                           placeholder={t('Enter your password')}
                           className="pl-10"
                           disabled={isLoading}
+                          autoComplete="off"
                           {...field}
                         />
                       </FormControl>
