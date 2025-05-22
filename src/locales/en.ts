@@ -130,6 +130,25 @@ const translations = {
   'Failed to create account. Please try again.': 'Failed to create account. Please try again.',
   'Success': 'Success',
   'Your account has been created successfully.': 'Your account has been created successfully.',
+  
+  // Forgot Password and Reset Password
+  'Forgot Password': 'Forgot Password',
+  'Enter your email address and we will send you a link to reset your password.': 'Enter your email address and we will send you a link to reset your password.',
+  'Submit': 'Submit',
+  'Submitting...': 'Submitting...',
+  'Cancel': 'Cancel',
+  'Password reset email has been sent to your email address.': 'Password reset email has been sent to your email address.',
+  'Failed to reset password. Please try again.': 'Failed to reset password. Please try again.',
+  'Reset Your Password': 'Reset Your Password',
+  'Enter a new password for your account': 'Enter a new password for your account',
+  'New Password': 'New Password',
+  'Enter your new password': 'Enter your new password',
+  'Confirm New Password': 'Confirm New Password',
+  'Confirm your new password': 'Confirm your new password',
+  'Reset Password': 'Reset Password',
+  'Resetting...': 'Resetting...',
+  'Your password has been reset successfully.': 'Your password has been reset successfully.',
+  'No email provided. Please try the password reset process again.': 'No email provided. Please try the password reset process again.',
 };
 
 export default translations;

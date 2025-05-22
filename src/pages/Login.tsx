@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { API_BASE_URL } from '@/config/api';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
+import { loginSchema, forgotPasswordSchema, type LoginFormValues, type ForgotPasswordFormValues } from "@/lib/validations/auth";
 import {
   Form,
   FormControl,
@@ -20,6 +20,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,6 +35,7 @@ const Login = () => {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
 
   // استخدام React Hook Form مع مخطط التحقق Zod
   const form = useForm<LoginFormValues>({
@@ -34,6 +43,14 @@ const Login = () => {
     defaultValues: {
       email: "",
       password: ""
+    }
+  });
+
+  // نموذج "نسيت كلمة المرور"
+  const forgotPasswordForm = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: ""
     }
   });
 
@@ -79,6 +96,45 @@ const Login = () => {
         variant: "destructive",
         title: t('Error'),
         description: error.message || t('Invalid email or password. Please try again.'),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (values: ForgotPasswordFormValues) => {
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgotPassword?email=${encodeURIComponent(values.email)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || t('Failed to reset password. Please try again.'));
+      }
+      
+      toast({
+        title: t('Success'),
+        description: t('Password reset email has been sent to your email address.'),
+        variant: "success",
+      });
+      
+      setShowForgotPasswordDialog(false);
+      
+      // توجيه المستخدم إلى صفحة إعادة تعيين كلمة المرور
+      navigate('/reset-password', { state: { email: values.email } });
+      
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: t('Error'),
+        description: error.message || t('Failed to reset password. Please try again.'),
       });
     } finally {
       setIsLoading(false);
@@ -185,7 +241,15 @@ const Login = () => {
                 <div className="flex items-center space-x-2">
                   {/* Optional: Remember me checkbox */}
                 </div>
-                <Button variant="link" className="px-0 text-sm" disabled={isLoading}>
+                <Button 
+                  variant="link" 
+                  className="px-0 text-sm" 
+                  disabled={isLoading}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowForgotPasswordDialog(true);
+                  }}
+                >
                   {t('Forgot Password?')}
                 </Button>
               </div>
@@ -218,6 +282,52 @@ const Login = () => {
           </Button>
         </CardFooter>
       </Card>
+      
+      {/* نافذة منبثقة لنسيت كلمة المرور */}
+      <Dialog open={showForgotPasswordDialog} onOpenChange={setShowForgotPasswordDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t('Forgot Password')}</DialogTitle>
+            <DialogDescription>
+              {t('Enter your email address and we will send you a link to reset your password.')}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...forgotPasswordForm}>
+            <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
+              <FormField
+                control={forgotPasswordForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Email')}</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder={t('Enter your email')} 
+                        disabled={isLoading}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowForgotPasswordDialog(false)}
+                  disabled={isLoading}
+                >
+                  {t('Cancel')}
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? t('Submitting...') : t('Submit')}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

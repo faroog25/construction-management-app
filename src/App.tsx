@@ -18,6 +18,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import EmailVerification from "./pages/EmailVerification";
+import ResetPassword from "./pages/ResetPassword";
 import Navbar from "./components/Navbar";
 import ApiDocsPage from "./pages/ApiDocsPage";
 import ClientProfilePage from "./pages/ClientProfile";
@@ -66,6 +67,7 @@ const App = () => {
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/verify-email" element={<EmailVerification />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/" element={<Navigate to="/projects" replace />} />
                   <Route path="/projects" element={
                     <ProtectedRoute>
