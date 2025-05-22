@@ -71,6 +71,12 @@ const translations = {
   'You have been successfully logged in.': 'You have been successfully logged in.',
   'Invalid email or password. Please try again.': 'Invalid email or password. Please try again.',
   
+  // Form Validation
+  'Email is required': 'Email is required',
+  'Please enter a valid email': 'Please enter a valid email',
+  'Password is required': 'Password is required',
+  'Password must be at least 8 characters long': 'Password must be at least 8 characters long',
+  
   // Registration
   'Create an Account': 'Create an Account',
   'Enter your information to create your account': 'Enter your information to create your account',
@@ -81,7 +87,6 @@ const translations = {
   'Create a password': 'Create a password',
   'Confirm Password': 'Confirm Password',
   'Confirm your password': 'Confirm your password',
-  'Password must be at least 8 characters long': 'Password must be at least 8 characters long',
   'Create Account': 'Create Account',
   'Creating Account...': 'Creating Account...',
   'Already have an account?': 'Already have an account?',

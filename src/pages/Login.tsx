@@ -7,22 +7,37 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { API_BASE_URL } from '@/config/api';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+
+  // استخدام React Hook Form مع مخطط التحقق Zod
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: ""
+    }
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
 
     try {
@@ -32,15 +47,15 @@ const Login = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
+          email: values.email,
+          password: values.password
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'خطأ في تسجيل الدخول');
+        throw new Error(data.message || t('Invalid email or password. Please try again.'));
       }
 
       // حفظ الرمز المميز (token) في localStorage
@@ -70,12 +85,24 @@ const Login = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  // تحديد رسائل الخطأ بناءً على اللغة الحالية
+  const getErrorMessage = (field: keyof LoginFormValues, error?: string) => {
+    if (!error) return "";
+    
+    // إذا كانت اللغة العربية
+    if (language === 'ar') {
+      if (field === 'email') {
+        if (error.includes("required")) return "الإيميل مطلوب";
+        if (error.includes("email")) return "يرجى إدخال بريد إلكتروني صحيح";
+      }
+      if (field === 'password') {
+        if (error.includes("required")) return "كلمة المرور مطلوبة";
+        if (error.includes("characters")) return "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل";
+      }
+    }
+    
+    // العودة إلى الخطأ الأصلي إذا لم يكن هناك ترجمة
+    return error;
   };
 
   return (
@@ -95,65 +122,79 @@ const Login = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('Email')}</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder={t('Enter your email')}
-                  className="pl-10"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={isLoading}
-                />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>{t('Email')}</FormLabel>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <FormControl>
+                        <Input
+                          placeholder={t('Enter your email')}
+                          className="pl-10"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>{t('Password')}</FormLabel>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <FormControl>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder={t('Enter your password')}
+                          className="pl-10"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                      </FormControl>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        disabled={isLoading}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {/* Optional: Remember me checkbox */}
+                </div>
+                <Button variant="link" className="px-0 text-sm" disabled={isLoading}>
+                  {t('Forgot Password?')}
+                </Button>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">{t('Password')}</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder={t('Enter your password')}
-                  className="pl-10"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  disabled={isLoading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {/* Optional: Remember me checkbox */}
-              </div>
-              <Button variant="link" className="px-0 text-sm" disabled={isLoading}>
-                {t('Forgot Password?')}
+              
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? t('Signing in...') : t('Login')}
               </Button>
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? t('Signing in...') : t('Login')}
-            </Button>
-          </form>
+            </form>
+          </Form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-center text-muted-foreground">
