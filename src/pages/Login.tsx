@@ -114,7 +114,7 @@ const Login = () => {
         });
         
         // توجيه المستخدم إلى الصفحة الرئيسية
-        navigate('/projects');
+        navigate('/dashboard');
       } else {
         throw new Error(t('Authentication failed. Please try again.'));
       }
