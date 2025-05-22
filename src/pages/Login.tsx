@@ -91,13 +91,20 @@ const Login = () => {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         throw new Error(data.message || t('Invalid email or password. Please try again.'));
       }
 
-      // حفظ الرمز المميز (token) في localStorage
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
+      // حفظ بيانات المستخدم وتوكن التسجيل في localStorage
+      if (data.success && data.data.accessToken) {
+        // حفظ التوكن والمعلومات الأساسية
+        localStorage.setItem('authToken', data.data.accessToken);
+        localStorage.setItem('refreshToken', data.data.refereshToken);
+        localStorage.setItem('user', JSON.stringify({
+          email: data.data.email,
+          name: data.data.name,
+          userName: data.data.userName,
+        }));
         localStorage.setItem('isAuthenticated', 'true');
         
         toast({
@@ -109,7 +116,7 @@ const Login = () => {
         // توجيه المستخدم إلى الصفحة الرئيسية
         navigate('/projects');
       } else {
-        throw new Error('لم يتم استلام الرمز المميز');
+        throw new Error(t('Authentication failed. Please try again.'));
       }
     } catch (error: any) {
       toast({
