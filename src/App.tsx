@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
+import EmailVerification from "./pages/EmailVerification";
 import Navbar from "./components/Navbar";
 import ApiDocsPage from "./pages/ApiDocsPage";
 import ClientProfilePage from "./pages/ClientProfile";
@@ -59,6 +60,7 @@ const App = () => (
                 <Route path="/welcome" element={<Welcome />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<EmailVerification />} />
                 <Route path="/" element={<Navigate to="/welcome" replace />} />
                 <Route path="/projects" element={
                   <ProtectedRoute>

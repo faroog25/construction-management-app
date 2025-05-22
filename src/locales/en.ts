@@ -1,4 +1,3 @@
-
 const translations = {
   // General
   'app.name': 'ConstructPro',
@@ -90,6 +89,21 @@ const translations = {
   'We have sent a verification link to your email address. Please click on the link to activate your account.': 'We have sent a verification link to your email address. Please click on the link to activate your account.',
   'If you do not receive the email within a few minutes, please check your spam folder.': 'If you do not receive the email within a few minutes, please check your spam folder.',
   'Go to Login': 'Go to Login',
+  
+  // Email Verification
+  'Verifying Your Email': 'Verifying Your Email',
+  'Email Verified': 'Email Verified',
+  'Verification Failed': 'Verification Failed',
+  'Please wait while we verify your email address': 'Please wait while we verify your email address',
+  'Your email has been successfully verified. You can now sign in to your account.': 'Your email has been successfully verified. You can now sign in to your account.',
+  'There was an issue verifying your email address': 'There was an issue verifying your email address',
+  'Thank you for verifying your email address. You now have full access to all features.': 'Thank you for verifying your email address. You now have full access to all features.',
+  'Your verification link may be expired or invalid. Please request a new verification email.': 'Your verification link may be expired or invalid. Please request a new verification email.',
+  'Go to Login': 'Go to Login',
+  'Back to Login': 'Back to Login',
+  'Email verification link is invalid or expired': 'Email verification link is invalid or expired',
+  'Email verified successfully': 'Email verified successfully',
+  'Failed to verify email': 'Failed to verify email',
   
   // Welcome Page
   'Build Better': 'Build Better',

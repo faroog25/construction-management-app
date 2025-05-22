@@ -1,4 +1,3 @@
-
 const translations = {
   // General
   'app.name': 'كونستركت برو',
@@ -90,6 +89,21 @@ const translations = {
   'We have sent a verification link to your email address. Please click on the link to activate your account.': 'لقد أرسلنا رابط التحقق إلى عنوان بريدك الإلكتروني. يرجى النقر على الرابط لتنشيط حسابك.',
   'If you do not receive the email within a few minutes, please check your spam folder.': 'إذا لم تستلم البريد الإلكتروني في غضون دقائق قليلة، يرجى التحقق من مجلد الرسائل غير المرغوب فيها.',
   'Go to Login': 'الذهاب إلى تسجيل الدخول',
+  
+  // Email Verification
+  'Verifying Your Email': 'جاري التحقق من بريدك الإلكتروني',
+  'Email Verified': 'تم تأكيد البريد الإلكتروني',
+  'Verification Failed': 'فشل التحقق',
+  'Please wait while we verify your email address': 'يرجى الانتظار بينما نتحقق من عنوان بريدك الإلكتروني',
+  'Your email has been successfully verified. You can now sign in to your account.': 'تم التحقق من بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول إلى حسابك.',
+  'There was an issue verifying your email address': 'كانت هناك مشكلة في التحقق من عنوان بريدك الإلكتروني',
+  'Thank you for verifying your email address. You now have full access to all features.': 'شكرا لتأكيد عنوان بريدك الإلكتروني. لديك الآن وصول كامل إلى جميع الميزات.',
+  'Your verification link may be expired or invalid. Please request a new verification email.': 'قد تكون رابط التحقق منتهي الصلاحية أو غير صالح. يرجى طلب بريد إلكتروني جديد للتحقق.',
+  'Go to Login': 'الذهاب إلى تسجيل الدخول',
+  'Back to Login': 'العودة إلى تسجيل الدخول',
+  'Email verification link is invalid or expired': 'رابط تأكيد البريد الإلكتروني غير صالح أو منتهي الصلاحية',
+  'Email verified successfully': 'تم تأكيد البريد الإلكتروني بنجاح',
+  'Failed to verify email': 'فشل في تأكيد البريد الإلكتروني',
   
   // Welcome Page
   'Build Better': 'ابنِ مشاريع',
