@@ -1,3 +1,4 @@
+
 const translations = {
   // General
   'app.name': 'كونستركت برو',
@@ -67,6 +68,8 @@ const translations = {
   'No account?': 'ليس لديك حساب؟',
   'Sign Up': 'إنشاء حساب',
   'Back to Home': 'العودة إلى الصفحة الرئيسية',
+  'You have been successfully logged in.': 'تم تسجيل الدخول بنجاح.',
+  'Invalid email or password. Please try again.': 'البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.',
   
   // Registration
   'Create an Account': 'إنشاء حساب',
@@ -99,7 +102,6 @@ const translations = {
   'There was an issue verifying your email address': 'كانت هناك مشكلة في التحقق من عنوان بريدك الإلكتروني',
   'Thank you for verifying your email address. You now have full access to all features.': 'شكرا لتأكيد عنوان بريدك الإلكتروني. لديك الآن وصول كامل إلى جميع الميزات.',
   'Your verification link may be expired or invalid. Please request a new verification email.': 'قد تكون رابط التحقق منتهي الصلاحية أو غير صالح. يرجى طلب بريد إلكتروني جديد للتحقق.',
-  'Go to Login': 'الذهاب إلى تسجيل الدخول',
   'Back to Login': 'العودة إلى تسجيل الدخول',
   'Email verification link is invalid or expired': 'رابط تأكيد البريد الإلكتروني غير صالح أو منتهي الصلاحية',
   'Email verified successfully': 'تم تأكيد البريد الإلكتروني بنجاح',

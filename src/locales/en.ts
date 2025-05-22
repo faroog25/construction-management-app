@@ -1,3 +1,4 @@
+
 const translations = {
   // General
   'app.name': 'ConstructPro',
@@ -67,6 +68,8 @@ const translations = {
   'No account?': 'No account?',
   'Sign Up': 'Sign Up',
   'Back to Home': 'Back to Home',
+  'You have been successfully logged in.': 'You have been successfully logged in.',
+  'Invalid email or password. Please try again.': 'Invalid email or password. Please try again.',
   
   // Registration
   'Create an Account': 'Create an Account',
@@ -99,7 +102,6 @@ const translations = {
   'There was an issue verifying your email address': 'There was an issue verifying your email address',
   'Thank you for verifying your email address. You now have full access to all features.': 'Thank you for verifying your email address. You now have full access to all features.',
   'Your verification link may be expired or invalid. Please request a new verification email.': 'Your verification link may be expired or invalid. Please request a new verification email.',
-  'Go to Login': 'Go to Login',
   'Back to Login': 'Back to Login',
   'Email verification link is invalid or expired': 'Email verification link is invalid or expired',
   'Email verified successfully': 'Email verified successfully',

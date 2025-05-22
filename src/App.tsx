@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,8 +32,7 @@ const queryClient = new QueryClient();
 
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // TODO: Replace with actual authentication check
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const isAuthenticated = localStorage.getItem('authToken') !== null;
   
   if (!isAuthenticated) {
     return <Navigate to="/welcome" replace />;
@@ -47,85 +46,92 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const App = () => (
-  <React.StrictMode>
-    <ThemeProvider>
-      <LanguageProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/welcome" element={<Welcome />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/verify-email" element={<EmailVerification />} />
-                <Route path="/" element={<Navigate to="/welcome" replace />} />
-                <Route path="/projects" element={
-                  <ProtectedRoute>
-                    <Projects />
-                  </ProtectedRoute>
-                } />
-                <Route path="/projects/:id" element={
-                  <ProtectedRoute>
-                    <ProjectDetails />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team" element={
-                  <ProtectedRoute>
-                    <Team />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team/engineers" element={
-                  <ProtectedRoute>
-                    <SiteEngineersPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team/clients" element={
-                  <ProtectedRoute>
-                    <ClientsPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team/clients/:id" element={
-                  <ProtectedRoute>
-                    <ClientProfilePage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team/workers/:id" element={
-                  <ProtectedRoute>
-                    <WorkerProfilePage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team/site-engineers/:id" element={
-                  <ProtectedRoute>
-                    <SiteEngineerProfilePage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/worker-specialties" element={
-                  <ProtectedRoute>
-                    <WorkerSpecialties />
-                  </ProtectedRoute>
-                } />
-                <Route path="/equipment" element={
-                  <ProtectedRoute>
-                    <Equipment />
-                  </ProtectedRoute>
-                } />
-                <Route path="/api-docs" element={
-                  <ProtectedRoute>
-                    <ApiDocsPage />
-                  </ProtectedRoute>
-                } />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<Navigate to="/welcome" replace />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </QueryClientProvider>
-      </LanguageProvider>
-    </ThemeProvider>
-  </React.StrictMode>
-);
+const App = () => {
+  // تنظيف localStorage عند انتهاء عمر الرمز المميز (token)
+  useEffect(() => {
+    // يمكن تنفيذ التحقق من صلاحية الرمز المميز هنا إذا كان API يدعم ذلك
+  }, []);
+
+  return (
+    <React.StrictMode>
+      <ThemeProvider>
+        <LanguageProvider>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/welcome" element={<Welcome />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/verify-email" element={<EmailVerification />} />
+                  <Route path="/" element={<Navigate to="/projects" replace />} />
+                  <Route path="/projects" element={
+                    <ProtectedRoute>
+                      <Projects />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/projects/:id" element={
+                    <ProtectedRoute>
+                      <ProjectDetails />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/team" element={
+                    <ProtectedRoute>
+                      <Team />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/team/engineers" element={
+                    <ProtectedRoute>
+                      <SiteEngineersPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/team/clients" element={
+                    <ProtectedRoute>
+                      <ClientsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/team/clients/:id" element={
+                    <ProtectedRoute>
+                      <ClientProfilePage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/team/workers/:id" element={
+                    <ProtectedRoute>
+                      <WorkerProfilePage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/team/site-engineers/:id" element={
+                    <ProtectedRoute>
+                      <SiteEngineerProfilePage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/worker-specialties" element={
+                    <ProtectedRoute>
+                      <WorkerSpecialties />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/equipment" element={
+                    <ProtectedRoute>
+                      <Equipment />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/api-docs" element={
+                    <ProtectedRoute>
+                      <ApiDocsPage />
+                    </ProtectedRoute>
+                  } />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<Navigate to="/welcome" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;

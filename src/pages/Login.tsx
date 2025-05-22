@@ -26,26 +26,44 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        }),
+      });
 
-      // For demo purposes, accept any non-empty credentials
-      if (formData.email && formData.password) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'خطأ في تسجيل الدخول');
+      }
+
+      // حفظ الرمز المميز (token) في localStorage
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
         localStorage.setItem('isAuthenticated', 'true');
+        
         toast({
-          title: "Success",
-          description: "You have been successfully logged in.",
+          title: t('Success'),
+          description: t('You have been successfully logged in.'),
+          variant: "success",
         });
+        
+        // توجيه المستخدم إلى الصفحة الرئيسية
         navigate('/projects');
       } else {
-        throw new Error('Invalid credentials');
+        throw new Error('لم يتم استلام الرمز المميز');
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Invalid email or password. Please try again.",
+        title: t('Error'),
+        description: error.message || t('Invalid email or password. Please try again.'),
       });
     } finally {
       setIsLoading(false);
