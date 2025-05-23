@@ -156,7 +156,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                   } else {
                     const now = new Date();
                     const startDate = new Date(task.startDate);
-                    const endDate = new Date(task.endDate);
+                    const endDate = new Date(task.expectedEndDate);
                     
                     if (now > endDate) {
                       status = 'delayed';
@@ -524,7 +524,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
         name: formData.name,
         description: formData.description,
         startDate: formData.startDate,
-        endDate: formData.endDate
+        expectedEndDate: formData.endDate
       });
       
       if (result.success) {
@@ -552,7 +552,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                 } else {
                   const now = new Date();
                   const startDate = new Date(task.startDate);
-                  const endDate = new Date(task.endDate);
+                  const endDate = new Date(task.expectedEndDate);
                   
                   if (now > endDate) {
                     status = 'delayed';
@@ -646,7 +646,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
               } else {
                 const now = new Date();
                 const startDate = new Date(task.startDate);
-                const endDate = new Date(task.endDate);
+                const endDate = new Date(task.expectedEndDate);
                 
                 if (now > endDate) {
                   status = 'delayed';
@@ -1075,7 +1075,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                         {stage.tasks && stage.tasks.length > 0 ? (
                           <div className="space-y-4">
                             {stage.tasks.map((task) => {
-                              const overdueDays = calculateOverdueDays(task.endDate);
+                              const overdueDays = calculateOverdueDays(task.expectedEndDate);
                               const isCompleted = completedTasks.includes(task.id);
                               const isCompletingThisTask = completingTaskId === task.id;
                               const isDeletingThisTask = isDeletingTask && taskToDelete === task.id;
@@ -1117,7 +1117,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                         <div className="flex items-center gap-1.5">
                                           <Calendar className="h-3.5 w-3.5 text-violet-400" />
                                           <span className="text-xs text-gray-500">
-                                            {formatDate(task.startDate)} - {formatDate(task.endDate)}
+                                            {formatDate(task.startDate)} - {formatDate(task.expectedEndDate)}
                                           </span>
                                         </div>
                                       </div>

@@ -14,7 +14,7 @@ export interface ApiTask {
   name: string;
   description: string;
   startDate: string;
-  endDate: string;
+  expectedEndDate: string;
   isCompleted: boolean;
 }
 
@@ -55,7 +55,7 @@ export interface CreateTaskRequest {
   name: string;
   description: string;
   startDate: string;
-  endDate: string;
+  expectedEndDate: string;
 }
 
 export interface EditTaskRequest {
