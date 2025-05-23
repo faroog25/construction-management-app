@@ -1,4 +1,3 @@
-
 const translations = {
   // General
   'app.name': 'ConstructPro',
@@ -71,10 +70,11 @@ const translations = {
   'You have been successfully logged in.': 'You have been successfully logged in.',
   'Invalid email or password. Please try again.': 'Invalid email or password. Please try again.',
   'Authentication failed. Please try again.': 'Authentication failed. Please try again.',
+  'Please enter your email first': 'Please enter your email first',
+  'Please enter a valid email': 'Please enter a valid email',
   
   // Form Validation
   'Email is required': 'Email is required',
-  'Please enter a valid email': 'Please enter a valid email',
   'Password is required': 'Password is required',
   'Password must be at least 8 characters long': 'Password must be at least 8 characters long',
   
@@ -104,7 +104,7 @@ const translations = {
   'Email Verified': 'Email Verified',
   'Verification Failed': 'Verification Failed',
   'Please wait while we verify your email address': 'Please wait while we verify your email address',
-  'Your email has been successfully verified. You can now sign in to your account.': 'Your email has been successfully verified. You can now sign in to your account.',
+  'Your email {{email}} has been successfully verified. You can now sign in to your account.': 'Your email {{email}} has been successfully verified. You can now sign in to your account.',
   'There was an issue verifying your email address': 'There was an issue verifying your email address',
   'Thank you for verifying your email address. You now have full access to all features.': 'Thank you for verifying your email address. You now have full access to all features.',
   'Your verification link may be expired or invalid. Please request a new verification email.': 'Your verification link may be expired or invalid. Please request a new verification email.',
@@ -210,7 +210,6 @@ const translations = {
   'Purchase Date': 'Purchase Date',
   'Last Maintenance': 'Last Maintenance',
   'Next Maintenance': 'Next Maintenance',
-  'Status': 'Status',
   'Available': 'Available',
   'In Use': 'In Use',
   'Under Maintenance': 'Under Maintenance',
@@ -280,7 +279,12 @@ const translations = {
   'Loading...': 'Loading...',
   'No data available': 'No data available',
   'Confirm': 'Confirm',
-  'Cancel': 'Cancel'
+  'Cancel': 'Cancel',
+  'Invalid reset link. Please request a new password reset email.': 'Invalid reset link. Please request a new password reset email.',
+  'Reset Your Password': 'Reset Your Password',
+  'Enter a new password for your account': 'Enter a new password for your account',
+  'Your password has been reset successfully.': 'Your password has been reset successfully.',
+  'Resetting...': 'Resetting...',
 };
 
 export default translations;
