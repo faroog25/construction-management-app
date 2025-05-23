@@ -23,7 +23,7 @@ const ProjectDetailsModal = ({ project, isOpen, onOpenChange }: ProjectDetailsMo
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>تفاصيل المشروع</DialogTitle>
+          <DialogTitle>Project Details</DialogTitle>
         </DialogHeader>
         <ProjectDetails project={enhancedProject} />
       </DialogContent>
