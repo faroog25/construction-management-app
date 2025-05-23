@@ -134,10 +134,11 @@ export const getDocumentsByTask = async (taskId: number): Promise<Document[]> =>
   }
 };
 
-// Upload a document for a task
+// Upload a document for a task or project
 export const uploadTaskDocument = async (
   formData: FormData,
-  taskId?: number
+  taskId?: number,
+  projectId?: number
 ): Promise<{ success: boolean; message: string; data?: any }> => {
   try {
     console.log('Uploading document...');
@@ -151,14 +152,24 @@ export const uploadTaskDocument = async (
     
     let url = `${API_BASE_URL}/Documents`;
     
-    // If taskId is provided, use the new endpoint for uploading to a specific task
+    // Determine which endpoint to use based on taskId and projectId
     if (taskId && taskId > 0) {
+      // Task document upload
       url = `${API_BASE_URL}/Documents/uploadToTask/${taskId}`;
       console.log(`Using task-specific upload endpoint: ${url}`);
       
-      // For the new API, we don't need to include taskId in the formData
+      // For the task API, we don't need to include taskId in the formData
       if (formData.has('TaskId')) {
         formData.delete('TaskId');
+      }
+    } else if (projectId && projectId > 0) {
+      // Project document upload - using the new endpoint
+      url = `${API_BASE_URL}/Documents/uploadToProject/${projectId}`;
+      console.log(`Using project-specific upload endpoint: ${url}`);
+      
+      // For the project API, we don't need to include projectId in the formData
+      if (formData.has('ProjectId')) {
+        formData.delete('ProjectId');
       }
     }
     

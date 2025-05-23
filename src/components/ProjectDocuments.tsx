@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,13 +51,14 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch documents using React Query with retry disabled for 404 responses
+  // Remove ClassificationId filter to get all document types
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['project-documents', project.id],
     queryFn: () => getDocuments({ 
       projectId: project.id,
       pageNumber: 1,
-      pageSize: 20,
-      ClassificationId: 1
+      pageSize: 100
+      // Removed ClassificationId to get all document types
     }),
     retry: false // Don't retry on failure
   });

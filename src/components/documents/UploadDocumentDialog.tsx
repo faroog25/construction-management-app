@@ -66,13 +66,6 @@ export function UploadDocumentDialog({
       formData.append('Name', documentName);
       formData.append('Description', documentDescription);
       
-      // Only append project ID if we're uploading a project document (not a task document)
-      // When using the new API endpoint, we don't need to include the taskId in the form data
-      // as it's already in the URL, but we still need the projectId for project-level documents
-      if (taskId === 0) {
-        formData.append('ProjectId', projectId.toString());
-      }
-      
       // Log what we're sending (for debugging)
       console.log("Uploading document with:", {
         fileName: documentFile.name, 
@@ -81,8 +74,12 @@ export function UploadDocumentDialog({
         projectId
       });
       
-      // Pass taskId to uploadTaskDocument function to use the correct endpoint
-      const result = await uploadTaskDocument(formData, taskId > 0 ? taskId : undefined);
+      // Pass taskId and projectId to uploadTaskDocument function to use the correct endpoint
+      const result = await uploadTaskDocument(
+        formData, 
+        taskId > 0 ? taskId : undefined,
+        taskId === 0 ? projectId : undefined
+      );
       
       if (result.success) {
         toast.success('تم رفع المستند بنجاح');
