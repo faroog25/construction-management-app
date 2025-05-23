@@ -21,11 +21,11 @@ const Welcome = () => {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
-              {t('Build Better')} <span className="text-primary">Projects</span> {t('Together')}
+              {t('welcome.build_better')} <span className="text-primary">Projects</span> {t('welcome.together')}
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300">
-              {t('Streamline your construction projects with our comprehensive management platform. Monitor progress, manage resources, and collaborate efficiently.')}
+              {t('welcome.streamline_description')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -34,7 +34,7 @@ const Welcome = () => {
                 className="text-base px-8 py-6 rounded-lg shadow-lg hover:shadow-xl transition-all" 
                 onClick={() => navigate('/register')}
               >
-                {t('Get Started')} <ArrowRight className="ml-2" size={20} />
+                {t('welcome.get_started')} <ArrowRight className="ml-2" size={20} />
               </Button>
               
               <Button 
@@ -43,7 +43,7 @@ const Welcome = () => {
                 className="text-base px-8 py-6 rounded-lg"
                 onClick={() => navigate('/login')}
               >
-                {t('Login')}
+                {t('auth.login')}
               </Button>
             </div>
           </div>
@@ -74,8 +74,8 @@ const Welcome = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('Project Tracking')}</h3>
-            <p className="text-gray-600 dark:text-gray-300">{t('Monitor your projects in real-time with comprehensive dashboards and analytics.')}</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('welcome.project_tracking')}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{t('welcome.project_tracking_description')}</p>
           </div>
           
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-all hover:shadow-md">
@@ -84,8 +84,8 @@ const Welcome = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('Team Management')}</h3>
-            <p className="text-gray-600 dark:text-gray-300">{t('Manage workers, site engineers, and clients all in one place with efficient tools.')}</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('welcome.team_management')}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{t('welcome.team_management_description')}</p>
           </div>
           
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-all hover:shadow-md">
@@ -94,8 +94,8 @@ const Welcome = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('Document Management')}</h3>
-            <p className="text-gray-600 dark:text-gray-300">{t('Store, organize, and share project documents securely with your team and stakeholders.')}</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('welcome.document_management')}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{t('welcome.document_management_description')}</p>
           </div>
         </div>
       </Container>
@@ -111,7 +111,7 @@ const Welcome = () => {
             </div>
             
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              &copy; {new Date().getFullYear()} Construction Pro. {t('All rights reserved.')}
+              &copy; {new Date().getFullYear()} Construction Pro. {t('welcome.all_rights_reserved')}
             </p>
           </div>
         </Container>

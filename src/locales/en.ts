@@ -1,3 +1,4 @@
+
 export const en = {
   app: {
     name: 'ConstructFlow',
@@ -234,5 +235,22 @@ export const en = {
     passwords_dont_match: 'Passwords do not match',
     password_too_short: 'Password must be at least 6 characters',
     go_to_login: 'Go to Login'
+  },
+  welcome: {
+    build_better: 'Build Better',
+    together: 'Together',
+    streamline_description: 'Streamline your construction projects with our comprehensive management platform. Monitor progress, manage resources, and collaborate efficiently.',
+    get_started: 'Get Started',
+    project_tracking: 'Project Tracking',
+    project_tracking_description: 'Monitor your projects in real-time with comprehensive dashboards and analytics.',
+    team_management: 'Team Management',
+    team_management_description: 'Manage workers, site engineers, and clients all in one place with efficient tools.',
+    document_management: 'Document Management',
+    document_management_description: 'Store, organize, and share project documents securely with your team and stakeholders.',
+    all_rights_reserved: 'All rights reserved.'
+  },
+  language: {
+    english: 'English',
+    arabic: 'Arabic'
   }
 };

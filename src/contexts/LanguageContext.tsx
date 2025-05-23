@@ -39,10 +39,19 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   useEffect(() => {
     const loadTranslations = async () => {
       try {
-        const langData = await import(`../locales/${language}.ts`);
-        setTranslations(langData.default);
+        if (language === 'en') {
+          const { en } = await import('../locales/en.ts');
+          // Flatten the nested object structure for easier access
+          const flattenedTranslations = flattenObject(en);
+          setTranslations(flattenedTranslations);
+        } else if (language === 'ar') {
+          const arTranslations = await import('../locales/ar.ts');
+          // Arabic file has default export
+          setTranslations(arTranslations.default || {});
+        }
       } catch (error) {
         console.error(`Failed to load translations for ${language}:`, error);
+        setTranslations({});
       }
     };
 
@@ -65,6 +74,25 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     // Force update of UI components that depend on text direction
     window.dispatchEvent(new Event('languagechange'));
   }, [language, isRtl]);
+
+  // Helper function to flatten nested object
+  const flattenObject = (obj: any, prefix = ''): Record<string, string> => {
+    const flattened: Record<string, string> = {};
+    
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const newKey = prefix ? `${prefix}.${key}` : key;
+        
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          Object.assign(flattened, flattenObject(obj[key], newKey));
+        } else {
+          flattened[newKey] = obj[key];
+        }
+      }
+    }
+    
+    return flattened;
+  };
 
   // Translation function
   const t = (key: string): string => {
