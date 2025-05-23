@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import DashboardStats from '@/components/DashboardStats';
+import DashboardStatsNew from '@/components/DashboardStatsNew';
+import DetailedStatistics from '@/components/DetailedStatistics';
 import ProjectCard from '@/components/ProjectCard';
 import ProjectTimeline from '@/components/ProjectTimeline';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -60,7 +61,7 @@ const Index = () => {
         </div>
         
         <div className="space-y-8">
-          <DashboardStats />
+          <DashboardStatsNew />
           
           <div className="grid gap-8 lg:grid-cols-3">
             <Card className="lg:col-span-2 animate-in" style={{ animationDelay: "0.1s" }}>
@@ -107,6 +108,8 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
+
+          <DetailedStatistics />
           
           <div>
             <div className="flex items-center justify-between mb-6">
