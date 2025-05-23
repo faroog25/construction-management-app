@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema, type ResetPasswordFormValues } from "@/lib/validations/auth";
@@ -22,16 +22,29 @@ import {
 
 const ResetPassword = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  // استخراج البريد الإلكتروني من state إذا كان متاحًا
-  const email = location.state?.email || '';
+  // استخراج البريد الإلكتروني والتوكن من URL parameters
+  const email = searchParams.get('email') || '';
+  const token = searchParams.get('token') || '';
   
+  // التحقق من وجود المعاملات المطلوبة
+  useEffect(() => {
+    if (!email || !token) {
+      toast({
+        variant: "destructive",
+        title: t('Error'),
+        description: t('Invalid reset link. Please request a new password reset email.'),
+      });
+      navigate('/login');
+    }
+  }, [email, token, navigate, toast, t]);
+
   // استخدام React Hook Form مع مخطط التحقق Zod
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -42,23 +55,23 @@ const ResetPassword = () => {
   });
 
   const handleSubmit = async (values: ResetPasswordFormValues) => {
+    if (!email || !token) {
+      toast({
+        variant: "destructive",
+        title: t('Error'),
+        description: t('Invalid reset link. Please request a new password reset email.'),
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // استخدام البريد الإلكتروني من state إذا كان متاحًا
-      if (!email) {
-        throw new Error(t('No email provided. Please try the password reset process again.'));
-      }
-
-      const response = await fetch(`${API_BASE_URL}/auth/resetPassword`, {
+      const response = await fetch(`${API_BASE_URL}/auth/resetPassword?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}&newPassowrd=${encodeURIComponent(values.password)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email,
-          password: values.password
-        }),
       });
 
       const data = await response.json();
@@ -85,6 +98,11 @@ const ResetPassword = () => {
       setIsLoading(false);
     }
   };
+
+  // إذا لم تكن هناك معاملات صالحة، لا نعرض شيئاً (سيتم التوجيه)
+  if (!email || !token) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">

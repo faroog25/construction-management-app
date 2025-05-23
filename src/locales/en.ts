@@ -1,4 +1,3 @@
-
 const translations = {
   // General
   'app.name': 'ConstructPro',
@@ -280,7 +279,12 @@ const translations = {
   'Loading...': 'Loading...',
   'No data available': 'No data available',
   'Confirm': 'Confirm',
-  'Cancel': 'Cancel'
+  'Cancel': 'Cancel',
+  'Invalid reset link. Please request a new password reset email.': 'Invalid reset link. Please request a new password reset email.',
+  'Reset Your Password': 'Reset Your Password',
+  'Enter a new password for your account': 'Enter a new password for your account',
+  'Your password has been reset successfully.': 'Your password has been reset successfully.',
+  'Resetting...': 'Resetting...',
 };
 
 export default translations;

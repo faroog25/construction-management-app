@@ -1,4 +1,3 @@
-
 const arTranslations = {
   "Construction Pro": "كونستركشن برو",
   "Dashboard": "لوحة التحكم",
@@ -108,6 +107,11 @@ const arTranslations = {
   "Please enter your email first": "يرجى إدخال بريدك الإلكتروني أولاً",
   "Please enter a valid email": "يرجى إدخال بريد إلكتروني صحيح",
   "Submitting...": "جاري الإرسال...",
+  "Invalid reset link. Please request a new password reset email.": "رابط إعادة التعيين غير صالح. يرجى طلب بريد إلكتروني جديد لإعادة تعيين كلمة المرور.",
+  "Reset Your Password": "إعادة تعيين كلمة المرور",
+  "Enter a new password for your account": "أدخل كلمة مرور جديدة لحسابك",
+  "Your password has been reset successfully.": "تم إعادة تعيين كلمة المرور بنجاح.",
+  "Resetting...": "جاري إعادة التعيين...",
 };
 
 export default arTranslations;
