@@ -11,15 +11,23 @@ export interface Project {
   clientId: number;
   startDate: string;
   expectedEndDate: string;
-  status: number;
+  projectStatus: string;
   progress?: number;
   siteEngineerName?: string;
   clientName?: string;
-  projectStatus?: string;
   cancellationReason?: string;
   cancellationDate?: string;
   completionDate?: string;
   handoverDate?: string;
+}
+
+// إضافة واجهة لتحديث المشروع المبسط
+export interface UpdateProjectBasicInfo {
+  id: number;
+  projectName: string;
+  description?: string;
+  siteAddress: string;
+  geographicalCoordinates?: string;
 }
 
 // Add the ProjectWithClient interface that was referenced but not defined
@@ -194,7 +202,7 @@ export async function getProjectById(id: number): Promise<Project> {
       startDate: result.data.startDate,
       expectedEndDate: result.data.expectedEndDate,
       projectStatus: result.data.projectStatus,
-      status: getStatusCodeFromString(result.data.projectStatus),
+      progress: result.data.progress,
       cancellationReason: result.data.cancellationReason,
       cancellationDate: result.data.cancellationDate,
       completionDate: result.data.completionDate,
@@ -231,7 +239,7 @@ function getStatusCodeFromString(status: string | undefined): number {
   }
 }
 
-export async function createProject(projectData: Project): Promise<any> {
+export async function createProject(projectData: Partial<Project>): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/Projects`, {
     method: 'POST',
     headers: {
@@ -265,6 +273,98 @@ export async function updateProject(projectId: number, projectData: Partial<Proj
       body: errorText
     });
     throw new Error(`Failed to update project. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
+
+// تحديث المشروع بالمعلومات الأساسية فقط
+export async function updateProjectBasicInfo(projectData: UpdateProjectBasicInfo): Promise<any> {
+  console.log('Updating project basic info:', projectData);
+  
+  const response = await fetch(`${API_BASE_URL}/Projects`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(projectData),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response for basic info update:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`Failed to update project basic info. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
+
+// إلغاء المشروع
+export async function cancelProject(projectId: number, reason: string): Promise<any> {
+  console.log(`Cancelling project ${projectId} with reason: ${reason}`);
+  
+  const response = await fetch(`${API_BASE_URL}/Projects/Cancel/${projectId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(reason),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response for project cancellation:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`فشل في إلغاء المشروع. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
+
+// تعليق المشروع
+export async function pendProject(projectId: number): Promise<any> {
+  console.log(`Pending project ${projectId}`);
+  
+  const response = await fetch(`${API_BASE_URL}/Projects/Pend/${projectId}`, {
+    method: 'PUT',
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response for project pending:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`فشل في تعليق المشروع. (HTTP ${response.status})`);
+  }
+  
+  return response.json();
+}
+
+// تفعيل المشروع
+export async function activateProject(projectId: number): Promise<any> {
+  console.log(`Activating project ${projectId}`);
+  
+  const response = await fetch(`${API_BASE_URL}/Projects/Activate/${projectId}`, {
+    method: 'PUT',
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response for project activation:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
+    throw new Error(`فشل في تفعيل المشروع. (HTTP ${response.status})`);
   }
   
   return response.json();

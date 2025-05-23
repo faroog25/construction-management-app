@@ -39,6 +39,7 @@ export interface ProjectApiResponse {
     projectStatus: string;
     siteEngineerName: string;
     clientName: string;
+    progress: number;
     startDate: string;
     expectedEndDate: string;
     cancellationReason?: string;
@@ -65,8 +66,8 @@ export interface Project {
   actualEndDate?: string;
   stages?: ApiStage[];
   tasks?: ApiTask[];
-  createdAt: Date | string; // Added explicitly
-  updatedAt: Date | string; // Added explicitly
+  createdAt?: Date | string; // Made optional to avoid errors
+  updatedAt?: Date | string; // Made optional to avoid errors
   clientId?: number;
   geographicalCoordinates?: string;
   projectStatus?: string;
@@ -103,9 +104,9 @@ export interface ProjectCardProps {
   name: string;
   client_name: string;
   expected_end_date?: string;
-  start_date?: string;
+  start_date?: Date | string;
   progress: number;
-  status: number;
+  projectStatus?: string;
   site_engineer_name?: string;
   onViewDetails?: () => void;
   className?: string;

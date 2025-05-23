@@ -107,6 +107,17 @@ export interface DeleteTaskResponse {
   errors?: string[];
 }
 
+export interface UnassignWorkersRequest {
+  taskId: number;
+  workerIds: number[];
+}
+
+export interface UnassignWorkersResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+}
+
 /**
  * Interface for worker assignment data returned from the API
  */
@@ -300,6 +311,46 @@ export async function assignWorkersToTask(assignData: AssignWorkersRequest): Pro
     return result;
   } catch (error) {
     console.error('Error assigning workers to task:', error);
+    throw error;
+  }
+}
+
+/**
+ * Unassigns workers from a specific task
+ * @param unassignData The task ID and worker IDs to unassign
+ * @returns API response with success status and message
+ */
+export async function unassignWorkersFromTask(unassignData: UnassignWorkersRequest): Promise<UnassignWorkersResponse> {
+  try {
+    console.log('Unassigning workers from task:', unassignData);
+    const response = await fetch(`${API_BASE_URL}/TaskAssignments/unassign`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(unassignData),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response for worker unassignment:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: UnassignWorkersResponse = await response.json();
+    console.log('API Response - Unassign Workers:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to unassign workers from task');
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error unassigning workers from task:', error);
     throw error;
   }
 }

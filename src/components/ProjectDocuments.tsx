@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Upload, ArrowRight, Loader2, File, Plus, Download, Search } from 'lucide-react';
+import { FileText, Upload, ArrowRight, Loader2, File, Plus, Download, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import DocumentCard from '@/components/documents/DocumentCard';
-import { getDocuments } from '@/services/documentService';
+import { getDocuments, downloadDocument, deleteDocument, getDocument } from '@/services/documentService';
 import { Document } from '@/types/document';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EditDocumentDialog } from '@/components/documents/EditDocumentDialog';
+import { UploadDocumentDialog } from '@/components/documents/UploadDocumentDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectDocumentsProps {
   project: {
@@ -33,6 +45,11 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [documentType, setDocumentType] = useState<string>('all');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch documents using React Query with retry disabled for 404 responses
   const { data, isLoading, error, refetch } = useQuery({
@@ -61,31 +78,121 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
   }, [error]);
 
   const handleUpload = () => {
-    toast.info('سيتم تنفيذ وظيفة الرفع قريبًا');
+    setUploadDialogOpen(true);
   };
 
   const handleViewAll = () => {
     navigate('/documents', { state: { projectId: project.id } });
   };
 
-  const handleView = (id: string) => {
-    toast.info(`عرض المستند ${id}`);
+  // Function to open the document in a new tab
+  const handleView = async (id: string) => {
+    try {
+      toast.loading('جاري تحميل المستند...');
+      
+      const result = await getDocument(id);
+      
+      if (result.success && result.data && result.data.fileUrl) {
+        // Open the file URL in a new tab
+        window.open(result.data.fileUrl, '_blank');
+        toast.dismiss();
+        toast.success('تم فتح المستند بنجاح');
+      } else {
+        toast.dismiss();
+        toast.error('فشل في فتح المستند');
+      }
+    } catch (error) {
+      console.error('Error opening document:', error);
+      toast.dismiss();
+      toast.error('فشل في فتح المستند');
+    }
   };
 
-  const handleDownload = (id: string) => {
-    toast.info(`تحميل المستند ${id}`);
+  const handleDownload = async (id: string) => {
+    try {
+      toast.promise(
+        downloadDocument(id).then(blob => {
+          // Create a blob URL for the file
+          const url = window.URL.createObjectURL(blob);
+          
+          // Create a temporary link element
+          const link = window.document.createElement('a');
+          link.href = url;
+          const docName = documents.find(d => d.id === id)?.name || 'document';
+          link.download = docName;
+          
+          // Trigger download
+          window.document.body.appendChild(link);
+          link.click();
+          
+          // Clean up
+          window.document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }),
+        {
+          loading: 'جاري تحميل المستند...',
+          success: 'تم تحميل المستند بنجاح',
+          error: 'فشل في تحميل المستند'
+        }
+      );
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast.error('فشل في تحميل المستند');
+    }
   };
 
-  const handleShare = (id: string) => {
-    toast.info(`مشاركة المستند ${id}`);
-  };
-
+  // Function to handle document editing
   const handleEdit = (id: string) => {
-    toast.info(`تعديل المستند ${id}`);
+    const document = documents.find(doc => doc.id === id);
+    if (document) {
+      setSelectedDocument(document);
+      setEditDialogOpen(true);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    toast.info(`حذف المستند ${id}`);
+  // Function to handle document deletion confirmation
+  const handleDeleteConfirm = (id: string) => {
+    const document = documents.find(doc => doc.id === id);
+    if (document) {
+      setSelectedDocument(document);
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  // Function to handle document deletion
+  const handleDeleteDocument = async () => {
+    if (!selectedDocument) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      const result = await deleteDocument(selectedDocument.id);
+      
+      if (result.success) {
+        toast.success('تم حذف المستند بنجاح');
+        setDeleteDialogOpen(false);
+        
+        // Refresh documents list
+        refetch();
+      } else {
+        toast.error(result.message || 'فشل في حذف المستند');
+      }
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast.error('فشل في حذف المستند');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Handle document upload success
+  const handleDocumentUploaded = () => {
+    refetch();
+  };
+
+  // Handle document edit success
+  const handleDocumentEdited = () => {
+    refetch();
   };
 
   const getDocumentType = (name: string): string => {
@@ -207,9 +314,9 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
                   }}
                   onView={() => handleView(doc.id)}
                   onDownload={() => handleDownload(doc.id)}
-                  onShare={() => handleShare(doc.id)}
+                  onShare={() => toast.info(`مشاركة المستند ${doc.id}`)}
                   onEdit={() => handleEdit(doc.id)}
-                  onDelete={() => handleDelete(doc.id)}
+                  onDelete={() => handleDeleteConfirm(doc.id)}
                 />
               ))}
             </div>
@@ -250,6 +357,55 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Document Dialog */}
+      <EditDocumentDialog
+        isOpen={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        document={selectedDocument}
+        onDocumentUpdated={handleDocumentEdited}
+      />
+      
+      {/* Upload Document Dialog */}
+      <UploadDocumentDialog
+        isOpen={uploadDialogOpen}
+        onClose={() => setUploadDialogOpen(false)}
+        taskId={0} // 0 means project document
+        projectId={project.id}
+        onUploadSuccess={handleDocumentUploaded}
+      />
+      
+      {/* Delete Document Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right">تأكيد حذف المستند</AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              هل أنت متأكد من رغبتك في حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2 sm:justify-start">
+            <AlertDialogAction
+              onClick={handleDeleteDocument}
+              className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
+                  جاري الحذف...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  نعم، حذف المستند
+                </>
+              )}
+            </AlertDialogAction>
+            <AlertDialogCancel className="sm:mr-2">إلغاء</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createSpecialty } from '@/services/specialtyService';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const specialtySchema = z.object({
   name: z.string().min(1, { message: 'اسم التخصص مطلوب' }),
@@ -37,6 +38,7 @@ interface NewSpecialtyModalProps {
 
 export function NewSpecialtyModal({ isOpen, setIsOpen, onSuccess }: NewSpecialtyModalProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const form = useForm<SpecialtyFormValues>({
     resolver: zodResolver(specialtySchema),
     defaultValues: {
@@ -47,12 +49,12 @@ export function NewSpecialtyModal({ isOpen, setIsOpen, onSuccess }: NewSpecialty
   const onSubmit = async (data: SpecialtyFormValues) => {
     try {
       await createSpecialty(data.name);
-      toast.success('تم إضافة التخصص بنجاح');
+      toast.success(t('Specialty added successfully'));
       form.reset();
       setIsOpen(false);
       onSuccess();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء إضافة التخصص');
+      toast.error(error instanceof Error ? error.message : t('Failed to add specialty'));
     }
   };
 
@@ -60,7 +62,7 @@ export function NewSpecialtyModal({ isOpen, setIsOpen, onSuccess }: NewSpecialty
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>إضافة تخصص جديد</DialogTitle>
+          <DialogTitle>{t('Add New Specialty')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -69,9 +71,9 @@ export function NewSpecialtyModal({ isOpen, setIsOpen, onSuccess }: NewSpecialty
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم التخصص</FormLabel>
+                  <FormLabel>{t('Specialty Name')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل اسم التخصص" {...field} />
+                    <Input placeholder={t('Enter specialty name')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -79,9 +81,9 @@ export function NewSpecialtyModal({ isOpen, setIsOpen, onSuccess }: NewSpecialty
             />
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                إلغاء
+                {t('Cancel')}
               </Button>
-              <Button type="submit">إضافة</Button>
+              <Button type="submit">{t('Add')}</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -44,7 +44,7 @@ interface ProjectAdapter {
   expected_end_date: string;
   start_date: string;
   progress: number;
-  status: number;
+  projectStatus: string;
   site_engineer_name?: string;
 }
 
@@ -234,7 +234,7 @@ const Projects = () => {
     expected_end_date: project.expectedEndDate || '',
     start_date: project.startDate || '',
     progress: project.progress || 0,
-    status: project.status as number,
+    projectStatus: project.projectStatus as string,
     site_engineer_name: project.siteEngineerName || `Engineer ${project.siteEngineerId}`
   }))
   .sort((a, b) => {
@@ -457,7 +457,7 @@ const Projects = () => {
                     expected_end_date={project.expected_end_date}
                     start_date={project.start_date}
                     progress={project.progress}
-                    status={project.status}
+                    projectStatus={project.projectStatus}
                     site_engineer_name={project.site_engineer_name}
                     onViewDetails={() => handleViewDetails(project.id)}
                     className="animate-in"

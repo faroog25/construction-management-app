@@ -13,6 +13,8 @@ export interface Document {
   type?: string; // Added for UI display
   size?: string; // Added for UI display
   status?: 'approved' | 'pending' | 'rejected' | 'draft'; // Fixed typing
+  fileUrl?: string; // Added for document viewing
+  fileType?: string; // Added for file type information
 }
 
 export interface DocumentsParams {

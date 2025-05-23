@@ -30,7 +30,7 @@ const Navbar = () => {
   const navLinks = [
     { name: t('nav.dashboard'), path: '/' },
     { name: t('nav.projects'), path: '/projects' },
-    { name: t('nav.documents'), path: '/documents' },
+    // { name: t('nav.documents'), path: '/documents' },
     { name: t('nav.team'), path: '/team' },
     { name: t('nav.equipment'), path: '/equipment' },
     // { name: t('nav.api_docs'), path: '/api-docs', icon: <Code2 size={16} className={isRtl ? "ml-1" : "mr-1"} /> }

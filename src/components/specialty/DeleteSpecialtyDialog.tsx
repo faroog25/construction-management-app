@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteSpecialty, Specialty } from '@/services/specialtyService';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DeleteSpecialtyDialogProps {
   isOpen: boolean;
@@ -22,20 +23,21 @@ interface DeleteSpecialtyDialogProps {
 
 export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess }: DeleteSpecialtyDialogProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleDelete = async () => {
     if (!specialty) {
-      toast.error('لم يتم تحديد التخصص للحذف');
+      toast.error(t('No specialty selected for deletion'));
       return;
     }
 
     try {
       await deleteSpecialty(specialty.id);
-      toast.success('تم حذف التخصص بنجاح');
+      toast.success(t('Specialty deleted successfully'));
       setIsOpen(false);
       onSuccess();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء حذف التخصص');
+      toast.error(error instanceof Error ? error.message : t('Failed to delete specialty'));
     }
   };
 
@@ -43,15 +45,15 @@ export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess 
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>هل أنت متأكد من حذف هذا التخصص؟</AlertDialogTitle>
+          <AlertDialogTitle>{t('Are you sure you want to delete this specialty?')}</AlertDialogTitle>
           <AlertDialogDescription>
-            سيتم حذف التخصص "{specialty?.name}" نهائياً. هذا الإجراء لا يمكن التراجع عنه.
+            {specialty ? t('This will remove the specialty "{name}" permanently.').replace('{name}', specialty.name) : t('This will remove the specialty permanently.')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+          <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
           <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-            تأكيد الحذف
+            {t('Confirm')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

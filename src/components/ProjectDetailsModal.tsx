@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import ProjectDetails from '@/components/ProjectDetails';
 import { Project } from '@/types/project';
 
@@ -11,12 +11,10 @@ interface ProjectDetailsModalProps {
 }
 
 const ProjectDetailsModal = ({ project, isOpen, onOpenChange }: ProjectDetailsModalProps) => {
-  // Add default values for required properties that might be missing
+  // We're no longer adding createdAt and updatedAt as they cause errors
   const enhancedProject: Project = {
-    ...project,
-    // Ensure required properties have default values
-    createdAt: project.createdAt || new Date().toISOString(),
-    updatedAt: project.updatedAt || new Date().toISOString()
+    ...project
+    // No need to add default values for createdAt and updatedAt
   };
   
   return (

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -22,11 +23,14 @@ import {
   Calendar as CalendarIcon,
   XCircle,
   CheckCircle,
-  AlertOctagon
+  AlertOctagon,
+  Loader2,
+  Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import ProjectEditForm from './ProjectEditForm';
+import { generateProjectReport } from '@/services/reportService';
 
 // Status configuration same as in ProjectCard for consistency
 const statusConfig = {
@@ -43,6 +47,7 @@ interface ProjectDetailsInfoProps {
 
 const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   
   // Helper function to format dates
   const formatDate = (dateString: string | undefined) => {
@@ -81,7 +86,8 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
     return 'bg-green-500';
   };
 
-  const progressValue = project.progress || 0;
+  // Fix: Directly use the progress value from the API response
+  const progressValue = typeof project.progress === 'number' ? project.progress : 0;
   const progressColor = getProgressColor(progressValue);
 
   const handleEdit = () => {
@@ -94,6 +100,31 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
 
   const handleSaveSuccess = () => {
     setIsEditing(false);
+  };
+
+  // معالج لتوليد وتنزيل التقرير
+  const handleGenerateReport = async () => {
+    try {
+      setIsGeneratingReport(true);
+      toast.info("جاري إنشاء التقرير، يرجى الانتظار...");
+      
+      const pdfDataUri = await generateProjectReport(project);
+      
+      // إنشاء رابط مؤقت للتنزيل
+      const link = document.createElement('a');
+      link.href = pdfDataUri;
+      link.download = `تقرير_${project.projectName.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("تم إنشاء التقرير بنجاح");
+    } catch (error) {
+      console.error('خطأ أثناء إنشاء التقرير:', error);
+      toast.error("فشل إنشاء التقرير، الرجاء المحاولة مرة أخرى");
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
   // If in edit mode, show the edit form
@@ -127,10 +158,10 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <CardTitle className="text-xl font-bold">Project Overview</CardTitle>
                 <CardDescription>Key information about this project</CardDescription>
               </div>
-              <Button size="sm" variant="outline" className="gap-1" onClick={handleEdit}>
+              {/* <Button size="sm" variant="outline" className="gap-1" onClick={handleEdit}>
                 <Edit className="h-3.5 w-3.5" />
                 Edit
-              </Button>
+              </Button> */}
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
@@ -288,9 +319,23 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
             </div>
 
             <div className="mt-4 pt-4 border-t">
-              <Button variant="outline" className="w-full gap-2" onClick={() => toast.info("Report functionality coming soon")}>
-                <FileText className="h-4 w-4" />
-                Generate Report
+              <Button 
+                variant="outline" 
+                className="w-full gap-2" 
+                onClick={handleGenerateReport}
+                disabled={isGeneratingReport}
+              >
+                {isGeneratingReport ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    جاري إنشاء التقرير...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4" />
+                    Generate Report
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
