@@ -68,7 +68,7 @@ const ResetPassword = () => {
 
     try {
       const response = await fetch(`${API_BASE_URL}/auth/resetPassword?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}&newPassowrd=${encodeURIComponent(values.password)}`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
