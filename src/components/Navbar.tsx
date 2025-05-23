@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Menu, Bell, Search, Code2, Truck } from 'lucide-react';
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import UserProfileDropdown from './UserProfileDropdown';
 import Team from '@/pages/Team';
 
 const Navbar = () => {
@@ -88,6 +90,9 @@ const Navbar = () => {
           
           <ThemeSwitcher />
           <LanguageSwitcher />
+          
+          {/* User Profile Dropdown */}
+          <UserProfileDropdown />
           
           <div className="md:hidden">
             <Sheet>

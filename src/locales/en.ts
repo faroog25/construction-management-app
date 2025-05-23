@@ -10,7 +10,8 @@ export const en = {
     team: 'Team',
     equipment: 'Equipment',
     api_docs: 'API Docs',
-    get_started: 'Get Started'
+    get_started: 'Get Started',
+    logout: 'Logout'
   },
   dashboard: {
     title: 'Dashboard',

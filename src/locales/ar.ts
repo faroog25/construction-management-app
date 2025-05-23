@@ -1,4 +1,3 @@
-
 export const ar = {
   app: {
     name: 'كونستركشن فلو',
@@ -11,7 +10,8 @@ export const ar = {
     team: 'الفريق',
     equipment: 'المعدات',
     api_docs: 'وثائق API',
-    get_started: 'ابدأ الآن'
+    get_started: 'ابدأ الآن',
+    logout: 'تسجيل الخروج'
   },
   dashboard: {
     title: 'لوحة التحكم',
