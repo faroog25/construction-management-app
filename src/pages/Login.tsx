@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { API_BASE_URL } from '@/config/api';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, forgotPasswordSchema, type LoginFormValues, type ForgotPasswordFormValues } from "@/lib/validations/auth";
+import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
 import {
   Form,
   FormControl,
@@ -20,14 +20,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,7 +27,7 @@ const Login = () => {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showForgotPasswordDialog, setShowForgotPasswordDialog] = useState(false);
+  const [isForgotPasswordLoading, setIsForgotPasswordLoading] = useState(false);
 
   // Always reset form values when component mounts to ensure email is never pre-filled
   const form = useForm<LoginFormValues>({
@@ -55,24 +47,6 @@ const Login = () => {
       password: ""
     });
   }, [form]);
-
-  // نموذج "نسيت كلمة المرور" - ضمان أنه دائمًا يبدأ بحقل فارغ
-  const forgotPasswordForm = useForm<ForgotPasswordFormValues>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: ""
-    },
-    shouldUnregister: true,
-  });
-
-  // إعادة تعيين نموذج نسيت كلمة المرور عند فتح الحوار
-  const handleOpenForgotPasswordDialog = () => {
-    // تأكد من إعادة تعيين الحقل عند فتح الحوار
-    forgotPasswordForm.reset({
-      email: ""
-    });
-    setShowForgotPasswordDialog(true);
-  };
 
   const handleSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -129,11 +103,32 @@ const Login = () => {
     }
   };
 
-  const handleForgotPassword = async (values: ForgotPasswordFormValues) => {
-    setIsLoading(true);
+  const handleForgotPassword = async () => {
+    const email = form.getValues('email');
+    
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: t('Error'),
+        description: t('Please enter your email first'),
+      });
+      return;
+    }
+
+    // التحقق من صحة الإيميل
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast({
+        variant: "destructive",
+        title: t('Error'),
+        description: t('Please enter a valid email'),
+      });
+      return;
+    }
+
+    setIsForgotPasswordLoading(true);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/forgotPassword?email=${encodeURIComponent(values.email)}`, {
+      const response = await fetch(`${API_BASE_URL}/auth/forgotPassword?email=${encodeURIComponent(email)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,11 +147,6 @@ const Login = () => {
         variant: "success",
       });
       
-      setShowForgotPasswordDialog(false);
-      
-      // توجيه المستخدم إلى صفحة إعادة تعيين كلمة المرور
-      navigate('/reset-password', { state: { email: values.email } });
-      
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -164,28 +154,8 @@ const Login = () => {
         description: error.message || t('Failed to reset password. Please try again.'),
       });
     } finally {
-      setIsLoading(false);
+      setIsForgotPasswordLoading(false);
     }
-  };
-
-  // تحديد رسائل الخطأ بناءً على اللغة الحالية
-  const getErrorMessage = (field: keyof LoginFormValues, error?: string) => {
-    if (!error) return "";
-    
-    // إذا كانت اللغة العربية
-    if (language === 'ar') {
-      if (field === 'email') {
-        if (error.includes("required")) return "الإيميل مطلوب";
-        if (error.includes("email")) return "يرجى إدخال بريد إلكتروني صحيح";
-      }
-      if (field === 'password') {
-        if (error.includes("required")) return "كلمة المرور مطلوبة";
-        if (error.includes("characters")) return "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل";
-      }
-    }
-    
-    // العودة إلى الخطأ الأصلي إذا لم يكن هناك ترجمة
-    return error;
   };
 
   return (
@@ -273,17 +243,17 @@ const Login = () => {
                 <Button 
                   variant="link" 
                   className="px-0 text-sm" 
-                  disabled={isLoading}
+                  disabled={isLoading || isForgotPasswordLoading}
                   onClick={(e) => {
                     e.preventDefault();
-                    handleOpenForgotPasswordDialog();
+                    handleForgotPassword();
                   }}
                 >
-                  {t('Forgot Password?')}
+                  {isForgotPasswordLoading ? t('Submitting...') : t('Forgot Password?')}
                 </Button>
               </div>
               
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading || isForgotPasswordLoading}>
                 {isLoading ? t('Signing in...') : t('Login')}
               </Button>
             </form>
@@ -295,7 +265,7 @@ const Login = () => {
             <Button 
               variant="link" 
               className="px-1" 
-              disabled={isLoading}
+              disabled={isLoading || isForgotPasswordLoading}
               onClick={() => navigate('/register')}
             >
               {t('Sign Up')}
@@ -305,58 +275,12 @@ const Login = () => {
             variant="outline" 
             className="w-full" 
             onClick={() => navigate('/welcome')}
-            disabled={isLoading}
+            disabled={isLoading || isForgotPasswordLoading}
           >
             {t('Back to Home')}
           </Button>
         </CardFooter>
       </Card>
-      
-      {/* نافذة منبثقة لنسيت كلمة المرور */}
-      <Dialog open={showForgotPasswordDialog} onOpenChange={setShowForgotPasswordDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{t('Forgot Password')}</DialogTitle>
-            <DialogDescription>
-              {t('Enter your email address and we will send you a link to reset your password.')}
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...forgotPasswordForm}>
-            <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
-              <FormField
-                control={forgotPasswordForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('Email')}</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder={t('Enter your email')} 
-                        disabled={isLoading}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setShowForgotPasswordDialog(false)}
-                  disabled={isLoading}
-                >
-                  {t('Cancel')}
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? t('Submitting...') : t('Submit')}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

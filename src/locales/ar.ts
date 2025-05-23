@@ -1,6 +1,5 @@
-import { LanguageTranslations } from '@/contexts/LanguageContext';
 
-const arTranslations: LanguageTranslations = {
+const arTranslations = {
   "Construction Pro": "كونستركشن برو",
   "Dashboard": "لوحة التحكم",
   "Projects": "المشاريع",
@@ -90,9 +89,6 @@ const arTranslations: LanguageTranslations = {
   "Email already verified": "تم التحقق من البريد الإلكتروني بالفعل",
   "Resending...": "إعادة الإرسال...",
   "Email verification link sent to your email address": "تم إرسال رابط التحقق من البريد الإلكتروني إلى عنوان بريدك الإلكتروني",
-  "Email verification link is invalid or expired": "رابط التحقق من البريد الإلكتروني غير صالح أو منتهي الصلاحية",
-  "Email verified successfully": "تم التحقق من البريد الإلكتروني بنجاح",
-  "Failed to verify email": "فشل التحقق من البريد الإلكتروني",
   "Password Reset Email Sent": "تم إرسال رسالة إعادة تعيين كلمة المرور",
   "Email Verification": "تأكيد البريد الإلكتروني",
   "Verify Your Email": "التحقق من بريدك الإلكتروني",
@@ -109,6 +105,9 @@ const arTranslations: LanguageTranslations = {
   "Email verification link is invalid or expired": "رابط التحقق من البريد الإلكتروني غير صالح أو منتهي الصلاحية",
   "Email verified successfully": "تم التحقق من البريد الإلكتروني بنجاح",
   "Failed to verify email": "فشل التحقق من البريد الإلكتروني",
+  "Please enter your email first": "يرجى إدخال بريدك الإلكتروني أولاً",
+  "Please enter a valid email": "يرجى إدخال بريد إلكتروني صحيح",
+  "Submitting...": "جاري الإرسال...",
 };
 
 export default arTranslations;

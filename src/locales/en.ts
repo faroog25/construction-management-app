@@ -1,3 +1,4 @@
+
 const translations = {
   // General
   'app.name': 'ConstructPro',
@@ -70,10 +71,11 @@ const translations = {
   'You have been successfully logged in.': 'You have been successfully logged in.',
   'Invalid email or password. Please try again.': 'Invalid email or password. Please try again.',
   'Authentication failed. Please try again.': 'Authentication failed. Please try again.',
+  'Please enter your email first': 'Please enter your email first',
+  'Please enter a valid email': 'Please enter a valid email',
   
   // Form Validation
   'Email is required': 'Email is required',
-  'Please enter a valid email': 'Please enter a valid email',
   'Password is required': 'Password is required',
   'Password must be at least 8 characters long': 'Password must be at least 8 characters long',
   
@@ -209,7 +211,6 @@ const translations = {
   'Purchase Date': 'Purchase Date',
   'Last Maintenance': 'Last Maintenance',
   'Next Maintenance': 'Next Maintenance',
-  'Status': 'Status',
   'Available': 'Available',
   'In Use': 'In Use',
   'Under Maintenance': 'Under Maintenance',
