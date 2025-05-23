@@ -77,14 +77,13 @@ export function ClientMembers() {
       setLoading(true);
       setError(null);
       const response = await getClients(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
-      setClients(response?.items || []);
-      setTotalPages(response?.totalPages || 1);
-      setTotalItems(response?.totalItems || 0);
+      setClients(response.items);
+      setTotalPages(response.totalPages);
+      setTotalItems(response.totalItems);
     } catch (err) {
       console.error('Error fetching clients:', err);
-      setClients([]); // Set empty array on error
-      setTotalPages(1);
-      setTotalItems(0);
+      setError(err instanceof Error ? err.message : t('search.no_clients'));
+      toast.error(t('search.no_clients'));
     } finally {
       setLoading(false);
     }
@@ -211,15 +210,9 @@ export function ClientMembers() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center">
-        <Users className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">{t('client.no_clients')}</h3>
-        <p className="text-muted-foreground mb-4">{t('client.add_first_client')}</p>
-        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          {t('client.add_client')}
-        </Button>
-      </div>
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     );
   }
 
@@ -235,7 +228,7 @@ export function ClientMembers() {
             <div className="relative w-64">
               <Search className={`absolute ${isRtl ? 'right-2.5' : 'left-2.5'} top-2.5 h-4 w-4 text-muted-foreground`} />
               <Input 
-                placeholder={t('search.clients')}
+                placeholder={t('table.search')}
                 className={`${isRtl ? 'pr-9' : 'pl-9'} h-9 w-full`}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -243,7 +236,7 @@ export function ClientMembers() {
             </div>
             <Button size="sm" className="gap-1" onClick={() => setIsAddModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              {t('table.add')}
+              {t('client.add_client')}
             </Button>
           </div>
         </CardHeader>
@@ -254,7 +247,7 @@ export function ClientMembers() {
               <Skeleton className="h-8 w-full mb-2" />
               <Skeleton className="h-8 w-full" />
             </div>
-          ) : !clients || clients.length === 0 ? (
+          ) : clients.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <Users className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">{t('client.no_clients')}</h3>
@@ -273,7 +266,7 @@ export function ClientMembers() {
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center">
-                      {t('table.name')}
+                      {t('forms.name')}
                       <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
                     </div>
                   </TableHead>
@@ -282,7 +275,7 @@ export function ClientMembers() {
                     onClick={() => handleSort('email')}
                   >
                     <div className="flex items-center">
-                      {t('table.email')}
+                      {t('forms.email')}
                       <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
                     </div>
                   </TableHead>
@@ -291,7 +284,7 @@ export function ClientMembers() {
                     onClick={() => handleSort('phone')}
                   >
                     <div className="flex items-center">
-                      {t('table.phone')}
+                      {t('forms.phone')}
                       <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
                     </div>
                   </TableHead>

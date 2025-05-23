@@ -57,6 +57,7 @@ export const en = {
     add_member: 'Add Member',
     workers: 'Workers',
     site_engineers: 'Site Engineers',
+    clients: 'Clients',
     no_members: 'No team members found',
     name: 'Name',
     role: 'Role',
@@ -126,7 +127,8 @@ export const en = {
     loading: 'Loading...',
     page: 'Page',
     of: 'of',
-    rows_per_page: 'Rows per page'
+    rows_per_page: 'Rows per page',
+    type: 'Type'
   },
   common: {
     save: 'Save',
@@ -255,6 +257,15 @@ export const en = {
   client: {
     no_clients: "No Clients Found",
     add_first_client: "Start by adding your first client",
-    add_client: "Add Client"
-  }
+    add_client: "Add Client",
+    company: "Company",
+    client_name: "Client Name",
+    contact_person: "Contact Person",
+    contact_number: "Contact Number",
+    email: "Email",
+    address: "Address",
+    client_type: "Client Type",
+
+  },
+  
 };
