@@ -57,7 +57,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
     queryFn: () => getDocuments({ 
       projectId: project.id,
       pageNumber: 1,
-      pageSize: 100
+      pageSize: 50
       // Removed ClassificationId to get all document types
     }),
     retry: false // Don't retry on failure
