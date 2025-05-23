@@ -26,7 +26,8 @@ export const ar = {
     equipment_usage: 'استخدام المعدات',
     view_all: 'عرض الكل',
     no_projects: 'لا توجد مشاريع متاحة',
-    create_project: 'إنشاء مشروع جديد'
+    create_project: 'إنشاء مشروع جديد',
+    no_upcoming_tasks: 'لا توجد مهام قادمة'
   },
   projects: {
     title: 'المشاريع',
@@ -182,7 +183,8 @@ export const ar = {
     next_month: 'الشهر القادم',
     this_year: 'هذا العام',
     last_year: 'العام الماضي',
-    next_year: 'العام القادم'
+    next_year: 'العام القادم',
+    urgent: 'عاجل'
   },
   auth: {
     login: 'تسجيل الدخول',

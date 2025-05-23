@@ -4,10 +4,11 @@ import DashboardStatsNew from '@/components/DashboardStatsNew';
 import DetailedStatistics from '@/components/DetailedStatistics';
 import ProjectCard from '@/components/ProjectCard';
 import ProjectTimeline from '@/components/ProjectTimeline';
+import UpcomingTasks from '@/components/UpcomingTasks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronRight, Building, Clock, FileText, Briefcase } from 'lucide-react';
+import { Plus, ChevronRight } from 'lucide-react';
 import { getProjects, Project } from '@/services/projectService';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,23 +26,6 @@ const Index = () => {
   
   // Take the first 4 projects for the dashboard display
   const recentProjects = projects.slice(0, 4);
-
-  const tasks = [
-    { id: 1, title: 'مراجعة مخططات الأساس', type: 'document', dueDate: t('common.today'), status: 'urgent' },
-    { id: 2, title: 'الموافقة على موردي المواد', type: 'approval', dueDate: t('common.tomorrow'), status: 'normal' },
-    { id: 3, title: 'تفتيش الموقع في المرتفعات الغربية', type: 'site', dueDate: '28 أغسطس', status: 'normal' },
-    { id: 4, title: 'اجتماع تنسيق الفريق', type: 'meeting', dueDate: '29 أغسطس', status: 'normal' },
-  ];
-
-  const getTaskIcon = (type: string) => {
-    switch (type) {
-      case 'document': return <FileText className="h-4 w-4 text-blue-500" />;
-      case 'approval': return <Briefcase className="h-4 w-4 text-purple-500" />;
-      case 'site': return <Building className="h-4 w-4 text-green-500" />;
-      case 'meeting': return <Clock className="h-4 w-4 text-amber-500" />;
-      default: return <FileText className="h-4 w-4" />;
-    }
-  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -76,40 +60,9 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            <Card className="animate-in" style={{ animationDelay: "0.2s" }}>
-              <CardHeader className="pb-3 flex flex-row items-center justify-between">
-                <CardTitle>{t('dashboard.upcoming_deadlines')}</CardTitle>
-                <Button variant="ghost" size="sm" className="text-sm" asChild>
-                  <a href="/tasks">
-                    {t('dashboard.view_all')}
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </a>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {tasks.map((task) => (
-                    <div 
-                      key={task.id} 
-                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="mt-0.5">{getTaskIcon(task.type)}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm leading-none mb-1 text-balance">{task.title}</p>
-                        <p className="text-xs text-muted-foreground">استحقاق {task.dueDate}</p>
-                      </div>
-                      <div className={`px-2 py-1 text-xs rounded-full ${
-                        task.status === 'urgent' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-slate-100 text-slate-800'
-                      }`}>
-                        {task.status === 'urgent' ? 'عاجل' : 'عادي'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="animate-in" style={{ animationDelay: "0.2s" }}>
+              <UpcomingTasks />
+            </div>
           </div>
 
           <DetailedStatistics />

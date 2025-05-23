@@ -26,7 +26,8 @@ export const en = {
     equipment_usage: 'Equipment Usage',
     view_all: 'View All',
     no_projects: 'No projects available',
-    create_project: 'Create New Project'
+    create_project: 'Create New Project',
+    no_upcoming_tasks: 'No upcoming tasks'
   },
   projects: {
     title: 'Projects',
@@ -182,7 +183,8 @@ export const en = {
     next_month: 'Next Month',
     this_year: 'This Year',
     last_year: 'Last Year',
-    next_year: 'Next Year'
+    next_year: 'Next Year',
+    urgent: 'Urgent'
   },
   auth: {
     login: 'Login',

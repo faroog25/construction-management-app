@@ -136,6 +136,17 @@ export interface TaskAssignmentsResponse {
   data: WorkerAssignment[];
 }
 
+export interface UpcomingTask {
+  id: number;
+  name: string;
+  description: string;
+  startDate: string;
+  expectedEndDate: string;
+  stageName: string;
+  projectName: string;
+  isCompleted: boolean;
+}
+
 export async function getStageTasks(stageId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiTask[]> {
   try {
     console.log('Fetching tasks from:', `${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`);
@@ -551,5 +562,35 @@ export async function getTasksForWorker(workerId: number): Promise<WorkerAssignm
   } catch (error) {
     console.error('Error fetching tasks for worker:', error);
     return [];
+  }
+}
+
+/**
+ * Fetches upcoming tasks within the specified number of days
+ * @param daysAhead Number of days to look ahead for upcoming tasks
+ * @returns Array of upcoming tasks
+ */
+export async function getUpcomingTasks(daysAhead: number = 60): Promise<UpcomingTask[]> {
+  try {
+    console.log('Fetching upcoming tasks from:', `${API_BASE_URL}/Tasks/upcoming?daysAhead=${daysAhead}`);
+    const response = await fetch(`${API_BASE_URL}/Tasks/upcoming?daysAhead=${daysAhead}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response for upcoming tasks:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: UpcomingTask[] = await response.json();
+    console.log('API Response - Upcoming Tasks:', result);
+    
+    return result;
+  } catch (error) {
+    console.error('Error fetching upcoming tasks:', error);
+    throw error;
   }
 }
