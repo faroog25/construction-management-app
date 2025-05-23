@@ -1,4 +1,3 @@
-
 const translations = {
   // General
   'app.name': 'ConstructPro',
@@ -104,7 +103,7 @@ const translations = {
   'Email Verified': 'Email Verified',
   'Verification Failed': 'Verification Failed',
   'Please wait while we verify your email address': 'Please wait while we verify your email address',
-  'Your email has been successfully verified. You can now sign in to your account.': 'Your email has been successfully verified. You can now sign in to your account.',
+  'Your email {{email}} has been successfully verified. You can now sign in to your account.': 'Your email {{email}} has been successfully verified. You can now sign in to your account.',
   'There was an issue verifying your email address': 'There was an issue verifying your email address',
   'Thank you for verifying your email address. You now have full access to all features.': 'Thank you for verifying your email address. You now have full access to all features.',
   'Your verification link may be expired or invalid. Please request a new verification email.': 'Your verification link may be expired or invalid. Please request a new verification email.',
