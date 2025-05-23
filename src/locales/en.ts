@@ -1,4 +1,3 @@
-
 export const en = {
   app: {
     name: 'ConstructFlow',
@@ -252,5 +251,10 @@ export const en = {
   language: {
     english: 'English',
     arabic: 'Arabic'
+  },
+  client: {
+    no_clients: "No Clients Found",
+    add_first_client: "Start by adding your first client",
+    add_client: "Add Client"
   }
 };

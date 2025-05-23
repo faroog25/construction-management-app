@@ -77,13 +77,14 @@ export function ClientMembers() {
       setLoading(true);
       setError(null);
       const response = await getClients(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
-      setClients(response.items);
-      setTotalPages(response.totalPages);
-      setTotalItems(response.totalItems);
+      setClients(response?.items || []);
+      setTotalPages(response?.totalPages || 1);
+      setTotalItems(response?.totalItems || 0);
     } catch (err) {
       console.error('Error fetching clients:', err);
-      setError(err instanceof Error ? err.message : t('search.no_clients'));
-      toast.error(t('search.no_clients'));
+      setClients([]); // Set empty array on error
+      setTotalPages(1);
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }
@@ -210,9 +211,15 @@ export function ClientMembers() {
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <Users className="h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold mb-2">{t('client.no_clients')}</h3>
+        <p className="text-muted-foreground mb-4">{t('client.add_first_client')}</p>
+        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          {t('client.add_client')}
+        </Button>
+      </div>
     );
   }
 
@@ -241,87 +248,67 @@ export function ClientMembers() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table dir={isRtl ? "rtl" : "ltr"}>
-            <TableHeader>
-              <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead 
-                  className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
-                  onClick={() => handleSort('name')}
-                >
-                  <div className="flex items-center">
-                    {t('table.name')}
-                    <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
-                  onClick={() => handleSort('email')}
-                >
-                  <div className="flex items-center">
-                    {t('table.email')}
-                    <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
-                  onClick={() => handleSort('phone')}
-                >
-                  <div className="flex items-center">
-                    {t('table.phone')}
-                    <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
-                  onClick={() => handleSort('type')}
-                >
-                  <div className="flex items-center">
-                    {t('table.type')}
-                    <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
-                  </div>
-                </TableHead>
-                <TableHead className={`font-medium ${isRtl ? 'text-right' : 'text-left'}`}>{t('table.actions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={`skeleton-${index}`}>
-                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-                    <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
-                      <div className="flex space-x-2">
-                        <Skeleton className="h-8 w-[60px]" />
-                        <Skeleton className="h-8 w-[60px]" />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : clients.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center h-32">
-                    {searchQuery ? 
-                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                        <Search className="h-8 w-8 opacity-30" />
-                        <p>{t('search.no_results')} "{searchQuery}"</p>
-                        <Button variant="link" onClick={() => setSearchQuery('')}>{t('search.clear')}</Button>
-                      </div>
-                      : 
-                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                        <Users className="h-8 w-8 opacity-30" />
-                        <p>{t('search.no_clients')}</p>
-                        <Button variant="outline" size="sm" onClick={() => setIsAddModalOpen(true)}>
-                          <Plus className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                          {t('search.add_first_client')}
-                        </Button>
-                      </div>
-                    }
-                  </TableCell>
+          {loading ? (
+            <div className="p-4">
+              <Skeleton className="h-8 w-full mb-2" />
+              <Skeleton className="h-8 w-full mb-2" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : !clients || clients.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Users className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">{t('client.no_clients')}</h3>
+              <p className="text-muted-foreground mb-4">{t('client.add_first_client')}</p>
+              <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                {t('client.add_client')}
+              </Button>
+            </div>
+          ) : (
+            <Table dir={isRtl ? "rtl" : "ltr"}>
+              <TableHeader>
+                <TableRow className="bg-muted/30 hover:bg-muted/30">
+                  <TableHead 
+                    className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
+                    onClick={() => handleSort('name')}
+                  >
+                    <div className="flex items-center">
+                      {t('table.name')}
+                      <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
+                    onClick={() => handleSort('email')}
+                  >
+                    <div className="flex items-center">
+                      {t('table.email')}
+                      <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
+                    onClick={() => handleSort('phone')}
+                  >
+                    <div className="flex items-center">
+                      {t('table.phone')}
+                      <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
+                    onClick={() => handleSort('type')}
+                  >
+                    <div className="flex items-center">
+                      {t('table.type')}
+                      <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
+                    </div>
+                  </TableHead>
+                  <TableHead className={`font-medium ${isRtl ? 'text-right' : 'text-left'}`}>{t('table.actions')}</TableHead>
                 </TableRow>
-              ) : (
-                clients.map((client) => (
+              </TableHeader>
+              <TableBody>
+                {clients.map((client) => (
                   <TableRow 
                     key={client.id} 
                     className="group cursor-pointer hover:bg-muted/50 transition-colors"
@@ -369,10 +356,10 @@ export function ClientMembers() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          )}
           
           {!loading && clients.length > 0 && (
             <div className="py-4 px-2">

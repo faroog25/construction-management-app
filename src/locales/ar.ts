@@ -112,6 +112,11 @@ const arTranslations = {
   "Enter a new password for your account": "أدخل كلمة مرور جديدة لحسابك",
   "Your password has been reset successfully.": "تم إعادة تعيين كلمة المرور بنجاح.",
   "Resetting...": "جاري إعادة التعيين...",
+  client: {
+    no_clients: "لا يوجد عملاء",
+    add_first_client: "ابدأ بإضافة عميلك الأول",
+    add_client: "إضافة عميل",
+  },
 };
 
 export default arTranslations;

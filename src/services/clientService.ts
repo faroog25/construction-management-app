@@ -27,6 +27,7 @@ export async function getClients(
   sortDirection: 'asc' | 'desc' = 'asc'
 ): Promise<ClientResponse['data']> {
   try {
+    const token = localStorage.getItem('authToken');
     const queryParams = new URLSearchParams({
       pageNumber: page.toString(),
       pageSize: pageSize.toString(),
@@ -39,7 +40,8 @@ export async function getClients(
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8',
+        'Authorization': `Bearer ${token}`
       }
     });
     
@@ -62,6 +64,7 @@ export async function getClients(
 
 export async function getClientById(id: string): Promise<ClientType | undefined> {
   try {
+    const token = localStorage.getItem('authToken');
     console.log('Fetching client with ID:', id);
     const url = `${API_BASE_URL}/Clients/${id}`;
     console.log('API URL:', url);
@@ -70,7 +73,8 @@ export async function getClientById(id: string): Promise<ClientType | undefined>
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
       }
     });
     
@@ -124,10 +128,12 @@ export async function getClientById(id: string): Promise<ClientType | undefined>
 
 export async function createClient(client: Omit<ClientType, 'id'>): Promise<ClientType> {
   try {
+    const token = localStorage.getItem('authToken');
     const response = await fetch(`${API_BASE_URL}/Clients`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(client),
     });
@@ -155,6 +161,7 @@ export async function createClient(client: Omit<ClientType, 'id'>): Promise<Clie
 
 export async function updateClient(id: string, client: Partial<Omit<ClientType, 'id'>>): Promise<ClientType> {
   try {
+    const token = localStorage.getItem('authToken');
     // Log the incoming data
     console.log('Updating client with data:', { id, client });
 
@@ -174,6 +181,7 @@ export async function updateClient(id: string, client: Partial<Omit<ClientType, 
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(updateData),
     });
@@ -207,10 +215,13 @@ export async function updateClient(id: string, client: Partial<Omit<ClientType, 
 }
 
 export async function deleteClient(id: string): Promise<void> {
-  // TODO: Implement actual API call
   try {
+    const token = localStorage.getItem('authToken');
     const response = await fetch(`${API_BASE_URL}/clients/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
