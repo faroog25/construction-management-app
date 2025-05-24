@@ -1,16 +1,5 @@
-
 import { SiteEngineer, SiteEngineersResponse } from '@/types/siteEngineer';
 import { API_BASE_URL } from '@/config/api';
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('authToken');
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-    'Accept': 'application/json',
-    'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-  };
-};
 
 // بيانات وهمية للاستخدام عند فشل الاتصال بالخادم
 const mockSiteEngineers: SiteEngineer[] = [
@@ -162,7 +151,11 @@ export const getSiteEngineers = async (
     console.log('API URL:', url);
     
     const response = await fetch(url, {
-      headers: getAuthHeaders()
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
+      }
     });
     
     if (!response.ok) {
@@ -220,7 +213,10 @@ export async function getSiteEngineerById(id: string): Promise<SiteEngineer> {
     
     const response = await fetch(url, {
       method: 'GET',
-      headers: getAuthHeaders()
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
     
     console.log('Response status:', response.status);

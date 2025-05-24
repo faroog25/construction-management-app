@@ -60,20 +60,10 @@ export interface DeleteStageResponse {
   errors?: string[];
 }
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('authToken');
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-  };
-};
-
 export async function getProjectStages(projectId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiStage[]> {
   try {
     console.log('Fetching stages from:', `${API_BASE_URL}/Stages?projectId=${projectId}&pageNumber=${page}&pageSize=${pageSize}`);
-    const response = await fetch(`${API_BASE_URL}/Stages?projectId=${projectId}&pageNumber=${page}&pageSize=${pageSize}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${API_BASE_URL}/Stages?projectId=${projectId}&pageNumber=${page}&pageSize=${pageSize}`);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -109,7 +99,9 @@ export async function createStage(stageData: CreateStageRequest): Promise<Create
     console.log('Creating stage with data:', stageData);
     const response = await fetch(`${API_BASE_URL}/Stages`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(stageData),
     });
     
@@ -142,7 +134,9 @@ export async function updateStage(stageData: UpdateStageRequest): Promise<Update
     console.log('Updating stage with data:', stageData);
     const response = await fetch(`${API_BASE_URL}/Stages`, {
       method: 'PUT',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(stageData),
     });
     
@@ -175,7 +169,9 @@ export async function deleteStage(stageId: number): Promise<DeleteStageResponse>
     console.log('Deleting stage with ID:', stageId);
     const response = await fetch(`${API_BASE_URL}/Stages/${stageId}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
     
     if (!response.ok) {
