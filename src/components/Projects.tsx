@@ -57,6 +57,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { API_BASE_URL } from '@/config/api';
+import { NewProjectModal } from '@/components/NewProjectModal';
 
 interface PaginatedResponse<T> {
   success: boolean;
@@ -89,6 +90,7 @@ const Projects = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Update the clients query to handle paginated response
   const { data: clientsResponse, isLoading: isLoadingClients } = useQuery({
@@ -186,9 +188,12 @@ const Projects = () => {
   };
 
   const handleAddProject = () => {
-    toast({
-      description: 'سيتم إضافة نموذج إنشاء مشروع جديد قريباً',
-    });
+    setIsModalOpen(true);
+  };
+
+  const handleProjectCreated = () => {
+    // Refresh the projects list after creating a new project
+    fetchPaginatedProjects(currentPage, pageSize);
   };
 
   // Filter projects based on search
@@ -462,6 +467,12 @@ const Projects = () => {
           )}
         </div>
       )}
+      
+      <NewProjectModal 
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onProjectCreated={handleProjectCreated}
+      />
     </div>
   );
 };
