@@ -30,9 +30,9 @@ const UserProfileDropdown = () => {
     navigate('/welcome');
   };
 
-  const getUserInitials = (firstName?: string, lastName?: string) => {
-    if (!firstName && !lastName) return 'U';
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  const getUserInitials = (name?: string, userName?: string) => {
+    if (!name && !userName) return 'U';
+    return `${name?.charAt(0) || ''}${userName?.charAt(0) || ''}`.toUpperCase();
   };
 
   if (isLoading) {
@@ -48,9 +48,9 @@ const UserProfileDropdown = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="" alt={userProfile?.firstName} />
+            <AvatarImage src="" alt={userProfile?.name} />
             <AvatarFallback className="bg-primary text-primary-foreground">
-              {getUserInitials(userProfile?.firstName, userProfile?.lastName)}
+              {getUserInitials(userProfile?.name, userProfile?.userName)}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -59,16 +59,14 @@ const UserProfileDropdown = () => {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {userProfile?.firstName} {userProfile?.lastName}
+              {userProfile?.name}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground">
+              @{userProfile?.userName}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {userProfile?.email}
             </p>
-            {userProfile?.role && (
-              <p className="text-xs leading-none text-muted-foreground">
-                {userProfile.role}
-              </p>
-            )}
             {userProfile?.phoneNumber && (
               <p className="text-xs leading-none text-muted-foreground">
                 {userProfile.phoneNumber}

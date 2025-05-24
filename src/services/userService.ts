@@ -1,19 +1,18 @@
 
-import { api } from './api';
+import { API_BASE_URL } from '@/config/api';
 
 export interface UserProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
+  id: number;
+  name: string;
+  userName: string;
   email: string;
-  phoneNumber?: string;
-  role?: string;
+  phoneNumber: string;
 }
 
 export const getUserProfile = async (): Promise<UserProfile> => {
   const token = localStorage.getItem('authToken');
   
-  const response = await fetch('https://constructionmanagementassitantapi.runasp.net/me', {
+  const response = await fetch(`${API_BASE_URL}/Users/getProfile`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
