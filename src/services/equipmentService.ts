@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 import { EquipmentItem } from '@/types/equipment';
 
@@ -82,6 +83,15 @@ export interface SetEquipmentStatusResponse {
   errors?: string[];
 }
 
+// Helper function to get authentication headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 /**
  * Fetches equipment list with pagination
  * @param pageNumber The current page number
@@ -99,7 +109,9 @@ export async function getEquipment(pageNumber: number = 1, pageSize: number = 10
     }
     
     console.log(`Fetching equipment: ${url}`);
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -175,9 +187,7 @@ export async function createEquipment(equipment: CreateEquipmentRequest): Promis
     console.log('Creating new equipment:', equipment);
     const response = await fetch(`${API_BASE_URL}/Equipment`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(equipment),
     });
     
@@ -213,7 +223,9 @@ export async function createEquipment(equipment: CreateEquipmentRequest): Promis
 export async function getEquipmentById(id: number): Promise<EquipmentDetailResponse> {
   try {
     console.log(`Fetching equipment details for ID: ${id}`);
-    const response = await fetch(`${API_BASE_URL}/Equipment/${id}`);
+    const response = await fetch(`${API_BASE_URL}/Equipment/${id}`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -249,9 +261,7 @@ export async function updateEquipment(equipment: UpdateEquipmentRequest): Promis
     console.log('Updating equipment:', equipment);
     const response = await fetch(`${API_BASE_URL}/Equipment`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(equipment),
     });
     
@@ -290,9 +300,7 @@ export async function deleteEquipment(id: number): Promise<DeleteEquipmentRespon
     
     const response = await fetch(`${API_BASE_URL}/Equipment/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
     
     if (!response.ok) {
@@ -339,9 +347,7 @@ export async function setEquipmentStatus(equipmentId: number, status: number): P
     
     const response = await fetch(`${API_BASE_URL}/Equipment/SetStatus?equipmentId=${equipmentId}&status=${status}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
     
     if (!response.ok) {
