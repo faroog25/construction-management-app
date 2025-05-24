@@ -6,11 +6,26 @@ export interface ClientName {
   fullName: string;
 }
 
+export interface Client {
+  id: number;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  clientType: string;
+}
+
 interface ClientNamesResponse {
   success: boolean;
   message: string;
   errors?: string[];
   data: ClientName[];
+}
+
+interface ClientsResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: Client[];
 }
 
 // Helper function to get authentication headers
@@ -41,6 +56,66 @@ export async function getClientNames(): Promise<ClientName[]> {
     return result.data || [];
   } catch (error) {
     console.error('Error fetching client names:', error);
+    throw error;
+  }
+}
+
+// Add placeholder functions for compatibility
+export async function getClients(): Promise<{ data: Client[] }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Clients`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: ClientsResponse = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch clients');
+    }
+    
+    return { data: result.data || [] };
+  } catch (error) {
+    console.error('Error fetching clients:', error);
+    throw error;
+  }
+}
+
+export async function deleteClient(clientId: number): Promise<void> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Clients/${clientId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error deleting client:', error);
+    throw error;
+  }
+}
+
+export async function updateClient(clientId: number, clientData: Partial<Client>): Promise<Client> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Clients/${clientId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(clientData),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    return result.data;
+  } catch (error) {
+    console.error('Error updating client:', error);
     throw error;
   }
 }

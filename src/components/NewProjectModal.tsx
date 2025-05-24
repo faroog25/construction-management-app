@@ -31,7 +31,7 @@ import { API_BASE_URL } from '@/config/api';
 import { getClientNames, ClientName } from '@/services/clientService';
 import { getSiteEngineerNames, SiteEngineerName } from '@/services/siteEngineerService';
 
-// Schema for the new project form based on the API body
+// Schema for the new project form - only required fields
 const projectSchema = z.object({
   projectName: z.string().min(1, 'اسم المشروع مطلوب'),
   description: z.string().optional(),
