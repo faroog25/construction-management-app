@@ -28,6 +28,16 @@ export interface CreateSpecialtyRequest {
   name: string;
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/json',
+    'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
+  };
+};
+
 /**
  * جلب جميع تخصصات العمال
  */
@@ -36,11 +46,7 @@ export async function getSpecialties(): Promise<Specialty[]> {
     console.log('Fetching specialties from API');
     const response = await fetch(`${API_BASE_URL}/WorkerSpecialties`, {
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      }
+      headers: getAuthHeaders()
     });
 
     if (!response.ok) {
@@ -77,11 +83,7 @@ export async function createSpecialty(name: string): Promise<Specialty> {
   try {
     const response = await fetch(`${API_BASE_URL}/WorkerSpecialties`, {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ name })
     });
 
@@ -118,11 +120,7 @@ export async function updateSpecialty(id: number, name: string): Promise<Special
   try {
     const response = await fetch(`${API_BASE_URL}/WorkerSpecialties`, {
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ id, name })
     });
 
@@ -159,11 +157,7 @@ export async function deleteSpecialty(id: number): Promise<void> {
   try {
     const response = await fetch(`${API_BASE_URL}/WorkerSpecialties/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      }
+      headers: getAuthHeaders()
     });
 
     if (!response.ok) {
