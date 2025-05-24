@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +11,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, Search, SlidersHorizontal, ChevronDown, Loader2, X, Check, AlertCircle } from 'lucide-react';
-import { getProjects, Project, createProject, getClients, getSiteEngineers, Client, SiteEngineer, getStatusFromCode, getArabicStatus } from '@/services/projectService';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, Search, SlidersHorizontal, ChevronDown, Loader2, AlertCircle } from 'lucide-react';
+import { getProjects, Project, getClients, getSiteEngineers, Client, SiteEngineer, getStatusFromCode, getArabicStatus } from '@/services/projectService';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { 
   Select, 
@@ -23,9 +24,6 @@ import {
 } from '@/components/ui/select';
 import ProjectDetailsModal from '@/components/ProjectDetailsModal';
 import { useNavigate } from 'react-router-dom';
-import { projectSchema, ProjectFormValues } from '@/lib/validations/project';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import {
   Pagination,
   PaginationContent,
@@ -36,6 +34,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { PaginatedResponse } from '@/types/project';
+import { NewProjectModal } from '@/components/NewProjectModal';
 
 interface ProjectAdapter {
   id: number;
@@ -61,27 +60,11 @@ const Projects = () => {
   const [sortOption, setSortOption] = useState('newest');
   const [activeTab, setActiveTab] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [selectedEngineerId, setSelectedEngineerId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10); 
-  const [newProject, setNewProject] = useState({
-    projectName: '',
-    siteAddress: '',
-    clientName: '',
-    projectStatus: 'active',
-    description: '',
-    startDate: '',
-    expectedEndDate: '',
-    status: 0,
-    clientId: 0,
-    geographicalCoordinates: '',
-    siteEngineerId: 0
-  });
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const navigate = useNavigate();
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -117,113 +100,20 @@ const Projects = () => {
   }, [data]);
 
   const projectsData = data?.data?.items || [];
-  
-  const { data: client, isLoading: isLoadingClients } = useQuery({
-    queryKey: ['clients'],
-    queryFn: getClients,
-  });
-
-  const clients = client?.items || [];
-
-  const { data: siteEngineer = [], isLoading: isLoadingEngineers } = useQuery({
-    queryKey: ['siteEngineers'],
-    queryFn: getSiteEngineers,
-  });
-  const siteEngineers = siteEngineer?.items || [];
-  
-  const createProjectMutation = useMutation({
-    mutationFn: createProject,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      setIsModalOpen(false);
-      setNewProject({
-        projectName: '',
-        siteAddress: '',
-        clientName: '',
-        projectStatus: 'active',
-        description: '',
-        startDate: '',
-        expectedEndDate: '',
-        status: 0,
-        clientId: 0,
-        geographicalCoordinates: '',
-        siteEngineerId: 0
-      });
-      setSelectedClientId(null);
-    },
-  });
-
-  const form = useForm<ProjectFormValues>({
-    resolver: zodResolver(projectSchema),
-    defaultValues: {
-      projectName: '',
-      description: '',
-      siteAddress: '',
-      geographicalCoordinates: '',
-      siteEngineerId: 0,
-      clientId: 0,
-      startDate: '',
-      expectedEndDate: '',
-      status: 0
-    },
-  });
-
-  useEffect(() => {
-    if (selectedClientId) {
-      const selectedClient = clients.find(client => client.id === selectedClientId);
-      if (selectedClient) {
-        setNewProject(prev => ({
-          ...prev,
-          clientName: selectedClient.fullName,
-          clientId: selectedClient.id
-        }));
-      }
-    }
-  }, [selectedClientId, clients]);
 
   // When tab changes, return to first page
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab]);
 
-  const handleCreateProject = async () => {
-    try {
-      const formData = form.getValues();
-      const validationResult = projectSchema.safeParse(formData);
-      console.log(formData)
-      if (!validationResult.success) {
-        const errors: Record<string, string> = {};
-        validationResult.error.errors.forEach((err) => {
-          if (err.path) {
-            errors[err.path[0]] = err.message;
-          }
-        });
-        setFormErrors(errors);
-        return;
-      }
+  const handleAddProject = () => {
+    setIsModalOpen(true);
+  };
 
-      const projectData: Project = {
-        id: 0,
-        projectName: formData.projectName,
-        description: formData.description,
-        siteAddress: formData.siteAddress,
-        geographicalCoordinates: formData.geographicalCoordinates,
-        siteEngineerId: formData.siteEngineerId,
-        clientId: formData.clientId,
-        startDate: formData.startDate,
-        expectedEndDate: formData.expectedEndDate,
-        status: formData.status
-      };
-
-      await createProjectMutation.mutateAsync(projectData);
-      
-      toast.success("Project created successfully");
-      setIsModalOpen(false);
-      form.reset();
-      setFormErrors({});
-    } catch (error) {
-      toast.error("Failed to create project");
-    }
+  const handleProjectCreated = () => {
+    // Refresh the projects list after creating a new project
+    queryClient.invalidateQueries({ queryKey: ['projects'] });
+    setIsModalOpen(false);
   };
 
   // Convert projects to ProjectAdapter format
@@ -371,7 +261,7 @@ const Projects = () => {
           <div className="mt-4 lg:mt-0">
             <Button 
               className="rounded-lg"
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleAddProject}
             >
               <Plus className="mr-2 h-4 w-4" />
               مشروع جديد
@@ -503,176 +393,12 @@ const Projects = () => {
           )}
         </Tabs>
         
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">مشروع جديد</h2>
-                <button
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    form.reset();
-                    setFormErrors({});
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleCreateProject(); }}>
-                <div>
-                  <label className="block text-sm font-medium mb-1">اسم المشروع</label>
-                  <Input
-                    {...form.register("projectName")}
-                    placeholder="أدخل اسم المشروع"
-                  />
-                  {formErrors.projectName && (
-                    <p className="text-sm text-red-500 mt-1">{formErrors.projectName}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">الوصف</label>
-                  <textarea
-                    {...form.register("description")}
-                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                    placeholder="أدخل وصف المشروع"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">عنوان الموقع</label>
-                  <Input
-                    {...form.register("siteAddress")}
-                    placeholder="أدخل عنوان الموقع"
-                  />
-                  {formErrors.siteAddress && (
-                    <p className="text-sm text-red-500 mt-1">{formErrors.siteAddress}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">الإحداثيات الجغرافية</label>
-                  <Input
-                    {...form.register("geographicalCoordinates")}
-                    placeholder="أدخل الإحداثيات (مثال: 34.0522, -118.2437)"
-                  />
-                  {formErrors.geographicalCoordinates && (
-                    <p className="text-sm text-red-500 mt-1">{formErrors.geographicalCoordinates}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">العميل</label>
-                  <Select
-                    onValueChange={(value) => {
-                      const id = parseInt(value);
-                      setSelectedClientId(id);
-                      form.setValue("clientId", id);
-                    }}
-                    value={selectedClientId?.toString()}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="اختر العميل" />
-                    </SelectTrigger>
-                     <SelectContent>
-                      {isLoadingClients ? (
-                        <div className="p-2 flex items-center">
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          <span>جاري تحميل العملاء...</span>
-                        </div>
-                      ) : (
-                        clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id.toString()}>
-                            {client.fullName}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent> 
-                  </Select>
-                   {formErrors.clientId && (
-                    <p className="text-sm text-red-500 mt-1">{formErrors.clientId}</p>
-                  )} 
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">مهندس الموقع</label>
-                  <Select
-                    onValueChange={(value) => {
-                      const id = parseInt(value);
-                      setSelectedEngineerId(id);
-                      form.setValue("siteEngineerId", id);
-                    }}
-                    value={selectedEngineerId?.toString()}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="اختر مهندس الموقع" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {isLoadingEngineers ? (
-                        <div className="p-2 flex items-center">
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          <span>جاري تحميل مهندسي الموقع...</span>
-                        </div>
-                      ) : (
-                        siteEngineers.map((engineer) => (
-                          <SelectItem key={engineer.id} value={engineer.id.toString()}>
-                            {engineer.fullName}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {formErrors.siteEngineerId && (
-                    <p className="text-sm text-red-500 mt-1">{formErrors.siteEngineerId}</p>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">تاريخ البدء</label>
-                    <Input
-                      type="date"
-                      {...form.register("startDate")}
-                    />
-                    {formErrors.startDate && (
-                      <p className="text-sm text-red-500 mt-1">{formErrors.startDate}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">تاريخ الانتهاء المتوقع</label>
-                    <Input
-                      type="date"
-                      {...form.register("expectedEndDate")}
-                    />
-                    {formErrors.expectedEndDate && (
-                      <p className="text-sm text-red-500 mt-1">{formErrors.expectedEndDate}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsModalOpen(false);
-                      form.reset();
-                      setFormErrors({});
-                    }}
-                    type="button"
-                  >
-                    إلغاء
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createProjectMutation.isPending}
-                  >
-                    {createProjectMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="mr-2 h-4 w-4" />
-                    )}
-                    إنشاء
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* Use the NewProjectModal component instead of inline modal */}
+        <NewProjectModal 
+          isOpen={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          onProjectCreated={handleProjectCreated}
+        />
 
         {selectedProject && (
           <ProjectDetailsModal
