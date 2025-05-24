@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface Worker {
@@ -147,10 +148,20 @@ export interface UpcomingTask {
   isCompleted: boolean;
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 export async function getStageTasks(stageId: number | string, page: number = 1, pageSize: number = 10): Promise<ApiTask[]> {
   try {
     console.log('Fetching tasks from:', `${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`);
-    const response = await fetch(`${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`);
+    const response = await fetch(`${API_BASE_URL}/Tasks?stageId=${stageId}&pageNumber=${page}&pageSize=${pageSize}`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -184,7 +195,9 @@ export async function getStageTasks(stageId: number | string, page: number = 1, 
 export async function getTaskById(taskId: number | string): Promise<TaskDetailResponse> {
   try {
     console.log('Fetching task details from:', `${API_BASE_URL}/Tasks/${taskId}`);
-    const response = await fetch(`${API_BASE_URL}/Tasks/${taskId}`);
+    const response = await fetch(`${API_BASE_URL}/Tasks/${taskId}`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -206,7 +219,9 @@ export async function getTaskById(taskId: number | string): Promise<TaskDetailRe
     // Fetch task workers in a separate request if they're not included
     if (!result.data.workers) {
       try {
-        const workersResponse = await fetch(`${API_BASE_URL}/TaskAssignments/GetWorkersForTask/${taskId}`);
+        const workersResponse = await fetch(`${API_BASE_URL}/TaskAssignments/GetWorkersForTask/${taskId}`, {
+          headers: getAuthHeaders(),
+        });
         
         if (workersResponse.ok) {
           const workersResult = await workersResponse.json();
@@ -234,9 +249,7 @@ export async function createTask(taskData: CreateTaskRequest): Promise<CreateTas
     console.log('Creating task with data:', taskData);
     const response = await fetch(`${API_BASE_URL}/Tasks`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(taskData),
     });
     
@@ -260,9 +273,7 @@ export async function editTask(taskData: EditTaskRequest): Promise<EditTaskRespo
     console.log('Editing task with data:', taskData);
     const response = await fetch(`${API_BASE_URL}/Tasks`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(taskData),
     });
     
@@ -296,9 +307,7 @@ export async function assignWorkersToTask(assignData: AssignWorkersRequest): Pro
     console.log('Assigning workers to task:', assignData);
     const response = await fetch(`${API_BASE_URL}/TaskAssignments/AssignWorkersToTask`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(assignData),
     });
     
@@ -336,9 +345,7 @@ export async function unassignWorkersFromTask(unassignData: UnassignWorkersReque
     console.log('Unassigning workers from task:', unassignData);
     const response = await fetch(`${API_BASE_URL}/TaskAssignments/unassign`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(unassignData),
     });
     
@@ -375,10 +382,8 @@ export async function completeTask(taskId: number): Promise<CompleteTaskResponse
   try {
     console.log('Completing task:', taskId);
     const response = await fetch(`${API_BASE_URL}/Tasks/CompleteTask/${taskId}`, {
-      method: 'Put',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      method: 'PUT',
+      headers: getAuthHeaders(),
     });
     
     if (!response.ok) {
@@ -415,9 +420,7 @@ export async function uncheckTask(taskId: number): Promise<UncheckTaskResponse> 
     console.log('Unchecking task:', taskId);
     const response = await fetch(`${API_BASE_URL}/Tasks/UnCheckTask/${taskId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      headers: getAuthHeaders(),
     });
     
     if (!response.ok) {
@@ -454,9 +457,7 @@ export async function deleteTask(taskId: number): Promise<DeleteTaskResponse> {
     console.log('Deleting task:', taskId);
     const response = await fetch(`${API_BASE_URL}/Tasks/${taskId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      headers: getAuthHeaders(),
     });
     
     if (!response.ok) {
@@ -491,7 +492,9 @@ export async function deleteTask(taskId: number): Promise<DeleteTaskResponse> {
 export async function getWorkersForTask(taskId: number): Promise<Worker[]> {
   try {
     console.log('Fetching workers for task:', taskId);
-    const response = await fetch(`${API_BASE_URL}/TaskAssignments/ByTask/${taskId}`);
+    const response = await fetch(`${API_BASE_URL}/TaskAssignments/ByTask/${taskId}`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       if (response.status === 404) {
@@ -535,7 +538,9 @@ export async function getWorkersForTask(taskId: number): Promise<Worker[]> {
 export async function getTasksForWorker(workerId: number): Promise<WorkerAssignment[]> {
   try {
     console.log('Fetching tasks for worker:', workerId);
-    const response = await fetch(`${API_BASE_URL}/TaskAssignments/ByWorker/${workerId}`);
+    const response = await fetch(`${API_BASE_URL}/TaskAssignments/ByWorker/${workerId}`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       if (response.status === 404) {
@@ -573,7 +578,9 @@ export async function getTasksForWorker(workerId: number): Promise<WorkerAssignm
 export async function getUpcomingTasks(daysAhead: number = 60): Promise<UpcomingTask[]> {
   try {
     console.log('Fetching upcoming tasks from:', `${API_BASE_URL}/Tasks/upcoming?daysAhead=${daysAhead}`);
-    const response = await fetch(`${API_BASE_URL}/Tasks/upcoming?daysAhead=${daysAhead}`);
+    const response = await fetch(`${API_BASE_URL}/Tasks/upcoming?daysAhead=${daysAhead}`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();

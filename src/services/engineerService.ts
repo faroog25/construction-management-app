@@ -25,6 +25,14 @@ export interface SiteEngineerResponse {
   };
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 // Mock data for development
 const mockEngineers: SiteEngineer[] = [
   {
@@ -126,11 +134,7 @@ export const getAllEngineers = async (
     });
 
     const response = await fetch(`${API_BASE_URL}/SiteEngineers?${queryParams}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      }
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -155,11 +159,7 @@ export const createEngineer = async (engineer: Omit<SiteEngineer, 'id'>): Promis
   try {
     const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(engineer),
     });
 
@@ -182,11 +182,7 @@ export const updateEngineer = async (id: number, engineer: Partial<SiteEngineer>
     
     const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(engineer),
     });
 
@@ -211,11 +207,7 @@ export const deleteEngineer = async (id: number): Promise<void> => {
     
     const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
-      }
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {

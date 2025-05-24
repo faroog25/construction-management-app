@@ -52,13 +52,19 @@ export enum ReservationStatus {
   Completed = 2
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 export async function assignEquipment(assignmentData: EquipmentAssignmentRequest): Promise<EquipmentAssignmentResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/EquipmentAssignments/Assign`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(assignmentData),
     });
 
@@ -86,9 +92,7 @@ export async function reserveEquipment(reservationData: EquipmentReservationRequ
   try {
     const response = await fetch(`${API_BASE_URL}/EquipmentReservations/Reserve`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(reservationData),
     });
 
@@ -116,9 +120,7 @@ export async function getProjectEquipment(projectId: number): Promise<ProjectEqu
   try {
     const response = await fetch(`${API_BASE_URL}/EquipmentReservations/ByProject/${projectId}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -145,9 +147,7 @@ export async function getAllEquipmentAssignments(): Promise<ProjectEquipment[]> 
   try {
     const response = await fetch(`${API_BASE_URL}/EquipmentAssignments/All`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -174,9 +174,7 @@ export async function getAllEquipmentReservations(): Promise<EquipmentReservatio
   try {
     const response = await fetch(`${API_BASE_URL}/EquipmentReservations/All`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -203,9 +201,7 @@ export async function returnEquipment(assignmentId: number): Promise<EquipmentAs
   try {
     const response = await fetch(`${API_BASE_URL}/EquipmentAssignments/Return/${assignmentId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -232,9 +228,7 @@ export async function cancelReservation(reservationId: number): Promise<Equipmen
   try {
     const response = await fetch(`${API_BASE_URL}/EquipmentReservations/RemoveReservation/${reservationId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {

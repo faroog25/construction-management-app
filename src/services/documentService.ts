@@ -3,6 +3,14 @@ import { API_BASE_URL } from '@/config/api';
 import { Document, DocumentsParams, DocumentsResponse } from '@/types/document';
 import { toast } from 'sonner';
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 export const getDocuments = async (params: DocumentsParams): Promise<Document[]> => {
   const queryParams = new URLSearchParams();
   
@@ -14,9 +22,7 @@ export const getDocuments = async (params: DocumentsParams): Promise<Document[]>
   try {
     const response = await fetch(`${API_BASE_URL}/Documents?${queryParams.toString()}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     console.log('Documents API Response Status:', response.status);
@@ -77,9 +83,7 @@ export const getDocumentsByTask = async (taskId: number): Promise<Document[]> =>
     console.log('Fetching documents for task:', taskId);
     const response = await fetch(`${API_BASE_URL}/Documents/ByTask/${taskId}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     console.log('Task Documents API Response Status:', response.status);
@@ -173,10 +177,14 @@ export const uploadTaskDocument = async (
       }
     }
     
+    const token = localStorage.getItem('authToken');
     const response = await fetch(url, {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // Don't set Content-Type header when using FormData
+      },
       body: formData,
-      // Don't set Content-Type header when using FormData
     });
 
     console.log('Document Upload API Response Status:', response.status);
@@ -217,9 +225,7 @@ export const getDocument = async (documentId: string): Promise<{ success: boolea
     console.log('Fetching document with ID:', documentId);
     const response = await fetch(`${API_BASE_URL}/Documents/${documentId}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     console.log('Document API Response Status:', response.status);
@@ -252,9 +258,7 @@ export const editDocument = async (
     
     const response = await fetch(`${API_BASE_URL}/Documents`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         id: documentId,
         name: data.name,
@@ -297,9 +301,7 @@ export const deleteDocument = async (documentId: string): Promise<{ success: boo
     
     const response = await fetch(`${API_BASE_URL}/Documents/${documentId}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     console.log('Document Delete API Response Status:', response.status);
@@ -333,8 +335,12 @@ export const deleteDocument = async (documentId: string): Promise<{ success: boo
 // Download a document
 export const downloadDocument = async (documentId: string): Promise<Blob> => {
   try {
+    const token = localStorage.getItem('authToken');
     const response = await fetch(`${API_BASE_URL}/Documents/Download/${documentId}`, {
       method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     });
     
     if (!response.ok) {
