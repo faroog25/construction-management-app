@@ -236,7 +236,7 @@ export function ClientMembers() {
             </div>
             <Button size="sm" className="gap-1" onClick={() => setIsAddModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              {t('client.add_client')}
+              إضافة عميل
             </Button>
           </div>
         </CardHeader>
@@ -248,14 +248,29 @@ export function ClientMembers() {
               <Skeleton className="h-8 w-full" />
             </div>
           ) : clients.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center">
-              <Users className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">{t('client.no_clients')}</h3>
-              <p className="text-muted-foreground mb-4">{t('client.add_first_client')}</p>
-              <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                {t('client.add_client')}
-              </Button>
+            <div className="flex flex-col items-center justify-center p-16 text-center">
+              <div className="bg-gray-50 rounded-full p-6 mb-4">
+                <Users className="h-16 w-16 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                لا يوجد عملاء
+              </h3>
+              <p className="text-gray-500 mb-6 max-w-md">
+                {searchQuery 
+                  ? `لم يتم العثور على عملاء مطابقين لـ "${searchQuery}"`
+                  : "ابدأ بإضافة عملائك لإدارة المشاريع بكفاءة أكبر"
+                }
+              </p>
+              {searchQuery ? (
+                <Button variant="outline" onClick={() => setSearchQuery('')}>
+                  مسح البحث
+                </Button>
+              ) : (
+                <Button onClick={() => setIsAddModalOpen(true)} className="gap-2" size="lg">
+                  <Plus className="h-5 w-5" />
+                  إضافة أول عميل
+                </Button>
+              )}
             </div>
           ) : (
             <Table dir={isRtl ? "rtl" : "ltr"}>
@@ -266,7 +281,7 @@ export function ClientMembers() {
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center">
-                      {t('forms.name')}
+                      الاسم
                       <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
                     </div>
                   </TableHead>
@@ -275,7 +290,7 @@ export function ClientMembers() {
                     onClick={() => handleSort('email')}
                   >
                     <div className="flex items-center">
-                      {t('forms.email')}
+                      البريد الإلكتروني
                       <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
                     </div>
                   </TableHead>
@@ -284,7 +299,7 @@ export function ClientMembers() {
                     onClick={() => handleSort('phone')}
                   >
                     <div className="flex items-center">
-                      {t('forms.phone')}
+                      رقم الهاتف
                       <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
                     </div>
                   </TableHead>
@@ -293,11 +308,11 @@ export function ClientMembers() {
                     onClick={() => handleSort('type')}
                   >
                     <div className="flex items-center">
-                      {t('table.type')}
+                      النوع
                       <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
                     </div>
                   </TableHead>
-                  <TableHead className={`font-medium ${isRtl ? 'text-right' : 'text-left'}`}>{t('table.actions')}</TableHead>
+                  <TableHead className={`font-medium ${isRtl ? 'text-right' : 'text-left'}`}>الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -318,14 +333,14 @@ export function ClientMembers() {
                           <>
                             <User className="h-4 w-4 text-blue-600" />
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {t('client.individual')}
+                              فرد
                             </span>
                           </>
                         ) : (
                           <>
                             <Building2 className="h-4 w-4 text-purple-600" />
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              {t('client.company')}
+                              شركة
                             </span>
                           </>
                         )}
@@ -344,7 +359,7 @@ export function ClientMembers() {
                           size="xs"
                           onClick={() => handleDelete(client)}
                         >
-                          {t('table.delete')}
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -400,16 +415,16 @@ export function ClientMembers() {
       <AlertDialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the client
-              {clientToDelete && ` "${clientToDelete.fullName}"`}.
+              لا يمكن التراجع عن هذا الإجراء. سيتم حذف العميل
+              {clientToDelete && ` "${clientToDelete.fullName}"`} نهائياً.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              حذف
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -418,14 +433,14 @@ export function ClientMembers() {
       <Dialog open={!!clientToEdit} onOpenChange={() => setClientToEdit(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Client</DialogTitle>
+            <DialogTitle>تعديل العميل</DialogTitle>
             <DialogDescription>
-              Make changes to the client information here. Click save when you're done.
+              قم بتعديل معلومات العميل هنا. انقر على حفظ عند الانتهاء.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">الاسم الكامل</Label>
               <Input
                 id="fullName"
                 name="fullName"
@@ -435,7 +450,7 @@ export function ClientMembers() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">البريد الإلكتروني</Label>
               <Input
                 id="email"
                 name="email"
@@ -446,7 +461,7 @@ export function ClientMembers() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
@@ -456,31 +471,31 @@ export function ClientMembers() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="clientType">Client Type</Label>
+              <Label htmlFor="clientType">نوع العميل</Label>
               <Select
                 value={editFormData.clientType}
                 onValueChange={handleTypeChange}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select client type">
-                    {editFormData.clientType === ClientType.Individual ? t('client.individual') : t('client.company')}
+                  <SelectValue placeholder="اختر نوع العميل">
+                    {editFormData.clientType === ClientType.Individual ? 'فرد' : 'شركة'}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={ClientType.Individual}>
-                    {t('client.individual')}
+                    فرد
                   </SelectItem>
                   <SelectItem value={ClientType.Company}>
-                    {t('client.company')}
+                    شركة
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setClientToEdit(null)}>
-                Cancel
+                إلغاء
               </Button>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit">حفظ التغييرات</Button>
             </DialogFooter>
           </form>
         </DialogContent>
