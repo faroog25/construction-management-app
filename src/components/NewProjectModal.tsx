@@ -5,11 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { createProject } from '@/services/projectService';
-import { getEngineerNames, SiteEngineerName } from '@/services/engineerService';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { projectSchema, type ProjectFormValues } from '@/lib/validations/project';
+import { z } from 'zod';
 import {
   Form,
   FormControl,
@@ -26,9 +24,26 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from 'sonner';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { API_BASE_URL } from '@/config/api';
+import { getClientNames, ClientName } from '@/services/clientService';
+import { getSiteEngineerNames, SiteEngineerName } from '@/services/siteEngineerService';
+
+// Schema for the new project form based on the API body
+const projectSchema = z.object({
+  projectName: z.string().min(1, 'اسم المشروع مطلوب'),
+  description: z.string().optional(),
+  siteAddress: z.string().min(1, 'عنوان الموقع مطلوب'),
+  geographicalCoordinates: z.string().optional(),
+  siteEngineerId: z.number().optional(),
+  clientId: z.number().optional(),
+  startDate: z.string().min(1, 'تاريخ البدء مطلوب'),
+  expectedEndDate: z.string().min(1, 'تاريخ الانتهاء المتوقع مطلوب'),
+});
+
+type ProjectFormValues = z.infer<typeof projectSchema>;
 
 interface NewProjectModalProps {
   isOpen: boolean;
@@ -36,76 +51,115 @@ interface NewProjectModalProps {
   onProjectCreated?: () => void;
 }
 
+// Helper function to get authentication headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewProjectModalProps) {
-  const [engineers, setEngineers] = useState<SiteEngineerName[]>([]);
-  const [isLoadingEngineers, setIsLoadingEngineers] = useState(false);
+  const [clients, setClients] = useState<ClientName[]>([]);
+  const [siteEngineers, setSiteEngineers] = useState<SiteEngineerName[]>([]);
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
+  const [isLoadingSiteEngineers, setIsLoadingSiteEngineers] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
       projectName: '',
-      siteAddress: '',
-      clientName: '',
-      projectStatus: 'Active',
       description: '',
-      status: 1,
+      siteAddress: '',
+      geographicalCoordinates: '',
+      siteEngineerId: undefined,
+      clientId: undefined,
       startDate: '',
       expectedEndDate: '',
-      siteEngineerId: ''
     },
   });
 
   useEffect(() => {
     if (isOpen) {
-      loadEngineers();
+      loadClients();
+      loadSiteEngineers();
     }
   }, [isOpen]);
 
-  const loadEngineers = async () => {
-    setIsLoadingEngineers(true);
+  const loadClients = async () => {
+    setIsLoadingClients(true);
     try {
-      const engineerNames = await getEngineerNames();
-      setEngineers(engineerNames);
+      const clientNames = await getClientNames();
+      setClients(clientNames);
     } catch (error) {
-      console.error('Error loading engineers:', error);
-      toast.error('فشل في جلب قائمة المهندسين');
+      console.error('Error loading clients:', error);
+      toast.error('فشل في جلب قائمة العملاء');
     } finally {
-      setIsLoadingEngineers(false);
+      setIsLoadingClients(false);
+    }
+  };
+
+  const loadSiteEngineers = async () => {
+    setIsLoadingSiteEngineers(true);
+    try {
+      const engineerNames = await getSiteEngineerNames();
+      setSiteEngineers(engineerNames);
+    } catch (error) {
+      console.error('Error loading site engineers:', error);
+      toast.error('فشل في جلب قائمة مهندسي الموقع');
+    } finally {
+      setIsLoadingSiteEngineers(false);
     }
   };
 
   const onSubmit = async (data: ProjectFormValues) => {
+    setIsSubmitting(true);
     try {
       console.log('Form data before submission:', data);
       
-      // Ensure all required fields are included and properly typed
-      const project = {
-        id: 0, // سيتم تجاهله من قبل API
+      const projectData = {
         projectName: data.projectName,
-        siteAddress: data.siteAddress,
-        clientName: data.clientName,
-        projectStatus: data.projectStatus,
         description: data.description || '',
-        startDate: data.startDate || '',
-        expectedEndDate: data.expectedEndDate || '',
-        actualEndDate: null,
-        status: data.status || 1, // Active
-        orderId: null,
-        siteEngineerId: data.siteEngineerId ? parseInt(data.siteEngineerId) : null,
-        clientId: data.clientId || null,
-        stageId: null,
+        siteAddress: data.siteAddress,
+        geographicalCoordinates: data.geographicalCoordinates || '',
+        siteEngineerId: data.siteEngineerId,
+        clientId: data.clientId,
+        startDate: data.startDate,
+        expectedEndDate: data.expectedEndDate,
       };
 
-      console.log('Project data being sent to API:', project);
+      console.log('Project data being sent to API:', projectData);
       
-      await createProject(project);
+      const response = await fetch(`${API_BASE_URL}/Projects`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(projectData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`فشل في إنشاء المشروع. (HTTP ${response.status})`);
+      }
+
+      const result = await response.json();
+      console.log('Project created successfully:', result);
+      
       toast.success('تم إنشاء المشروع بنجاح');
       onOpenChange(false);
       onProjectCreated?.();
       form.reset();
     } catch (error) {
       console.error('Error creating project:', error);
-      toast.error('فشل إنشاء المشروع. الرجاء المحاولة مرة أخرى.');
+      toast.error(error instanceof Error ? error.message : 'فشل إنشاء المشروع. الرجاء المحاولة مرة أخرى.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -119,7 +173,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>إنشاء مشروع جديد</DialogTitle>
         </DialogHeader>
@@ -130,101 +184,10 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
               name="projectName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم المشروع</FormLabel>
+                  <FormLabel>اسم المشروع *</FormLabel>
                   <FormControl>
                     <Input placeholder="أدخل اسم المشروع" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="siteAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>عنوان الموقع</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل عنوان الموقع" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="clientName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>اسم العميل</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل اسم العميل" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="siteEngineerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>مهندس الموقع</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                    disabled={isLoadingEngineers}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={
-                          isLoadingEngineers ? "جاري التحميل..." : "اختر مهندس الموقع (اختياري)"
-                        } />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {engineers.map((engineer) => (
-                        <SelectItem 
-                          key={engineer.id} 
-                          value={engineer.id.toString()}
-                        >
-                          {engineer.name}
-                        </SelectItem>
-                      ))}
-                      {engineers.length === 0 && !isLoadingEngineers && (
-                        <SelectItem value="" disabled>
-                          لا توجد مهندسين متاحين
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="projectStatus"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>حالة المشروع</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر حالة المشروع" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Active">نشط</SelectItem>
-                      <SelectItem value="Completed">مكتمل</SelectItem>
-                      <SelectItem value="Pending">معلق</SelectItem>
-                      <SelectItem value="Delayed">متأخر</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -244,13 +207,121 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="siteAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>عنوان الموقع *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="أدخل عنوان الموقع" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="geographicalCoordinates"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>الإحداثيات الجغرافية</FormLabel>
+                  <FormControl>
+                    <Input placeholder="أدخل الإحداثيات الجغرافية" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="clientId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>العميل</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
+                      value={field.value?.toString() || ''}
+                      disabled={isLoadingClients}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={
+                            isLoadingClients ? "جاري التحميل..." : "اختر العميل"
+                          } />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {clients.map((client) => (
+                          <SelectItem 
+                            key={client.id} 
+                            value={client.id.toString()}
+                          >
+                            {client.fullName}
+                          </SelectItem>
+                        ))}
+                        {clients.length === 0 && !isLoadingClients && (
+                          <SelectItem value="" disabled>
+                            لا توجد عملاء متاحين
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="siteEngineerId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>مهندس الموقع</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
+                      value={field.value?.toString() || ''}
+                      disabled={isLoadingSiteEngineers}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={
+                            isLoadingSiteEngineers ? "جاري التحميل..." : "اختر مهندس الموقع"
+                          } />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {siteEngineers.map((engineer) => (
+                          <SelectItem 
+                            key={engineer.id} 
+                            value={engineer.id.toString()}
+                          >
+                            {engineer.name}
+                          </SelectItem>
+                        ))}
+                        {siteEngineers.length === 0 && !isLoadingSiteEngineers && (
+                          <SelectItem value="" disabled>
+                            لا توجد مهندسين متاحين
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="startDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>تاريخ البدء</FormLabel>
+                    <FormLabel>تاريخ البدء *</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -275,10 +346,9 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
                           onSelect={(date) => {
-                            console.log('Selected start date:', date);
                             field.onChange(date ? format(date, "yyyy-MM-dd") : "")
                           }}
-                          className="rounded-md border pointer-events-auto"
+                          className="rounded-md border"
                         />
                       </PopoverContent>
                     </Popover>
@@ -292,7 +362,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 name="expectedEndDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>تاريخ الانتهاء المتوقع</FormLabel>
+                    <FormLabel>تاريخ الانتهاء المتوقع *</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -317,10 +387,9 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
                           onSelect={(date) => {
-                            console.log('Selected end date:', date);
                             field.onChange(date ? format(date, "yyyy-MM-dd") : "")
                           }}
-                          className="rounded-md border pointer-events-auto"
+                          className="rounded-md border"
                         />
                       </PopoverContent>
                     </Popover>
@@ -335,22 +404,25 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 type="button" 
                 variant="outline" 
                 onClick={() => {
-                  console.log('Cancel button clicked');
                   onOpenChange(false);
+                  form.reset();
                 }}
+                disabled={isSubmitting}
               >
                 إلغاء
               </Button>
               <Button 
                 type="submit" 
-                disabled={form.formState.isSubmitting}
-                onClick={() => {
-                  console.log('Submit button clicked');
-                  console.log('Form is valid:', form.formState.isValid);
-                  console.log('Form errors:', form.formState.errors);
-                }}
+                disabled={isSubmitting}
               >
-                {form.formState.isSubmitting ? 'جاري الإنشاء...' : 'إنشاء'}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    جاري الإنشاء...
+                  </>
+                ) : (
+                  'إنشاء المشروع'
+                )}
               </Button>
             </div>
           </form>
