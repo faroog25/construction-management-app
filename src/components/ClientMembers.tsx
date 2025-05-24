@@ -75,15 +75,23 @@ export function ClientMembers() {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      setError(null);
+      setError(null); // Clear any previous errors
       const response = await getClients(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
       setClients(response.items);
       setTotalPages(response.totalPages);
       setTotalItems(response.totalItems);
     } catch (err) {
       console.error('Error fetching clients:', err);
-      setError(err instanceof Error ? err.message : t('search.no_clients'));
-      toast.error(t('search.no_clients'));
+      // Only set error for actual unexpected errors, not for "no data" scenarios
+      if (err instanceof Error && !err.message.includes('404')) {
+        setError(err.message);
+        toast.error('حدث خطأ في جلب بيانات العملاء');
+      } else {
+        // For 404 or "no data" scenarios, just set empty state
+        setClients([]);
+        setTotalPages(1);
+        setTotalItems(0);
+      }
     } finally {
       setLoading(false);
     }
@@ -208,7 +216,7 @@ export function ClientMembers() {
     navigate(`/team/clients/${clientId}`);
   };
 
-  if (error) {
+  if (error && !error.includes('404')) {
     return (
       <Alert variant="destructive">
         <AlertDescription>{error}</AlertDescription>

@@ -45,6 +45,19 @@ export async function getClients(
       }
     });
     
+    // Handle 404 specifically - return empty data instead of throwing error
+    if (response.status === 404) {
+      return {
+        items: [],
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: 1,
+        pageSize: pageSize,
+        hasNextPage: false,
+        hasPreveiosPage: false
+      };
+    }
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -52,12 +65,29 @@ export async function getClients(
     const result: ClientResponse = await response.json();
     
     if (!result.success) {
+      // If API says no success but we have empty data, return empty instead of error
+      if (result.data && result.data.items && result.data.items.length === 0) {
+        return result.data;
+      }
       throw new Error(result.message || 'Failed to fetch clients');
     }
     
     return result.data;
   } catch (error) {
     console.error('Error fetching clients:', error);
+    // If it's a network error or any error that's not related to "no data", 
+    // return empty data structure to show the "no clients" UI
+    if (error instanceof TypeError || (error instanceof Error && error.message.includes('fetch'))) {
+      return {
+        items: [],
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: 1,
+        pageSize: pageSize,
+        hasNextPage: false,
+        hasPreveiosPage: false
+      };
+    }
     throw error;
   }
 }
