@@ -1,5 +1,6 @@
+
 import { useEffect, useState } from 'react';
-import { getSiteEngineers } from '../services/siteEngineerService';
+import { getAllEngineers } from '../services/engineerService';
 import { SiteEngineer } from '@/types/siteEngineer';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -51,7 +52,7 @@ export function SiteEngineers() {
     try {
       setLoading(true);
       setError(null);
-      const response = await getSiteEngineers(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
+      const response = await getAllEngineers(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
       setEngineers(response.items);
       setTotalPages(response.totalPages);
       setTotalItems(response.totalItems);
