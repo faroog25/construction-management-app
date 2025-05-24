@@ -14,7 +14,7 @@ export const projectSchema = z.object({
     .min(3, { message: "اسم العميل يجب أن يكون 3 أحرف على الأقل" }),
   projectStatus: z.string(),
   geographicalCoordinates: z.string().optional(),
-  siteEngineerId: z.number().optional(),
+  siteEngineerId: z.string().optional(),
   clientId: z.number().optional(),
   startDate: z.string().optional(),
   expectedEndDate: z.string().optional(),

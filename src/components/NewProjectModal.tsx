@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { createProject } from '@/services/projectService';
+import { getEngineerNames, SiteEngineerName } from '@/services/engineerService';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { projectSchema, type ProjectFormValues } from '@/lib/validations/project';
@@ -37,6 +37,9 @@ interface NewProjectModalProps {
 }
 
 export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewProjectModalProps) {
+  const [engineers, setEngineers] = useState<SiteEngineerName[]>([]);
+  const [isLoadingEngineers, setIsLoadingEngineers] = useState(false);
+
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -47,9 +50,29 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
       description: '',
       status: 1,
       startDate: '',
-      expectedEndDate: ''
+      expectedEndDate: '',
+      siteEngineerId: ''
     },
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      loadEngineers();
+    }
+  }, [isOpen]);
+
+  const loadEngineers = async () => {
+    setIsLoadingEngineers(true);
+    try {
+      const engineerNames = await getEngineerNames();
+      setEngineers(engineerNames);
+    } catch (error) {
+      console.error('Error loading engineers:', error);
+      toast.error('فشل في جلب قائمة المهندسين');
+    } finally {
+      setIsLoadingEngineers(false);
+    }
+  };
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
@@ -68,7 +91,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
         actualEndDate: null,
         status: data.status || 1, // Active
         orderId: null,
-        siteEngineerId: data.siteEngineerId || null,
+        siteEngineerId: data.siteEngineerId ? parseInt(data.siteEngineerId) : null,
         clientId: data.clientId || null,
         stageId: null,
       };
@@ -139,6 +162,45 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                   <FormControl>
                     <Input placeholder="أدخل اسم العميل" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="siteEngineerId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>مهندس الموقع</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                    disabled={isLoadingEngineers}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={
+                          isLoadingEngineers ? "جاري التحميل..." : "اختر مهندس الموقع (اختياري)"
+                        } />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {engineers.map((engineer) => (
+                        <SelectItem 
+                          key={engineer.id} 
+                          value={engineer.id.toString()}
+                        >
+                          {engineer.name}
+                        </SelectItem>
+                      ))}
+                      {engineers.length === 0 && !isLoadingEngineers && (
+                        <SelectItem value="" disabled>
+                          لا توجد مهندسين متاحين
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
