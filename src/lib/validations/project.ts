@@ -16,8 +16,8 @@ export const projectSchema = z.object({
   geographicalCoordinates: z.string().optional(),
   siteEngineerId: z.number().optional(),
   clientId: z.number().optional(),
-  startDate: z.date().optional(),
-  expectedEndDate: z.date().optional(),
+  startDate: z.string().optional(), // تغيير من date إلى string
+  expectedEndDate: z.string().optional(), // تغيير من date إلى string
   status: z.number().default(1)
 })
 

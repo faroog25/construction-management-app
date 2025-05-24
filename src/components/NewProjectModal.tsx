@@ -26,6 +26,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from 'sonner';
+import { CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface NewProjectModalProps {
   isOpen: boolean;
@@ -43,6 +46,8 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
       projectStatus: 'Active',
       description: '',
       status: 1,
+      startDate: '',
+      expectedEndDate: ''
     },
   });
 
@@ -56,8 +61,8 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
         clientName: data.clientName,
         projectStatus: data.projectStatus,
         description: data.description,
-        startDate: data.startDate ? format(data.startDate, 'yyyy-MM-dd') : '',
-        expectedEndDate: data.expectedEndDate ? format(data.expectedEndDate, 'yyyy-MM-dd') : '',
+        startDate: data.startDate || '',
+        expectedEndDate: data.expectedEndDate || '',
         actualEndDate: null,
         status: data.status || 1, // Active
         orderId: null,
@@ -165,21 +170,41 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
               )}
             />
 
-          <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="startDate"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>تاريخ البدء</FormLabel>
-                    <FormControl>
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        className="rounded-md border"
-                      />
-                    </FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(new Date(field.value), "PPP")
+                            ) : (
+                              <span>اختر التاريخ</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                          className="rounded-md border pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -189,31 +214,51 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 control={form.control}
                 name="expectedEndDate"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>تاريخ الانتهاء المتوقع</FormLabel>
-                    <FormControl>
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        className="rounded-md border"
-                      />
-                    </FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(new Date(field.value), "PPP")
+                            ) : (
+                              <span>اختر التاريخ</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                          className="rounded-md border pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-          </div>
+            </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 إلغاء
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? 'جاري الإنشاء...' : 'إنشاء'}
-            </Button>
-          </div>
-        </form>
+              </Button>
+            </div>
+          </form>
         </Form>
       </DialogContent>
     </Dialog>
