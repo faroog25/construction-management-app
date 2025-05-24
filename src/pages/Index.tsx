@@ -45,15 +45,15 @@ const Index = () => {
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">لوحة التحكم</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
             <p className="text-muted-foreground mt-1">
-              مرحباً بك في نظام إدارة المشاريع
+              {t('dashboard.subtitle')}
             </p>
           </div>
           <div className="mt-4 lg:mt-0 flex flex-wrap gap-3">
             <Button className="rounded-lg" onClick={handleCreateProject}>
               <Plus className="mr-2 h-4 w-4" />
-              إنشاء مشروع جديد
+              {t('dashboard.create_project')}
             </Button>
           </div>
         </div>
@@ -64,7 +64,7 @@ const Index = () => {
           <div className="grid gap-8 lg:grid-cols-3">
             <Card className="lg:col-span-2 animate-in" style={{ animationDelay: "0.1s" }}>
               <CardHeader className="pb-3">
-                <CardTitle>تقدم المشاريع</CardTitle>
+                <CardTitle>{t('dashboard.project_progress')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ProjectTimeline />
@@ -80,10 +80,10 @@ const Index = () => {
           
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">المشاريع الحديثة</h2>
+              <h2 className="text-xl font-semibold">{t('dashboard.recent_projects')}</h2>
               <Button variant="ghost" size="sm" asChild>
                 <a href="/projects">
-                  عرض جميع المشاريع
+                  {t('dashboard.view_all')}
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </a>
               </Button>
@@ -91,9 +91,9 @@ const Index = () => {
             
             <Tabs defaultValue="all" className="space-y-4">
               <TabsList>
-                <TabsTrigger value="all">جميع المشاريع</TabsTrigger>
-                <TabsTrigger value="active">المشاريع النشطة</TabsTrigger>
-                <TabsTrigger value="completed">المشاريع المكتملة</TabsTrigger>
+                <TabsTrigger value="all">{t('projects.filter_all')}</TabsTrigger>
+                <TabsTrigger value="active">{t('projects.filter_active')}</TabsTrigger>
+                <TabsTrigger value="completed">{t('projects.filter_completed')}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="all" className="space-y-4">
