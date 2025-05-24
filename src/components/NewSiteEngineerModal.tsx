@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,15 +33,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
   const form = useForm<SiteEngineerFormValues>({
     resolver: zodResolver(siteEngineerSchema),
     defaultValues: {
-      firstName: '',
-      secondName: '',
-      thirdName: '',
-      lastName: '',
+      name: '',
       email: '',
+      password: '',
+      confirmPassword: '',
       phoneNumber: '',
-      nationalNumber: '',
-      address: '',
-      hireDate: '',
     },
     mode: "onTouched"
   });
@@ -48,15 +45,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
   const onSubmit = async (data: SiteEngineerFormValues) => {
     try {
       const engineer = {
-        firstName: data.firstName.trim(),
-        secondName: data.secondName?.trim(),
-        thirdName: data.thirdName?.trim(),
-        lastName: data.lastName.trim(),
-        email: data.email?.trim() || null,
+        name: data.name.trim(),
+        email: data.email.trim(),
+        password: data.password,
+        confirmPassword: data.confirmPassword,
         phoneNumber: data.phoneNumber.trim(),
-        nationalNumber: data.nationalNumber?.trim() || null,
-        address: data.address?.trim() || null,
-        hireDate: data.hireDate || null,
       };
 
       await createEngineer(engineer);
@@ -86,60 +79,15 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="firstName"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-1">
-                    الاسم الأول
+                    الاسم
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل الاسم الأول" {...field} />
-                  </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="secondName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الاسم الثاني</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل الاسم الثاني" {...field} />
-                  </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="thirdName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الاسم الثالث</FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل الاسم الثالث" {...field} />
-                  </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    الاسم الأخير
-                    <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="أدخل الاسم الأخير" {...field} />
+                    <Input placeholder="أدخل الاسم الكامل" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs text-destructive" />
                 </FormItem>
@@ -151,7 +99,10 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>البريد الإلكتروني</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    البريد الإلكتروني
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="أدخل البريد الإلكتروني" {...field} />
                   </FormControl>
@@ -179,12 +130,15 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
 
             <FormField
               control={form.control}
-              name="nationalNumber"
+              name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الرقم الوطني</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    كلمة المرور
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل الرقم الوطني" {...field} />
+                    <Input type="password" placeholder="أدخل كلمة المرور" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs text-destructive" />
                 </FormItem>
@@ -193,26 +147,15 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
 
             <FormField
               control={form.control}
-              name="address"
+              name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>العنوان</FormLabel>
+                  <FormLabel className="flex items-center gap-1">
+                    تأكيد كلمة المرور
+                    <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل العنوان" {...field} />
-                  </FormControl>
-                  <FormMessage className="text-xs text-destructive" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="hireDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>تاريخ التعيين</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type="password" placeholder="أعد إدخال كلمة المرور" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs text-destructive" />
                 </FormItem>
@@ -235,4 +178,4 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
       </DialogContent>
     </Dialog>
   );
-} 
+}

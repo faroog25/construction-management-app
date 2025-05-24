@@ -26,6 +26,14 @@ export interface SiteEngineerResponse {
   };
 }
 
+export interface CreateSiteEngineerRequest {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phoneNumber: string;
+}
+
 const getAuthHeaders = () => {
   const token = localStorage.getItem('authToken');
   return {
@@ -119,7 +127,7 @@ export const getAllEngineers = async (
   }
 };
 
-export const createEngineer = async (engineer: Omit<SiteEngineer, 'id'>): Promise<SiteEngineer> => {
+export const createEngineer = async (engineer: CreateSiteEngineerRequest): Promise<SiteEngineer> => {
   try {
     const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
       method: 'POST',
