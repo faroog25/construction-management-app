@@ -94,6 +94,15 @@ export interface Specialty {
   name: string;
 }
 
+// Helper function to get authentication headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 /**
  * Fetches all workers from the API
  * @throws {Error} When the API request fails or returns invalid data
@@ -101,7 +110,9 @@ export interface Specialty {
 export async function getAllWorkers(): Promise<Worker[]> {
   try {
     console.log('Fetching workers from:', `${API_BASE_URL}/Workers`);
-    const response = await fetch(`${API_BASE_URL}/Workers`);
+    const response = await fetch(`${API_BASE_URL}/Workers`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -163,8 +174,8 @@ export async function getPaginatedWorkers(
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {
+        ...getAuthHeaders(),
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       }
     });
@@ -209,8 +220,8 @@ export async function createWorker(workerData: CreateWorkerRequest): Promise<Wor
     const response = await fetch(`${API_BASE_URL}/Workers`, {
       method: 'POST',
       headers: {
+        ...getAuthHeaders(),
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       },
       body: JSON.stringify(workerData)
@@ -250,8 +261,8 @@ export async function getSpecialties(): Promise<Specialty[]> {
     const response = await fetch(`${API_BASE_URL}/WorkerSpecialties`, {
       method: 'GET',
       headers: {
+        ...getAuthHeaders(),
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       }
     });
@@ -294,7 +305,7 @@ export const getWorkerById = async (id: number): Promise<Worker> => {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
         'Accept': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       },
@@ -328,7 +339,9 @@ export const getWorkerById = async (id: number): Promise<Worker> => {
  */
 export async function getWorkersByProjectId(projectId: number): Promise<Worker[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/Workers/project/${projectId}`);
+    const response = await fetch(`${API_BASE_URL}/Workers/project/${projectId}`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -351,8 +364,8 @@ export async function deleteWorker(id: number): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/Workers/${id}`, {
       method: 'DELETE',
       headers: {
+        ...getAuthHeaders(),
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       }
     });
@@ -394,8 +407,8 @@ export async function updateWorker(id: number, workerData: CreateWorkerRequest):
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
+        ...getAuthHeaders(),
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
         'Accept-Language': 'ar-SA,ar;q=0.9,en;q=0.8'
       },
       body: JSON.stringify({

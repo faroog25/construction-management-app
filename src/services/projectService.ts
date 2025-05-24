@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 import { Project as ProjectType, ProjectApiResponse, PaginatedResponse } from '@/types/project';
 
@@ -62,10 +63,21 @@ export interface ProjectNameResponse {
   name: string;
 }
 
+// Helper function to get authentication headers
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 // Get all project names for dropdowns
 export async function getAllProjectNames(): Promise<ProjectNameResponse[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/Projects/GetAllProjectNames`);
+    const response = await fetch(`${API_BASE_URL}/Projects/GetAllProjectNames`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -86,7 +98,9 @@ export async function getAllProjectNames(): Promise<ProjectNameResponse[]> {
 
 export async function getAllProjects(): Promise<Project[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/Projects`);
+    const response = await fetch(`${API_BASE_URL}/Projects`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -136,7 +150,9 @@ export async function getProjects(params: ProjectsQueryParams = {}): Promise<Pag
     }
     
     console.log('Fetching projects from:', url);
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -166,7 +182,9 @@ export async function getProjects(params: ProjectsQueryParams = {}): Promise<Pag
 export async function getProjectById(id: number): Promise<Project> {
   try {
     console.log('Fetching project details from:', `${API_BASE_URL}/Projects/${id}`);
-    const response = await fetch(`${API_BASE_URL}/Projects/${id}`);
+    const response = await fetch(`${API_BASE_URL}/Projects/${id}`, {
+      headers: getAuthHeaders(),
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -242,9 +260,7 @@ function getStatusCodeFromString(status: string | undefined): number {
 export async function createProject(projectData: Partial<Project>): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/Projects`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(projectData),
   });
   
@@ -259,9 +275,7 @@ export async function createProject(projectData: Partial<Project>): Promise<any>
 export async function updateProject(projectId: number, projectData: Partial<Project>): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/Projects/${projectId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(projectData),
   });
   
@@ -284,9 +298,7 @@ export async function updateProjectBasicInfo(projectData: UpdateProjectBasicInfo
   
   const response = await fetch(`${API_BASE_URL}/Projects`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(projectData),
   });
   
@@ -309,9 +321,7 @@ export async function cancelProject(projectId: number, reason: string): Promise<
   
   const response = await fetch(`${API_BASE_URL}/Projects/Cancel/${projectId}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(reason),
   });
   
@@ -334,6 +344,7 @@ export async function pendProject(projectId: number): Promise<any> {
   
   const response = await fetch(`${API_BASE_URL}/Projects/Pend/${projectId}`, {
     method: 'PUT',
+    headers: getAuthHeaders(),
   });
   
   if (!response.ok) {
@@ -355,6 +366,7 @@ export async function activateProject(projectId: number): Promise<any> {
   
   const response = await fetch(`${API_BASE_URL}/Projects/Activate/${projectId}`, {
     method: 'PUT',
+    headers: getAuthHeaders(),
   });
   
   if (!response.ok) {
@@ -424,7 +436,9 @@ export interface SiteEngineer {
 
 export const getClients = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/Clients`);
+    const response = await fetch(`${API_BASE_URL}/Clients`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch clients');
     }
@@ -438,7 +452,9 @@ export const getClients = async () => {
 
 export const getSiteEngineers = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers`);
+    const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch site engineers');
     }
