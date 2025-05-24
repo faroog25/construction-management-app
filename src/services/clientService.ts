@@ -12,6 +12,10 @@ export interface Client {
   email: string;
   phoneNumber: string;
   clientType: string;
+  projects?: {
+    id: number;
+    name: string;
+  }[];
 }
 
 interface ClientNamesResponse {
@@ -29,6 +33,13 @@ interface ClientsResponse {
 }
 
 interface CreateClientResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: Client;
+}
+
+interface ClientResponse {
   success: boolean;
   message: string;
   errors?: string[];
@@ -63,6 +74,35 @@ export async function getClientNames(): Promise<ClientName[]> {
     return result.data || [];
   } catch (error) {
     console.error('Error fetching client names:', error);
+    throw error;
+  }
+}
+
+export async function getClientById(clientId: string): Promise<Client> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Clients/${clientId}`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: ClientResponse = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch client');
+    }
+    
+    // Mock projects data if not provided by API
+    const clientData = result.data;
+    if (!clientData.projects) {
+      clientData.projects = [];
+    }
+    
+    return clientData;
+  } catch (error) {
+    console.error('Error fetching client:', error);
     throw error;
   }
 }
