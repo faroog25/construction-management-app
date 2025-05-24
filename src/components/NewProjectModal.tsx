@@ -53,6 +53,8 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
+      console.log('Form data before submission:', data);
+      
       // Ensure all required fields are included and properly typed
       const project = {
         id: 0, // سيتم تجاهله من قبل API
@@ -60,7 +62,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
         siteAddress: data.siteAddress,
         clientName: data.clientName,
         projectStatus: data.projectStatus,
-        description: data.description,
+        description: data.description || '',
         startDate: data.startDate || '',
         expectedEndDate: data.expectedEndDate || '',
         actualEndDate: null,
@@ -71,6 +73,8 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
         stageId: null,
       };
 
+      console.log('Project data being sent to API:', project);
+      
       await createProject(project);
       toast.success('تم إنشاء المشروع بنجاح');
       onOpenChange(false);
@@ -82,6 +86,14 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
     }
   };
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submitted');
+    console.log('Form state:', form.formState);
+    console.log('Form errors:', form.formState.errors);
+    form.handleSubmit(onSubmit)(e);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -89,7 +101,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
           <DialogTitle>إنشاء مشروع جديد</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleFormSubmit} className="space-y-4">
             <FormField
               control={form.control}
               name="projectName"
@@ -188,7 +200,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                             )}
                           >
                             {field.value ? (
-                              format(new Date(field.value), "PPP")
+                              format(new Date(field.value), "dd/MM/yyyy")
                             ) : (
                               <span>اختر التاريخ</span>
                             )}
@@ -200,7 +212,10 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                          onSelect={(date) => {
+                            console.log('Selected start date:', date);
+                            field.onChange(date ? format(date, "yyyy-MM-dd") : "")
+                          }}
                           className="rounded-md border pointer-events-auto"
                         />
                       </PopoverContent>
@@ -227,7 +242,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                             )}
                           >
                             {field.value ? (
-                              format(new Date(field.value), "PPP")
+                              format(new Date(field.value), "dd/MM/yyyy")
                             ) : (
                               <span>اختر التاريخ</span>
                             )}
@@ -239,7 +254,10 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                          onSelect={(date) => {
+                            console.log('Selected end date:', date);
+                            field.onChange(date ? format(date, "yyyy-MM-dd") : "")
+                          }}
                           className="rounded-md border pointer-events-auto"
                         />
                       </PopoverContent>
@@ -250,11 +268,26 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
               />
             </div>
 
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  console.log('Cancel button clicked');
+                  onOpenChange(false);
+                }}
+              >
                 إلغاء
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
+              <Button 
+                type="submit" 
+                disabled={form.formState.isSubmitting}
+                onClick={() => {
+                  console.log('Submit button clicked');
+                  console.log('Form is valid:', form.formState.isValid);
+                  console.log('Form errors:', form.formState.errors);
+                }}
+              >
                 {form.formState.isSubmitting ? 'جاري الإنشاء...' : 'إنشاء'}
               </Button>
             </div>
