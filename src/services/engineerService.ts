@@ -26,6 +26,13 @@ export interface SiteEngineerResponse {
   };
 }
 
+export interface SingleSiteEngineerResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: SiteEngineer;
+}
+
 export interface CreateSiteEngineerRequest {
   name: string;
   email: string;
@@ -123,6 +130,39 @@ export const getAllEngineers = async (
       };
     }
     
+    throw error;
+  }
+};
+
+export const getEngineerById = async (id: string): Promise<SiteEngineer> => {
+  try {
+    console.log('Fetching engineer with ID:', id);
+
+    const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Engineer not found');
+      }
+      throw new Error(`Failed to fetch engineer: ${response.status}`);
+    }
+
+    const result: SingleSiteEngineerResponse = await response.json();
+    console.log('API Response:', result);
+
+    if (!result.success) {
+      throw new Error(result.message || 'Unknown error from backend');
+    }
+
+    // Add fullName for backward compatibility
+    return {
+      ...result.data,
+      fullName: result.data.name || result.data.userName
+    };
+  } catch (error) {
+    console.error('Error fetching engineer:', error);
     throw error;
   }
 };

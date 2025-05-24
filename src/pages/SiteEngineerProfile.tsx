@@ -1,27 +1,22 @@
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getSiteEngineerById } from '@/services/siteEngineerService';
+import { getEngineerById } from '@/services/engineerService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Building2, Calendar, Mail, MapPin, Phone, User, Users, ArrowLeft } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { Building2, Mail, Phone, User, ArrowLeft, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export default function SiteEngineerProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
 
   const { data: engineer, isLoading, error } = useQuery({
     queryKey: ['siteEngineer', id],
-    queryFn: () => getSiteEngineerById(id!),
+    queryFn: () => getEngineerById(id!),
     enabled: !!id
   });
 
@@ -32,7 +27,7 @@ export default function SiteEngineerProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="h-16"></div>
         <div className="w-full max-w-6xl mx-auto px-4 py-8">
           <Button
             variant="ghost"
@@ -41,7 +36,7 @@ export default function SiteEngineerProfilePage() {
             className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
-            {t('back_to_team')}
+            العودة للفريق
           </Button>
           
           <div className="space-y-4">
@@ -64,10 +59,10 @@ export default function SiteEngineerProfilePage() {
   }
 
   if (error) {
-    toast.error(error instanceof Error ? error.message : t('error.unknown'));
+    toast.error(error instanceof Error ? error.message : 'حدث خطأ غير متوقع');
     return (
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="h-16"></div>
         <div className="w-full max-w-6xl mx-auto px-4 py-8">
           <Button
             variant="ghost"
@@ -76,12 +71,12 @@ export default function SiteEngineerProfilePage() {
             className="flex items-center gap-1 mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
-            {t('back_to_team')}
+            العودة للفريق
           </Button>
           
           <Alert variant="destructive">
             <AlertDescription>
-              {error instanceof Error ? error.message : t('error.unknown')}
+              {error instanceof Error ? error.message : 'حدث خطأ غير متوقع'}
             </AlertDescription>
           </Alert>
         </div>
@@ -90,10 +85,10 @@ export default function SiteEngineerProfilePage() {
   }
 
   if (!engineer) {
-    toast.error(t('error.not_found'));
+    toast.error('لم يتم العثور على المهندس');
     return (
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="h-16"></div>
         <div className="w-full max-w-6xl mx-auto px-4 py-8">
           <Button
             variant="ghost"
@@ -102,25 +97,22 @@ export default function SiteEngineerProfilePage() {
             className="flex items-center gap-1 mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
-            {t('back_to_team')}
+            العودة للفريق
           </Button>
           
           <Alert>
-            <AlertDescription>{t('error.not_found')}</AlertDescription>
+            <AlertDescription>لم يتم العثور على المهندس</AlertDescription>
           </Alert>
         </div>
       </div>
     );
   }
 
-  const fullName = `${engineer.firstName} ${engineer.secondName} ${engineer.thirdName} ${engineer.lastName}`.trim();
-  const hireDate = new Date(engineer.hireDate);
-  const formattedHireDate = format(hireDate, 'PPP', { locale: isRtl ? ar : undefined });
-  const initials = `${engineer.firstName?.charAt(0) || ''}${engineer.lastName?.charAt(0) || ''}`.toUpperCase();
+  const initials = engineer.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().substring(0, 2);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-      <div className="h-16"></div> {/* Spacer for navbar */}
+      <div className="h-16"></div>
       <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-6">
         {/* Back button */}
         <Button
@@ -130,7 +122,7 @@ export default function SiteEngineerProfilePage() {
           className="flex items-center gap-1 mb-2 shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" />
-          {t('back_to_team')}
+          العودة للفريق
         </Button>
 
         {/* Engineer header */}
@@ -142,16 +134,13 @@ export default function SiteEngineerProfilePage() {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">{fullName}</h1>
+              <h1 className="text-2xl font-bold tracking-tight">{engineer.name}</h1>
               <div className="flex items-center mt-1">
                 <Building2 className="h-4 w-4 text-muted-foreground mr-1" />
-                <p className="text-muted-foreground">{t('site_engineer')}</p>
+                <p className="text-muted-foreground">مهندس موقع</p>
               </div>
             </div>
           </div>
-          <Badge variant={engineer.isAvailable ? "success" : "destructive"} className="px-3 py-1 mt-4 md:mt-0">
-            {engineer.isAvailable ? t('status.available') : t('status.unavailable')}
-          </Badge>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -159,44 +148,30 @@ export default function SiteEngineerProfilePage() {
             <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent pb-3">
               <CardTitle className="text-xl flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
-                {t('contact_information')}
+                معلومات الاتصال
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
+                  <UserCircle className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">اسم المستخدم</p>
+                    <p className="font-medium">{engineer.userName}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">{t('table.email')}</p>
+                    <p className="text-sm text-muted-foreground">البريد الإلكتروني</p>
                     <p className="font-medium">{engineer.email}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">{t('table.phone')}</p>
+                    <p className="text-sm text-muted-foreground">رقم الهاتف</p>
                     <p className="font-medium">{engineer.phoneNumber}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <User className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('table.national_number')}</p>
-                    <p className="font-medium">{engineer.nationalNumber}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('table.address')}</p>
-                    <p className="font-medium">{engineer.address}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('table.hire_date')}</p>
-                    <p className="font-medium">{formattedHireDate}</p>
                   </div>
                 </div>
               </div>
@@ -207,29 +182,14 @@ export default function SiteEngineerProfilePage() {
             <CardHeader className="bg-gradient-to-r from-blue-500/10 to-transparent pb-3">
               <CardTitle className="text-xl flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-blue-500" />
-                {t('table.projects')}
+                معلومات إضافية
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              {engineer.projects.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-lg">
-                  <Building2 className="mx-auto h-12 w-12 mb-3 text-muted-foreground/50" />
-                  <p>{t('search.no_projects')}</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-3">
-                  {engineer.projects.map((project) => (
-                    <Card key={project.id} className="hover:bg-muted/50 transition-colors">
-                      <CardContent className="pt-4 pb-4">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-5 w-5 text-blue-500" />
-                          <p className="font-medium">{project.name}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+              <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-lg">
+                <Building2 className="mx-auto h-12 w-12 mb-3 text-muted-foreground/50" />
+                <p>لا توجد معلومات إضافية متاحة</p>
+              </div>
             </CardContent>
           </Card>
         </div>
