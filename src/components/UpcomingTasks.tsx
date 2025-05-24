@@ -1,94 +1,71 @@
+
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, ChevronRight, Building, FileText, Calendar, AlertCircle, CheckCircle2, CalendarRange } from 'lucide-react';
+import { Calendar, MapPin, Clock, Plus, AlertCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { getUpcomingTasks } from '@/services/taskService';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-
-interface Task {
-  id: number;
-  name: string;
-  projectName: string;
-  stageName: string;
-  startDate: string;
-  expectedEndDate: string;
-  isCompleted: boolean;
-}
+import { useNavigate } from 'react-router-dom';
 
 const UpcomingTasks = () => {
   const { t } = useLanguage();
-
-  const { data: upcomingTasks = [], isLoading } = useQuery({
-    queryKey: ['upcoming-tasks'],
+  const navigate = useNavigate();
+  
+  const { data: tasks = [], isLoading, error } = useQuery({
+    queryKey: ['upcomingTasks'],
     queryFn: () => getUpcomingTasks(60),
   });
 
-  const getTaskIcon = (task: Task) => {
-    if (task.isCompleted) {
-      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-    }
-    return <FileText className="h-4 w-4 text-blue-500" />;
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM dd');
-    } catch {
-      return dateString;
-    }
-  };
-
-  const getTaskStatus = (task: Task) => {
-    if (task.isCompleted) {
-      return { 
-        label: t('status.completed'), 
-        variant: 'default' as const,
-        icon: <CheckCircle2 className="h-3 w-3 mr-1" />
-      };
-    }
-    
-    const today = new Date();
-    const taskDate = new Date(task.expectedEndDate);
-    const diffTime = taskDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) {
-      return { 
-        label: t('statistics.overdue_tasks'), 
-        variant: 'destructive' as const,
-        icon: <AlertCircle className="h-3 w-3 mr-1" />
-      };
-    } else if (diffDays <= 3) {
-      return { 
-        label: t('common.urgent'), 
-        variant: 'destructive' as const,
-        icon: <AlertCircle className="h-3 w-3 mr-1" />
-      };
-    } else {
-      return { 
-        label: t('status.in_progress'), 
-        variant: 'secondary' as const,
-        icon: <Clock className="h-3 w-3 mr-1" />
-      };
-    }
+  const handleAddTask = () => {
+    // Navigate to tasks page or open task creation modal
+    navigate('/tasks');
   };
 
   if (isLoading) {
     return (
-      <Card className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
-        <CardHeader className="pb-3">
+      <Card>
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-blue-500" />
-            {t('dashboard.upcoming_deadlines')}
+            <Clock className="h-5 w-5" />
+            {t('upcomingTasks')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            {t('common.loading')}
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-4 w-[150px]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            {t('upcomingTasks')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground mb-4">حدث خطأ في تحميل المهام</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              حاول مرة أخرى
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -96,94 +73,68 @@ const UpcomingTasks = () => {
   }
 
   return (
-    <Card className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
-      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+    <Card>
+      <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-blue-500" />
-          {t('dashboard.upcoming_deadlines')}
+          <Clock className="h-5 w-5" />
+          {t('upcomingTasks')}
         </CardTitle>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors"
-        >
-          {t('dashboard.view_all')}
-          <ChevronRight className="ml-1 h-4 w-4" />
-        </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {upcomingTasks.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {t('dashboard.no_upcoming_tasks')}
-            </div>
-          ) : (
-            upcomingTasks.slice(0, 5).map((task) => {
-              const status = getTaskStatus(task);
-              const isOverdue = status.variant === 'destructive';
-              const isCompleted = task.isCompleted;
-              
-              return (
-                <div 
-                  key={task.id} 
-                  className={cn(
-                    "group flex items-start gap-3 p-4 rounded-lg transition-all duration-200",
-                    "hover:bg-slate-50/80 hover:shadow-sm border border-slate-200/50",
-                    isOverdue && "bg-red-50/50 hover:bg-red-50/80",
-                    isCompleted && "bg-green-50/50 hover:bg-green-50/80"
-                  )}
-                >
-                  <div className={cn(
-                    "mt-0.5 p-2 rounded-md transition-colors duration-200",
-                    isOverdue ? "bg-red-100" : 
-                    isCompleted ? "bg-green-100" : 
-                    "bg-blue-50 group-hover:bg-blue-100"
-                  )}>
-                    {getTaskIcon(task)}
-                  </div>
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <p className={cn(
-                      "font-medium text-sm leading-none text-balance",
-                      isOverdue && "text-red-700",
-                      isCompleted && "text-green-700"
-                    )}>
-                      {task.name}
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Building className="h-3 w-3" />
-                      <span>{task.projectName}</span>
-                      <span className="text-slate-300">•</span>
-                      <span>{task.stageName}</span>
-                    </div>
-                    <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3" />
-                        <span>{t('forms.start_date')}: {formatDate(task.startDate)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CalendarRange className="h-3 w-3" />
-                        <span>{t('forms.expected_end_date')}: {formatDate(task.expectedEndDate)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <Badge 
-                      variant={status.variant} 
-                      className={cn(
-                        "text-xs px-2 py-1 transition-colors duration-200 flex items-center",
-                        isOverdue && "bg-red-100 text-red-700 hover:bg-red-200",
-                        isCompleted && "bg-green-100 text-green-700 hover:bg-green-200"
-                      )}
-                    >
-                      {status.icon}
-                      {status.label}
+        {tasks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <Clock className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">لا توجد مهام قادمة</h3>
+            <p className="text-muted-foreground mb-4">لم يتم العثور على أي مهام قادمة خلال الـ 60 يوم القادمة</p>
+            <Button onClick={handleAddTask} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              إضافة مهمة جديدة
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {tasks.slice(0, 5).map((task) => (
+              <div key={task.id} className="flex items-start justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium">{task.name}</h4>
+                    <Badge variant={task.isCompleted ? "secondary" : "outline"}>
+                      {task.isCompleted ? "مكتملة" : "قيد التنفيذ"}
                     </Badge>
                   </div>
+                  {task.description && (
+                    <p className="text-sm text-muted-foreground">{task.description}</p>
+                  )}
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      <span>{task.projectName}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>المرحلة: {task.stageName}</span>
+                    </div>
+                  </div>
                 </div>
-              );
-            })
-          )}
-        </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium">
+                    {new Date(task.expectedEndDate).toLocaleDateString('ar-SA')}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    التاريخ المتوقع للانتهاء
+                  </div>
+                </div>
+              </div>
+            ))}
+            {tasks.length > 5 && (
+              <div className="text-center">
+                <Button variant="outline" onClick={() => navigate('/tasks')}>
+                  عرض جميع المهام ({tasks.length})
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
