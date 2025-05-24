@@ -12,8 +12,11 @@ import {
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const TeamStatistics = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-6 animate-in fade-in-50">
       {/* Summary Cards */}
@@ -22,7 +25,7 @@ const TeamStatistics = () => {
           <CardContent className="pt-4">
             <div className="flex justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">إجمالي الفريق</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('dashboard.team_members')}</p>
                 <p className="text-2xl font-bold">24</p>
               </div>
               <div className="p-2 bg-primary/10 rounded-full">
@@ -36,11 +39,11 @@ const TeamStatistics = () => {
           <CardContent className="pt-4">
             <div className="flex justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">المهندسين المتاحين</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('statistics.total_site_engineers')}</p>
                 <p className="text-2xl font-bold">18</p>
                 <p className="text-xs text-green-600 flex items-center">
                   <ArrowUp className="h-3 w-3 mr-1" />
-                  8% من الشهر الماضي
+                  8% {t('common.last_month')}
                 </p>
               </div>
               <div className="p-2 bg-green-100 rounded-full">
@@ -54,11 +57,11 @@ const TeamStatistics = () => {
           <CardContent className="pt-4">
             <div className="flex justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">العمال النشطين</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('statistics.assigned_workers')}</p>
                 <p className="text-2xl font-bold">42</p>
                 <p className="text-xs text-red-600 flex items-center">
                   <ArrowDown className="h-3 w-3 mr-1" />
-                  3% من الشهر الماضي
+                  3% {t('common.last_month')}
                 </p>
               </div>
               <div className="p-2 bg-blue-100 rounded-full">
@@ -72,7 +75,7 @@ const TeamStatistics = () => {
           <CardContent className="pt-4">
             <div className="flex justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">العملاء النشطين</p>
+                <p className="text-sm font-medium text-muted-foreground">{t('statistics.total_clients')}</p>
                 <p className="text-2xl font-bold">16</p>
               </div>
               <div className="p-2 bg-purple-100 rounded-full">
@@ -87,13 +90,13 @@ const TeamStatistics = () => {
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">توزيع الأدوار</CardTitle>
+            <CardTitle className="text-lg font-semibold">{t('team.specialty')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">مهندسين</span>
+                  <span className="text-muted-foreground">{t('team.site_engineers')}</span>
                   <span>8 (33%)</span>
                 </div>
                 <Progress value={33} className="h-2" />
@@ -109,7 +112,7 @@ const TeamStatistics = () => {
               
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">عمال</span>
+                  <span className="text-muted-foreground">{t('team.workers')}</span>
                   <span>12 (50%)</span>
                 </div>
                 <Progress value={50} className="h-2" />
@@ -120,13 +123,13 @@ const TeamStatistics = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">حالة التوظيف</CardTitle>
+            <CardTitle className="text-lg font-semibold">{t('team.availability')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">متاح</p>
+                  <p className="text-sm text-muted-foreground">{t('team.available')}</p>
                   <div className="flex items-baseline space-x-2 rtl:space-x-reverse">
                     <span className="text-2xl font-bold">18</span>
                     <Badge variant="secondary">75%</Badge>
@@ -134,7 +137,7 @@ const TeamStatistics = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">مشغول</p>
+                  <p className="text-sm text-muted-foreground">{t('team.unavailable')}</p>
                   <div className="flex items-baseline space-x-2 rtl:space-x-reverse">
                     <span className="text-2xl font-bold">6</span>
                     <Badge variant="secondary">25%</Badge>

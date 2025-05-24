@@ -63,35 +63,35 @@ const DashboardStatsNew = () => {
 
   const stats = [
     {
-      title: 'إجمالي العمال',
+      title: t('statistics.total_workers'),
       value: teamStats?.totalWorkers || 0,
       icon: Users,
       color: 'text-blue-500',
       bg: 'bg-blue-50',
     },
     {
-      title: 'المشاريع النشطة',
+      title: t('dashboard.active_projects'),
       value: projectStats?.activeProjects || 0,
       icon: Building2,
       color: 'text-green-500',
       bg: 'bg-green-50',
     },
     {
-      title: 'المهام المكتملة',
+      title: t('statistics.completed_tasks'),
       value: taskStats?.completedTasks || 0,
       icon: CheckSquare,
       color: 'text-purple-500',
       bg: 'bg-purple-50',
     },
     {
-      title: 'المعدات المتاحة',
+      title: t('statistics.available_equipments'),
       value: equipmentStats?.availabeEquipments || 0,
       icon: Truck,
       color: 'text-orange-500',
       bg: 'bg-orange-50',
     },
     {
-      title: 'المستندات المحفوظة',
+      title: t('statistics.total_documents'),
       value: documentStats?.totalDocuments || 0,
       icon: FileText,
       color: 'text-indigo-500',
