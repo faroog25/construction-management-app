@@ -121,6 +121,20 @@ export async function getAllWorkers(): Promise<Worker[]> {
         statusText: response.statusText,
         body: errorText
       });
+      
+      // إذا كان الخطأ 404 مع رسالة عدم وجود عمال، نرجع قائمة فارغة
+      if (response.status === 404) {
+        try {
+          const errorResponse = JSON.parse(errorText);
+          if (errorResponse.message === "لم يتم العثور على أي عمال") {
+            return [];
+          }
+        } catch (parseError) {
+          // إذا فشل في تحليل الاستجابة، نتجاهل ونرجع قائمة فارغة
+          return [];
+        }
+      }
+      
       throw new Error(`فشل في جلب العمال. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
     }
     
@@ -187,6 +201,44 @@ export async function getPaginatedWorkers(
         statusText: response.statusText,
         body: errorText
       });
+      
+      // إذا كان الخطأ 404 مع رسالة عدم وجود عمال، نرجع استجابة فارغة
+      if (response.status === 404) {
+        try {
+          const errorResponse = JSON.parse(errorText);
+          if (errorResponse.message === "لم يتم العثور على أي عمال") {
+            return {
+              success: true,
+              message: "لا يوجد عمال",
+              data: {
+                items: [],
+                totalItems: 0,
+                totalPages: 0,
+                currentPage: 1,
+                pageSize: pageSize,
+                hasNextPage: false,
+                hasPreveiosPage: false
+              }
+            };
+          }
+        } catch (parseError) {
+          // إذا فشل في تحليل الاستجابة، نرجع استجابة فارغة
+          return {
+            success: true,
+            message: "لا يوجد عمال",
+            data: {
+              items: [],
+              totalItems: 0,
+              totalPages: 0,
+              currentPage: 1,
+              pageSize: pageSize,
+              hasNextPage: false,
+              hasPreveiosPage: false
+            }
+          };
+        }
+      }
+      
       throw new Error(`فشل في جلب العمال. الرجاء المحاولة مرة أخرى. (HTTP ${response.status})`);
     }
     
