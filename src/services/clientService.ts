@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface ClientName {
@@ -26,6 +25,13 @@ interface ClientsResponse {
   message: string;
   errors?: string[];
   data: Client[];
+}
+
+interface CreateClientResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: Client;
 }
 
 // Helper function to get authentication headers
@@ -60,7 +66,31 @@ export async function getClientNames(): Promise<ClientName[]> {
   }
 }
 
-// Add placeholder functions for compatibility
+export async function createClient(clientData: Omit<Client, 'id'>): Promise<Client> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/Clients`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(clientData),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result: CreateClientResponse = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to create client');
+    }
+    
+    return result.data;
+  } catch (error) {
+    console.error('Error creating client:', error);
+    throw error;
+  }
+}
+
 export async function getClients(): Promise<{ data: Client[] }> {
   try {
     const response = await fetch(`${API_BASE_URL}/Clients`, {
