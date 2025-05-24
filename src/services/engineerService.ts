@@ -3,11 +3,12 @@ import { API_BASE_URL } from '@/config/api';
 
 export interface SiteEngineer {
   id: number;
-  fullName: string;
+  name: string;
+  userName: string;
+  email: string;
   phoneNumber: string;
-  email?: string;
-  address?: string;
-  isAvailable: boolean;
+  // Backward compatibility
+  fullName?: string;
 }
 
 export interface SiteEngineerResponse {
@@ -18,7 +19,7 @@ export interface SiteEngineerResponse {
     items: SiteEngineer[];
     totalItems: number;
     totalPages: number;
-    currentPage: number;
+    pageNumber: number;
     pageSize: number;
     hasNextPage: boolean;
     hasPreveiosPage: boolean;
@@ -33,127 +34,90 @@ const getAuthHeaders = () => {
   };
 };
 
-// Mock data for development
-const mockEngineers: SiteEngineer[] = [
-  {
-    id: 1,
-    fullName: "Ahmed Hassan",
-    phoneNumber: "+966 555 123 4567",
-    email: "ahmed.hassan@example.com",
-    address: "Riyadh, Saudi Arabia",
-    isAvailable: true
-  },
-  {
-    id: 2,
-    fullName: "Mohammed Ali",
-    phoneNumber: "+966 555 234 5678",
-    email: "mohammed.ali@example.com",
-    address: "Jeddah, Saudi Arabia",
-    isAvailable: false
-  },
-  {
-    id: 3,
-    fullName: "Sara Khan",
-    phoneNumber: "+966 555 345 6789",
-    email: "sara.khan@example.com",
-    address: "Dammam, Saudi Arabia",
-    isAvailable: true
-  },
-  {
-    id: 4,
-    fullName: "Yusuf Ahmed",
-    phoneNumber: "+966 555 456 7890",
-    email: "yusuf.ahmed@example.com",
-    address: "Medina, Saudi Arabia",
-    isAvailable: true
-  },
-  {
-    id: 5,
-    fullName: "Fatima Mohammed",
-    phoneNumber: "+966 555 567 8901",
-    email: "fatima.mohammed@example.com",
-    address: "Makkah, Saudi Arabia",
-    isAvailable: false
-  },
-  {
-    id: 6,
-    fullName: "Khalid Omar",
-    phoneNumber: "+966 555 678 9012",
-    email: "khalid.omar@example.com",
-    address: "Tabuk, Saudi Arabia",
-    isAvailable: true
-  },
-  {
-    id: 7,
-    fullName: "Layla Ibrahim",
-    phoneNumber: "+966 555 789 0123",
-    email: "layla.ibrahim@example.com",
-    address: "Abha, Saudi Arabia",
-    isAvailable: true
-  },
-  {
-    id: 8,
-    fullName: "Abdullah Saleh",
-    phoneNumber: "+966 555 890 1234",
-    email: "abdullah.saleh@example.com",
-    address: "Khobar, Saudi Arabia",
-    isAvailable: false
-  },
-  {
-    id: 9,
-    fullName: "Noura Al-Sheikh",
-    phoneNumber: "+966 555 901 2345",
-    email: "noura.alsheikh@example.com",
-    address: "Yanbu, Saudi Arabia",
-    isAvailable: true
-  },
-  {
-    id: 10,
-    fullName: "Majed Al-Qahtani",
-    phoneNumber: "+966 555 012 3456",
-    email: "majed.alqahtani@example.com",
-    address: "Taif, Saudi Arabia",
-    isAvailable: true
-  }
-];
-
 export const getAllEngineers = async (
-  page: number = 2,
-  pageSize: number = 8,
+  page: number = 1,
+  pageSize: number = 10,
   searchQuery: string = '',
   sortColumn: string = 'name',
   sortDirection: 'asc' | 'desc' = 'asc'
 ): Promise<SiteEngineerResponse['data']> => {
   try {
     const queryParams = new URLSearchParams({
-      pageNumber: page.toString(),   // أو currentPage حسب ما ينتظر الـ backend
+      pageNumber: page.toString(),
       pageSize: pageSize.toString(),
-      search: searchQuery,
-      sortColumn,
-      sortDirection
     });
+
+    if (searchQuery) {
+      queryParams.append('search', searchQuery);
+    }
+
+    if (sortColumn) {
+      queryParams.append('sortColumn', sortColumn);
+      queryParams.append('sortDirection', sortDirection);
+    }
+
+    console.log('Fetching engineers with URL:', `${API_BASE_URL}/SiteEngineers?${queryParams}`);
 
     const response = await fetch(`${API_BASE_URL}/SiteEngineers?${queryParams}`, {
       headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
+      // Handle 404 specifically - return empty data instead of throwing error
+      if (response.status === 404) {
+        return {
+          items: [],
+          totalItems: 0,
+          totalPages: 0,
+          pageNumber: page,
+          pageSize: pageSize,
+          hasNextPage: false,
+          hasPreveiosPage: false
+        };
+      }
       throw new Error(`Failed to fetch site engineers: ${response.status}`);
     }
 
-    const result = await response.json();
+    const result: SiteEngineerResponse = await response.json();
+    console.log('API Response:', result);
 
     if (!result.success) {
+      // If API says no success but we have empty data, return empty instead of error
+      if (result.data && result.data.items && result.data.items.length === 0) {
+        return result.data;
+      }
       throw new Error(result.message || 'Unknown error from backend');
     }
 
-    return result.data;
+    // Map the response to include fullName for backward compatibility
+    const mappedItems = result.data.items.map(engineer => ({
+      ...engineer,
+      fullName: engineer.name || `${engineer.userName}` // Use name as fullName
+    }));
+
+    return {
+      ...result.data,
+      items: mappedItems
+    };
   } catch (error) {
     console.error('Error fetching site engineers:', error);
+    
+    // If it's a network error, return empty data structure to show the "no engineers" UI
+    if (error instanceof TypeError || (error instanceof Error && error.message.includes('fetch'))) {
+      return {
+        items: [],
+        totalItems: 0,
+        totalPages: 0,
+        pageNumber: page,
+        pageSize: pageSize,
+        hasNextPage: false,
+        hasPreveiosPage: false
+      };
+    }
+    
     throw error;
   }
 };
-
 
 export const createEngineer = async (engineer: Omit<SiteEngineer, 'id'>): Promise<SiteEngineer> => {
   try {

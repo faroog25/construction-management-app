@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { getAllEngineers } from '../services/engineerService';
 import { SiteEngineer } from '@/types/siteEngineer';
@@ -31,7 +30,7 @@ export function SiteEngineers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortColumn, setSortColumn] = useState<string>('fullName');
+  const [sortColumn, setSortColumn] = useState<string>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isNewEngineerModalOpen, setIsNewEngineerModalOpen] = useState(false);
   const [isEditEngineerModalOpen, setIsEditEngineerModalOpen] = useState(false);
@@ -56,10 +55,19 @@ export function SiteEngineers() {
       setEngineers(response.items);
       setTotalPages(response.totalPages);
       setTotalItems(response.totalItems);
-      setCurrentPage(response.currentPage);
+      setCurrentPage(response.pageNumber);
     } catch (err) {
       console.error('Error fetching engineers:', err);
-      setError(err instanceof Error ? err.message : 'فشل في جلب بيانات المهندسين');
+      // Only set error for actual unexpected errors, not for "no data" scenarios
+      if (err instanceof Error && !err.message.includes('404')) {
+        setError(err.message);
+        toast.error('حدث خطأ في جلب بيانات المهندسين');
+      } else {
+        // For 404 or "no data" scenarios, just set empty state
+        setEngineers([]);
+        setTotalPages(1);
+        setTotalItems(0);
+      }
     } finally {
       setLoading(false);
     }
@@ -76,12 +84,12 @@ export function SiteEngineers() {
       setSortColumn(column);
       setSortDirection('asc');
     }
-    setCurrentPage(1); // إعادة التعيين للصفحة الأولى عند تغيير الترتيب
+    setCurrentPage(1);
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // إعادة التعيين للصفحة الأولى عند تغيير البحث
+    setCurrentPage(1);
   };
 
   const handlePageChange = (pageNumber: number) => {
@@ -89,21 +97,17 @@ export function SiteEngineers() {
     setCurrentPage(pageNumber);
   };
 
-  // إنشاء أرقام الصفحات للتنقل
   const pageNumbers = [];
   const maxPageButtons = 5;
   
   if (totalPages <= maxPageButtons) {
-    // إذا كان عدد الصفحات أقل من أو يساوي الحد الأقصى، اعرضها جميعًا
     for (let i = 1; i <= totalPages; i++) {
       pageNumbers.push(i);
     }
   } else {
-    // عرض بعض الصفحات في المنتصف حول الصفحة الحالية
     let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
     let endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
     
-    // تعديل startPage إذا كانت endPage في الحد الأقصى
     if (endPage === totalPages) {
       startPage = Math.max(totalPages - maxPageButtons + 1, 1);
     }
@@ -127,7 +131,7 @@ export function SiteEngineers() {
         toast.success('تم حذف المهندس بنجاح');
         setIsDeleteDialogOpen(false);
         setEngineerToDelete(null);
-        await fetchEngineers(); // إعادة جلب البيانات بعد الحذف
+        await fetchEngineers();
       } catch (error) {
         console.error('Error deleting engineer:', error);
         toast.error(error instanceof Error ? error.message : 'فشل في حذف المهندس');
@@ -147,7 +151,7 @@ export function SiteEngineers() {
     navigate(`/team/site-engineers/${engineerId}`);
   };
 
-  if (error) {
+  if (error && !error.includes('404')) {
     return (
       <Alert variant="destructive">
         <AlertDescription>{error}</AlertDescription>
@@ -186,9 +190,15 @@ export function SiteEngineers() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead onClick={() => handleSort('fullName')} className="cursor-pointer">
+                <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
                   <div className="flex items-center">
                     الاسم
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                  </div>
+                </TableHead>
+                <TableHead onClick={() => handleSort('userName')} className="cursor-pointer">
+                  <div className="flex items-center">
+                    اسم المستخدم
                     <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
@@ -219,6 +229,9 @@ export function SiteEngineers() {
                       <Skeleton className="h-4 w-[120px]" />
                     </TableCell>
                     <TableCell>
+                      <Skeleton className="h-4 w-[120px]" />
+                    </TableCell>
+                    <TableCell>
                       <Skeleton className="h-4 w-[180px]" />
                     </TableCell>
                     <TableCell>
@@ -231,7 +244,7 @@ export function SiteEngineers() {
                 ))
               ) : engineers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     {searchQuery ? 
                       <div className="flex flex-col items-center justify-center p-4">
                         <Search className="h-8 w-8 opacity-30 mb-2" />
@@ -262,8 +275,9 @@ export function SiteEngineers() {
                     onClick={() => handleEngineerClick(engineer.id)}
                   >
                     <TableCell>
-                      {engineer.fullName}
+                      {engineer.name}
                     </TableCell>
+                    <TableCell>{engineer.userName}</TableCell>
                     <TableCell>{engineer.phoneNumber}</TableCell>
                     <TableCell>{engineer.email || '-'}</TableCell>
                     <TableCell>

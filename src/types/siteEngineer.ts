@@ -1,9 +1,11 @@
-
 export interface SiteEngineer {
   id: number;
-  fullName: string;
+  name: string;
+  userName: string;
+  email: string;
   phoneNumber: string;
-  email?: string;
+  // Keep backward compatibility fields for existing components
+  fullName?: string;
   address?: string;
   isAvailable?: boolean;
   specialization?: string;
@@ -28,7 +30,7 @@ export interface SiteEngineersResponse {
     items: SiteEngineer[];
     totalItems: number;
     totalPages: number;
-    currentPage: number;
+    pageNumber: number;
     pageSize: number;
     hasNextPage: boolean;
     hasPreveiosPage: boolean;
