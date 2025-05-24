@@ -71,11 +71,16 @@ export const getAllEngineers = async (
       queryParams.append('sortDirection', sortDirection);
     }
 
-    console.log('Fetching engineers with URL:', `${API_BASE_URL}/SiteEngineers?${queryParams}`);
+    const url = `${API_BASE_URL}/SiteEngineers?${queryParams}`;
+    console.log('Fetching engineers with URL:', url);
+    console.log('Auth headers:', getAuthHeaders());
 
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers?${queryParams}`, {
+    const response = await fetch(url, {
       headers: getAuthHeaders(),
     });
+
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
 
     if (!response.ok) {
       // Handle 404 specifically - return empty data instead of throwing error
@@ -136,15 +141,23 @@ export const getAllEngineers = async (
 
 export const getEngineerById = async (id: string): Promise<SiteEngineer> => {
   try {
-    console.log('Fetching engineer with ID:', id);
+    const url = `${API_BASE_URL}/SiteEngineers/${id}`;
+    console.log('Fetching engineer with URL:', url);
+    console.log('Auth headers:', getAuthHeaders());
 
-    const response = await fetch(`${API_BASE_URL}/SiteEngineers/${id}`, {
+    const response = await fetch(url, {
       headers: getAuthHeaders(),
     });
+
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
 
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error('Engineer not found');
+      }
+      if (response.status === 401) {
+        throw new Error('غير مخول للوصول - يرجى تسجيل الدخول مرة أخرى');
       }
       throw new Error(`Failed to fetch engineer: ${response.status}`);
     }
@@ -163,6 +176,12 @@ export const getEngineerById = async (id: string): Promise<SiteEngineer> => {
     };
   } catch (error) {
     console.error('Error fetching engineer:', error);
+    
+    // Check if it's a network connectivity issue
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('فشل في الاتصال بالخادم - يرجى التحقق من اتصال الإنترنت');
+    }
+    
     throw error;
   }
 };

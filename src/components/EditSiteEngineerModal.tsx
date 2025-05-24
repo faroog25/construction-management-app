@@ -1,313 +1,187 @@
 
-import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { siteEngineerSchema, type SiteEngineerFormValues } from '@/lib/validations/siteEngineer';
-import { updateEngineer } from '@/services/engineerService';
+import { z } from 'zod';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 import { toast } from 'sonner';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Skeleton } from './ui/skeleton';
-import { getSiteEngineerById } from '@/services/siteEngineerService';
+import { updateEngineer } from '@/services/engineerService';
+import { SiteEngineer } from '@/services/engineerService';
+
+const editSiteEngineerSchema = z.object({
+  name: z.string().min(2, 'الاسم يجب أن يكون أكثر من حرفين'),
+  email: z.string().email('البريد الإلكتروني غير صحيح'),
+  phoneNumber: z.string().min(10, 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل'),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+}).refine((data) => {
+  if (data.password || data.confirmPassword) {
+    return data.password === data.confirmPassword;
+  }
+  return true;
+}, {
+  message: "كلمة المرور غير متطابقة",
+  path: ["confirmPassword"],
+});
+
+type EditSiteEngineerFormValues = z.infer<typeof editSiteEngineerSchema>;
 
 interface EditSiteEngineerModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onEngineerUpdated?: () => void;
-  engineer: {
-    id: number;
-    fullName: string;
-    phoneNumber: string;
-    email?: string;
-    address?: string;
-    nationalId?: string;
-  };
+  onEngineerUpdated: () => void;
+  engineer: SiteEngineer;
 }
 
-export function EditSiteEngineerModal({ 
-  isOpen, 
-  onOpenChange, 
+export function EditSiteEngineerModal({
+  isOpen,
+  onOpenChange,
   onEngineerUpdated,
-  engineer 
+  engineer
 }: EditSiteEngineerModalProps) {
-  const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  const form = useForm<SiteEngineerFormValues>({
-    resolver: zodResolver(siteEngineerSchema),
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset
+  } = useForm<EditSiteEngineerFormValues>({
+    resolver: zodResolver(editSiteEngineerSchema),
     defaultValues: {
-      firstName: '',
-      secondName: '',
-      thirdName: '',
-      lastName: '',
-      email: '',
-      phoneNumber: '',
-      address: '',
-      hireDate: '',
-      nationalNumber: '',
-    },
-    mode: "onChange"
+      name: engineer.name,
+      email: engineer.email,
+      phoneNumber: engineer.phoneNumber,
+    }
   });
 
-  // جلب بيانات المهندس من API عند فتح النافذة
   useEffect(() => {
-    if (isOpen && engineer?.id) {
-      const fetchEngineerData = async () => {
-        try {
-          setLoading(true);
-          setApiError(null);
-          const engineerData = await getSiteEngineerById(engineer.id.toString());
-          
-          // استخدام الحقول المباشرة من الـ API بدلاً من تقسيم الاسم الكامل
-          form.reset({
-            firstName: engineerData.firstName || '',
-            secondName: engineerData.secondName || '',
-            thirdName: engineerData.thirdName || '',
-            lastName: engineerData.lastName || '',
-            email: engineerData.email || '',
-            phoneNumber: engineerData.phoneNumber || '',
-            address: engineerData.address || '',
-            hireDate: engineerData.hireDate || '',
-            nationalNumber: engineerData.nationalNumber || '',
-          });
-        } catch (error) {
-          console.error('Error fetching engineer data:', error);
-          setApiError(error instanceof Error ? error.message : 'حدث خطأ أثناء جلب بيانات المهندس');
-          toast.error('فشل في جلب بيانات المهندس');
-        } finally {
-          setLoading(false);
-        }
-      };
-      
-      fetchEngineerData();
+    if (isOpen && engineer) {
+      reset({
+        name: engineer.name,
+        email: engineer.email,
+        phoneNumber: engineer.phoneNumber,
+      });
     }
-  }, [isOpen, engineer?.id, form]);
+  }, [isOpen, engineer, reset]);
 
-  const onSubmit = async (data: SiteEngineerFormValues) => {
-    if (!engineer?.id) {
-      toast.error('معرف المهندس غير متوفر');
-      return;
-    }
-
+  const onSubmit = async (data: EditSiteEngineerFormValues) => {
     try {
-      // تجهيز البيانات وفقًا للصيغة المطلوبة في الـ API
-      const updatedEngineer = {
+      const updateData: any = {
         id: engineer.id,
-        firstName: data.firstName.trim(),
-        secondName: data.secondName?.trim() || "",
-        thirdName: data.thirdName?.trim() || "",
-        lastName: data.lastName.trim(),
-        email: data.email?.trim() || "",
-        phoneNumber: data.phoneNumber.trim(),
-        nationalNumber: data.nationalNumber?.trim() || "",
-        address: data.address?.trim() || ""
+        name: data.name,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
       };
 
-      console.log('Sending update with data:', updatedEngineer);
-      await updateEngineer(engineer.id, updatedEngineer);
-      toast.success('تم التحديث بنجاح');
-      onOpenChange(false);
-      onEngineerUpdated?.();
-    } catch (error: unknown) {
-      console.error('Error updating site engineer:', error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else if (typeof error === 'string') {
-        toast.error(error);
-      } else {
-        toast.error('فشل التحديث. الرجاء المحاولة مرة أخرى');
+      // Only include password if provided
+      if (data.password) {
+        updateData.password = data.password;
+        updateData.confirmPassword = data.confirmPassword;
       }
+
+      await updateEngineer(engineer.id, updateData);
+      toast.success('تم تحديث بيانات المهندس بنجاح');
+      onEngineerUpdated();
+      onOpenChange(false);
+      reset();
+    } catch (error) {
+      console.error('Error updating engineer:', error);
+      toast.error(error instanceof Error ? error.message : 'حدث خطأ في تحديث بيانات المهندس');
     }
   };
-
-  if (!engineer) {
-    return null;
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>تعديل بيانات مهندس الموقع</DialogTitle>
-          <DialogDescription>
-            قم بتعديل بيانات مهندس الموقع واضغط على تحديث البيانات عند الانتهاء
-          </DialogDescription>
+          <DialogTitle>تعديل بيانات المهندس</DialogTitle>
         </DialogHeader>
         
-        {apiError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {apiError}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">الاسم الكامل</Label>
+              <Input
+                id="name"
+                type="text"
+                {...register('name')}
+                className={errors.name ? 'border-red-500' : ''}
+              />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Input
+                id="email"
+                type="email"
+                {...register('email')}
+                className={errors.email ? 'border-red-500' : ''}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                {...register('phoneNumber')}
+                className={errors.phoneNumber ? 'border-red-500' : ''}
+              />
+              {errors.phoneNumber && (
+                <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">كلمة المرور الجديدة (اختياري)</Label>
+              <Input
+                id="password"
+                type="password"
+                {...register('password')}
+                className={errors.password ? 'border-red-500' : ''}
+                placeholder="اتركه فارغاً إذا كنت لا تريد تغيير كلمة المرور"
+              />
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                {...register('confirmPassword')}
+                className={errors.confirmPassword ? 'border-red-500' : ''}
+              />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+              )}
+            </div>
           </div>
-        )}
-        
-        {loading ? (
-          <div className="space-y-4 py-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              إلغاء
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+            </Button>
           </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم الأول</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل الاسم الأول" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="secondName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم الثاني</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل الاسم الثاني" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="thirdName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الاسم الثالث</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل الاسم الثالث" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>اسم العائلة</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل اسم العائلة" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>البريد الإلكتروني</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="أدخل البريد الإلكتروني" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="phoneNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>رقم الهاتف</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل رقم الهاتف" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="nationalNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الرقم الوطني</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل الرقم الوطني" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>العنوان</FormLabel>
-                    <FormControl>
-                      <Input placeholder="أدخل العنوان" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="hireDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>تاريخ التعيين</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  إلغاء
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={!form.formState.isValid || form.formState.isSubmitting}
-                >
-                  {form.formState.isSubmitting ? 'جاري التحديث...' : 'تحديث البيانات'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        )}
+        </form>
       </DialogContent>
     </Dialog>
   );
