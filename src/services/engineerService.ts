@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 export interface SiteEngineer {
@@ -39,6 +38,18 @@ export interface CreateSiteEngineerRequest {
   password: string;
   confirmPassword: string;
   phoneNumber: string;
+}
+
+export interface SiteEngineerName {
+  id: number;
+  name: string;
+}
+
+export interface SiteEngineerNamesResponse {
+  success: boolean;
+  message: string;
+  errors?: string[];
+  data: SiteEngineerName[];
 }
 
 const getAuthHeaders = () => {
@@ -251,6 +262,51 @@ export const deleteEngineer = async (id: number): Promise<void> => {
     return;
   } catch (error) {
     console.error('Error deleting site engineer:', error);
+    throw error;
+  }
+};
+
+export const getEngineerNames = async (): Promise<SiteEngineerName[]> => {
+  try {
+    const url = `${API_BASE_URL}/SiteEngineers/Names`;
+    console.log('Fetching engineer names with URL:', url);
+    console.log('Auth headers:', getAuthHeaders());
+
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
+
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+
+    if (!response.ok) {
+      // Handle 404 specifically - return empty array instead of throwing error
+      if (response.status === 404) {
+        return [];
+      }
+      throw new Error(`Failed to fetch engineer names: ${response.status}`);
+    }
+
+    const result: SiteEngineerNamesResponse = await response.json();
+    console.log('API Response:', result);
+
+    if (!result.success) {
+      // If API says no success but we have empty data, return empty instead of error
+      if (result.data && result.data.length === 0) {
+        return result.data;
+      }
+      throw new Error(result.message || 'Unknown error from backend');
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error('Error fetching engineer names:', error);
+    
+    // If it's a network error, return empty array
+    if (error instanceof TypeError || (error instanceof Error && error.message.includes('fetch'))) {
+      return [];
+    }
+    
     throw error;
   }
 };
