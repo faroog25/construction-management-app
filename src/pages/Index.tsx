@@ -12,11 +12,13 @@ import { Plus, ChevronRight } from 'lucide-react';
 import { getProjects, Project } from '@/services/projectService';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { NewProjectModal } from '@/components/NewProjectModal';
 
 const Index = () => {
   const { t } = useLanguage();
+  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
   
-  const { data: projectsData = { data: { items: [] } }, isLoading } = useQuery({
+  const { data: projectsData = { data: { items: [] } }, isLoading, refetch } = useQuery({
     queryKey: ['projects'],
     queryFn: () => getProjects(),
   });
@@ -27,6 +29,15 @@ const Index = () => {
   // Take the first 4 projects for the dashboard display
   const recentProjects = projects.slice(0, 4);
 
+  const handleCreateProject = () => {
+    setIsNewProjectModalOpen(true);
+  };
+
+  const handleProjectCreated = () => {
+    // Refresh projects data when a new project is created
+    refetch();
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="h-16"></div> {/* Navbar spacer */}
@@ -34,15 +45,15 @@ const Index = () => {
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">لوحة التحكم</h1>
             <p className="text-muted-foreground mt-1">
-              {t('dashboard.subtitle')}
+              مرحباً بك في نظام إدارة المشاريع
             </p>
           </div>
           <div className="mt-4 lg:mt-0 flex flex-wrap gap-3">
-            <Button className="rounded-lg">
+            <Button className="rounded-lg" onClick={handleCreateProject}>
               <Plus className="mr-2 h-4 w-4" />
-              {t('dashboard.create_project')}
+              إنشاء مشروع جديد
             </Button>
           </div>
         </div>
@@ -53,7 +64,7 @@ const Index = () => {
           <div className="grid gap-8 lg:grid-cols-3">
             <Card className="lg:col-span-2 animate-in" style={{ animationDelay: "0.1s" }}>
               <CardHeader className="pb-3">
-                <CardTitle>{t('dashboard.project_progress')}</CardTitle>
+                <CardTitle>تقدم المشاريع</CardTitle>
               </CardHeader>
               <CardContent>
                 <ProjectTimeline />
@@ -69,10 +80,10 @@ const Index = () => {
           
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">{t('dashboard.recent_projects')}</h2>
+              <h2 className="text-xl font-semibold">المشاريع الحديثة</h2>
               <Button variant="ghost" size="sm" asChild>
                 <a href="/projects">
-                  {t('projects.title')} {t('dashboard.view_all')}
+                  عرض جميع المشاريع
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </a>
               </Button>
@@ -80,9 +91,9 @@ const Index = () => {
             
             <Tabs defaultValue="all" className="space-y-4">
               <TabsList>
-                <TabsTrigger value="all">{t('projects.filter_all')}</TabsTrigger>
-                <TabsTrigger value="active">{t('projects.filter_active')}</TabsTrigger>
-                <TabsTrigger value="completed">{t('projects.filter_completed')}</TabsTrigger>
+                <TabsTrigger value="all">جميع المشاريع</TabsTrigger>
+                <TabsTrigger value="active">المشاريع النشطة</TabsTrigger>
+                <TabsTrigger value="completed">المشاريع المكتملة</TabsTrigger>
               </TabsList>
               
               <TabsContent value="all" className="space-y-4">
@@ -149,6 +160,12 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      <NewProjectModal 
+        isOpen={isNewProjectModalOpen}
+        onOpenChange={setIsNewProjectModalOpen}
+        onProjectCreated={handleProjectCreated}
+      />
     </div>
   );
 };

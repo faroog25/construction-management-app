@@ -7,7 +7,7 @@ export interface ClientName {
 }
 
 export interface Client {
-  id: number;
+  id: string;
   fullName: string;
   email: string;
   phoneNumber: string;
@@ -94,8 +94,12 @@ export async function getClientById(clientId: string): Promise<Client> {
       throw new Error(result.message || 'Failed to fetch client');
     }
     
-    // Mock projects data if not provided by API
-    const clientData = result.data;
+    // Convert id to string for consistency
+    const clientData = {
+      ...result.data,
+      id: result.data.id.toString()
+    };
+    
     if (!clientData.projects) {
       clientData.projects = [];
     }
@@ -125,7 +129,11 @@ export async function createClient(clientData: Omit<Client, 'id'>): Promise<Clie
       throw new Error(result.message || 'Failed to create client');
     }
     
-    return result.data;
+    // Convert id to string for consistency
+    return {
+      ...result.data,
+      id: result.data.id.toString()
+    };
   } catch (error) {
     console.error('Error creating client:', error);
     throw error;
@@ -148,7 +156,12 @@ export async function getClients(page?: number, pageSize?: number, searchTerm?: 
       throw new Error(result.message || 'Failed to fetch clients');
     }
     
-    const clients = result.data || [];
+    // Convert ids to strings for consistency
+    const clients = (result.data || []).map(client => ({
+      ...client,
+      id: client.id.toString()
+    }));
+    
     return { 
       data: clients,
       items: clients,
@@ -161,7 +174,7 @@ export async function getClients(page?: number, pageSize?: number, searchTerm?: 
   }
 }
 
-export async function deleteClient(clientId: number): Promise<void> {
+export async function deleteClient(clientId: string): Promise<void> {
   try {
     const response = await fetch(`${API_BASE_URL}/Clients/${clientId}`, {
       method: 'DELETE',
@@ -177,7 +190,7 @@ export async function deleteClient(clientId: number): Promise<void> {
   }
 }
 
-export async function updateClient(clientId: number, clientData: Partial<Client>): Promise<Client> {
+export async function updateClient(clientId: string, clientData: Partial<Client>): Promise<Client> {
   try {
     const response = await fetch(`${API_BASE_URL}/Clients/${clientId}`, {
       method: 'PUT',
@@ -190,7 +203,12 @@ export async function updateClient(clientId: number, clientData: Partial<Client>
     }
     
     const result = await response.json();
-    return result.data;
+    
+    // Convert id to string for consistency
+    return {
+      ...result.data,
+      id: result.data.id.toString()
+    };
   } catch (error) {
     console.error('Error updating client:', error);
     throw error;
