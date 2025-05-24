@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 
 export interface ClientName {
@@ -91,7 +92,7 @@ export async function createClient(clientData: Omit<Client, 'id'>): Promise<Clie
   }
 }
 
-export async function getClients(): Promise<{ data: Client[] }> {
+export async function getClients(page?: number, pageSize?: number, searchTerm?: string, clientType?: string, sortBy?: string): Promise<{ items: Client[]; totalPages: number; totalItems: number; data: Client[] }> {
   try {
     const response = await fetch(`${API_BASE_URL}/Clients`, {
       headers: getAuthHeaders(),
@@ -107,7 +108,13 @@ export async function getClients(): Promise<{ data: Client[] }> {
       throw new Error(result.message || 'Failed to fetch clients');
     }
     
-    return { data: result.data || [] };
+    const clients = result.data || [];
+    return { 
+      data: clients,
+      items: clients,
+      totalPages: 1,
+      totalItems: clients.length
+    };
   } catch (error) {
     console.error('Error fetching clients:', error);
     throw error;
