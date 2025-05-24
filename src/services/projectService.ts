@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { Project as ProjectType, ProjectApiResponse, PaginatedResponse } from '@/types/project';
 
@@ -161,6 +160,27 @@ export async function getProjects(params: ProjectsQueryParams = {}): Promise<Pag
         statusText: response.statusText,
         body: errorText
       });
+      
+      // إذا كان الخطأ 404 مع رسالة عدم وجود مشاريع، نرجع استجابة فارغة
+      if (response.status === 404) {
+        const errorResponse = JSON.parse(errorText);
+        if (errorResponse.message === "لم يتم العثور على المشاريع") {
+          return {
+            success: true,
+            message: "لا توجد مشاريع",
+            data: {
+              items: [],
+              totalItems: 0,
+              totalPages: 0,
+              currentPage: 1,
+              pageSize: pageSize,
+              hasNextPage: false,
+              hasPreveiosPage: false
+            }
+          };
+        }
+      }
+      
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
