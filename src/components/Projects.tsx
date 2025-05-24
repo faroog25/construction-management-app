@@ -57,7 +57,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { API_BASE_URL } from '@/config/api';
-import { useNavigate } from 'react-router-dom';
 
 interface PaginatedResponse<T> {
   success: boolean;
@@ -75,8 +74,6 @@ interface PaginatedResponse<T> {
 }
 
 const Projects = () => {
-  const navigate = useNavigate();
-  
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -189,7 +186,9 @@ const Projects = () => {
   };
 
   const handleAddProject = () => {
-    navigate('/new-project');
+    toast({
+      description: 'سيتم إضافة نموذج إنشاء مشروع جديد قريباً',
+    });
   };
 
   // Filter projects based on search
