@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,17 @@ export default function WorkerSpecialties() {
     queryFn: getSpecialties,
   });
 
+  // عرض رسالة خطأ عند فشل تحميل البيانات - في useEffect لتجنب infinite loop
+  useEffect(() => {
+    if (isError) {
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل التخصصات'
+      });
+    }
+  }, [isError, error, toast]);
+
   // فتح مودال التعديل مع تحديد التخصص
   const handleEditClick = (specialty: Specialty) => {
     setSelectedSpecialty(specialty);
@@ -49,11 +60,6 @@ export default function WorkerSpecialties() {
   const refreshData = () => {
     queryClient.invalidateQueries({ queryKey: ['specialties'] });
   };
-
-  // عرض رسالة خطأ عند فشل تحميل البيانات
-  if (isError) {
-    toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل التخصصات');
-  }
 
   return (
     <div className="container mx-auto py-8 pt-20">
