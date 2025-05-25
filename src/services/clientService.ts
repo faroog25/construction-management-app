@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { ClientType } from '@/types/client';
 
@@ -30,7 +29,15 @@ interface ClientsResponse {
   success: boolean;
   message: string;
   errors?: string[];
-  data: Client[];
+  data: {
+    items: Client[];
+    totalItems: number;
+    totalPages: number;
+    pageNumber: number;
+    pageSize: number;
+    hasNextPage: boolean;
+    hasPreveiosPage: boolean;
+  };
 }
 
 interface CreateClientResponse {
@@ -160,7 +167,7 @@ export async function getClients(page?: number, pageSize?: number, searchTerm?: 
     }
     
     // Convert ids to strings for consistency and ensure clientType is proper enum
-    const clients = (result.data || []).map(client => ({
+    const clients = (result.data.items || []).map(client => ({
       ...client,
       id: client.id.toString(),
       clientType: client.clientType as ClientType
@@ -169,8 +176,8 @@ export async function getClients(page?: number, pageSize?: number, searchTerm?: 
     return { 
       data: clients,
       items: clients,
-      totalPages: 1,
-      totalItems: clients.length
+      totalPages: result.data.totalPages || 1,
+      totalItems: result.data.totalItems || clients.length
     };
   } catch (error) {
     console.error('Error fetching clients:', error);
