@@ -29,7 +29,9 @@ interface ClientsResponse {
   success: boolean;
   message: string;
   errors?: string[];
-  data: Client[];
+  data: {
+    items: Client[];
+  };
 }
 
 interface CreateClientResponse {
@@ -157,7 +159,7 @@ export async function getClients(page?: number, pageSize?: number, searchTerm?: 
     }
     
     // Convert ids to strings for consistency
-    const clients = (result.data || []).map(client => ({
+    const clients = (result.data.items || []).map(client => ({
       ...client,
       id: client.id.toString()
     }));
