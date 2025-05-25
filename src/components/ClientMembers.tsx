@@ -1,6 +1,7 @@
+
 import { useEffect, useState } from 'react';
-import { getClients, deleteClient, updateClient } from '../services/clientService';
-import { Client, ClientType } from '@/types/client';
+import { getClients, deleteClient, updateClient, Client } from '../services/clientService';
+import { ClientType } from '@/types/client';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Skeleton } from './ui/skeleton';
@@ -154,7 +155,7 @@ export function ClientMembers() {
       fullName: client.fullName,
       email: client.email,
       phoneNumber: client.phoneNumber,
-      clientType:client.clientType
+      clientType: client.clientType
     });
   };
 
@@ -337,7 +338,7 @@ export function ClientMembers() {
                     <TableCell>{client.phoneNumber}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">
-                        {client.clientType === 'فرد' ? (
+                        {client.clientType === ClientType.Individual ? (
                           <>
                             <User className="h-4 w-4 text-blue-600" />
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

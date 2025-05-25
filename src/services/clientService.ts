@@ -1,5 +1,6 @@
 
 import { API_BASE_URL } from '@/config/api';
+import { ClientType } from '@/types/client';
 
 export interface ClientName {
   id: number;
@@ -11,7 +12,7 @@ export interface Client {
   fullName: string;
   email: string;
   phoneNumber: string;
-  clientType: string;
+  clientType: ClientType;
   projects?: {
     id: number;
     name: string;
@@ -94,10 +95,11 @@ export async function getClientById(clientId: string): Promise<Client> {
       throw new Error(result.message || 'Failed to fetch client');
     }
     
-    // Convert id to string for consistency
+    // Convert id to string for consistency and ensure clientType is proper enum
     const clientData = {
       ...result.data,
-      id: result.data.id.toString()
+      id: result.data.id.toString(),
+      clientType: result.data.clientType as ClientType
     };
     
     if (!clientData.projects) {
@@ -129,10 +131,11 @@ export async function createClient(clientData: Omit<Client, 'id'>): Promise<Clie
       throw new Error(result.message || 'Failed to create client');
     }
     
-    // Convert id to string for consistency
+    // Convert id to string for consistency and ensure clientType is proper enum
     return {
       ...result.data,
-      id: result.data.id.toString()
+      id: result.data.id.toString(),
+      clientType: result.data.clientType as ClientType
     };
   } catch (error) {
     console.error('Error creating client:', error);
@@ -156,10 +159,11 @@ export async function getClients(page?: number, pageSize?: number, searchTerm?: 
       throw new Error(result.message || 'Failed to fetch clients');
     }
     
-    // Convert ids to strings for consistency
+    // Convert ids to strings for consistency and ensure clientType is proper enum
     const clients = (result.data || []).map(client => ({
       ...client,
-      id: client.id.toString()
+      id: client.id.toString(),
+      clientType: client.clientType as ClientType
     }));
     
     return { 
@@ -204,10 +208,11 @@ export async function updateClient(clientId: string, clientData: Partial<Client>
     
     const result = await response.json();
     
-    // Convert id to string for consistency
+    // Convert id to string for consistency and ensure clientType is proper enum
     return {
       ...result.data,
-      id: result.data.id.toString()
+      id: result.data.id.toString(),
+      clientType: result.data.clientType as ClientType
     };
   } catch (error) {
     console.error('Error updating client:', error);
