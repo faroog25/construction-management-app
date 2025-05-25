@@ -13,18 +13,7 @@ import { SiteEngineer } from '@/services/engineerService';
 
 const editSiteEngineerSchema = z.object({
   name: z.string().min(2, 'الاسم يجب أن يكون أكثر من حرفين'),
-  email: z.string().email('البريد الإلكتروني غير صحيح'),
   phoneNumber: z.string().min(10, 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل'),
-  password: z.string().optional(),
-  confirmPassword: z.string().optional(),
-}).refine((data) => {
-  if (data.password || data.confirmPassword) {
-    return data.password === data.confirmPassword;
-  }
-  return true;
-}, {
-  message: "كلمة المرور غير متطابقة",
-  path: ["confirmPassword"],
 });
 
 type EditSiteEngineerFormValues = z.infer<typeof editSiteEngineerSchema>;
@@ -51,7 +40,6 @@ export function EditSiteEngineerModal({
     resolver: zodResolver(editSiteEngineerSchema),
     defaultValues: {
       name: engineer.name,
-      email: engineer.email,
       phoneNumber: engineer.phoneNumber,
     }
   });
@@ -60,7 +48,6 @@ export function EditSiteEngineerModal({
     if (isOpen && engineer) {
       reset({
         name: engineer.name,
-        email: engineer.email,
         phoneNumber: engineer.phoneNumber,
       });
     }
@@ -68,20 +55,7 @@ export function EditSiteEngineerModal({
 
   const onSubmit = async (data: EditSiteEngineerFormValues) => {
     try {
-      const updateData: any = {
-        id: engineer.id,
-        name: data.name,
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-      };
-
-      // Only include password if provided
-      if (data.password) {
-        updateData.password = data.password;
-        updateData.confirmPassword = data.confirmPassword;
-      }
-
-      await updateEngineer(engineer.id, updateData);
+      await updateEngineer(engineer.id, data);
       toast.success('تم تحديث بيانات المهندس بنجاح');
       onEngineerUpdated();
       onOpenChange(false);
@@ -115,19 +89,6 @@ export function EditSiteEngineerModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register('email')}
-                className={errors.email ? 'border-red-500' : ''}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="phoneNumber">رقم الهاتف</Label>
               <Input
                 id="phoneNumber"
@@ -141,30 +102,33 @@ export function EditSiteEngineerModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">كلمة المرور الجديدة (اختياري)</Label>
+              <Label htmlFor="email">البريد الإلكتروني</Label>
               <Input
-                id="password"
-                type="password"
-                {...register('password')}
-                className={errors.password ? 'border-red-500' : ''}
-                placeholder="اتركه فارغاً إذا كنت لا تريد تغيير كلمة المرور"
+                id="email"
+                type="email"
+                value={engineer.email}
+                disabled
+                className="bg-gray-100 cursor-not-allowed"
+                placeholder="البريد الإلكتروني غير قابل للتعديل"
               />
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                البريد الإلكتروني غير قابل للتعديل
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
+              <Label htmlFor="userName">اسم المستخدم</Label>
               <Input
-                id="confirmPassword"
-                type="password"
-                {...register('confirmPassword')}
-                className={errors.confirmPassword ? 'border-red-500' : ''}
+                id="userName"
+                type="text"
+                value={engineer.userName}
+                disabled
+                className="bg-gray-100 cursor-not-allowed"
+                placeholder="اسم المستخدم غير قابل للتعديل"
               />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                اسم المستخدم غير قابل للتعديل
+              </p>
             </div>
           </div>
 
