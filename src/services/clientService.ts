@@ -122,28 +122,47 @@ export async function getClientById(clientId: string): Promise<Client> {
 
 export async function createClient(clientData: Omit<Client, 'id'>): Promise<Client> {
   try {
+    console.log('Creating client with data:', clientData);
+    
     const response = await fetch(`${API_BASE_URL}/Clients`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(clientData),
     });
     
+    console.log('Create client response status:', response.status);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const result: CreateClientResponse = await response.json();
+    console.log('Create client response data:', result);
     
     if (!result.success) {
       throw new Error(result.message || 'Failed to create client');
     }
     
+    // تحقق من وجود البيانات قبل الوصول إليها
+    if (!result.data) {
+      throw new Error('No client data returned from server');
+    }
+    
     // Convert id to string for consistency and ensure clientType is proper enum
-    return {
+    const newClient: Client = {
       ...result.data,
-      id: result.data.id.toString(),
+      id: result.data.id ? result.data.id.toString() : '',
       clientType: result.data.clientType as ClientType
     };
+    
+    console.log('Processed client data:', newClient);
+    return newClient;
   } catch (error) {
     console.error('Error creating client:', error);
     throw error;
