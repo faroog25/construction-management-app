@@ -1,9 +1,8 @@
-
 import React, { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
 import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -16,10 +15,12 @@ import { NewSpecialtyModal } from '@/components/specialty/NewSpecialtyModal';
 import { EditSpecialtyModal } from '@/components/specialty/EditSpecialtyModal';
 import { DeleteSpecialtyDialog } from '@/components/specialty/DeleteSpecialtyDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export default function WorkerSpecialties() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   
   // حالات فتح وغلق النوافذ المنبثقة
   const [isNewModalOpen, setIsNewModalOpen] = React.useState(false);
@@ -64,7 +65,18 @@ export default function WorkerSpecialties() {
   return (
     <div className="container mx-auto py-8 pt-20">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">تخصصات العمال</h1>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            رجوع
+          </Button>
+          <h1 className="text-2xl font-bold">تخصصات العمال</h1>
+        </div>
         <Button onClick={() => setIsNewModalOpen(true)}>
           <Plus className="mr-2" /> إضافة تخصص
         </Button>
