@@ -149,20 +149,22 @@ export async function createClient(clientData: Omit<Client, 'id'>): Promise<Clie
       throw new Error(result.message || 'Failed to create client');
     }
     
-    // تحقق من وجود البيانات قبل الوصول إليها
-    if (!result.data) {
-      throw new Error('No client data returned from server');
+    // Check if the response has the expected structure
+    if (result.data) {
+      // Convert id to string for consistency and ensure clientType is proper enum
+      return {
+        ...result.data,
+        id: result.data.id.toString(),
+        clientType: result.data.clientType as ClientType
+      };
+    } else {
+      // If no data field, assume the result is the client data itself
+      return {
+        ...result,
+        id: result.id ? result.id.toString() : '',
+        clientType: result.clientType as ClientType
+      };
     }
-    
-    // Convert id to string for consistency and ensure clientType is proper enum
-    const newClient: Client = {
-      ...result.data,
-      id: result.data.id ? result.data.id.toString() : '',
-      clientType: result.data.clientType as ClientType
-    };
-    
-    console.log('Processed client data:', newClient);
-    return newClient;
   } catch (error) {
     console.error('Error creating client:', error);
     throw error;
@@ -222,24 +224,55 @@ export async function deleteClient(clientId: string): Promise<void> {
 
 export async function updateClient(clientId: string, clientData: Partial<Client>): Promise<Client> {
   try {
-    const response = await fetch(`${API_BASE_URL}/Clients/${clientId}`, {
+    // Prepare the request body with the required format
+    const requestBody = {
+      id: parseInt(clientId), // Convert string ID to number
+      fullName: clientData.fullName,
+      email: clientData.email,
+      phoneNumber: clientData.phoneNumber,
+      clientType: clientData.clientType
+    };
+
+    console.log('Updating client with ID:', clientId);
+    console.log('Request body:', requestBody);
+
+    const response = await fetch(`${API_BASE_URL}/Clients`, {
       method: 'PUT',
       headers: getAuthHeaders(),
-      body: JSON.stringify(clientData),
+      body: JSON.stringify(requestBody),
     });
     
+    console.log('Update client response status:', response.status);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const result = await response.json();
+    console.log('Update client response data:', result);
     
-    // Convert id to string for consistency and ensure clientType is proper enum
-    return {
-      ...result.data,
-      id: result.data.id.toString(),
-      clientType: result.data.clientType as ClientType
-    };
+    // Check if the response has the expected structure
+    if (result.data) {
+      // Convert id to string for consistency and ensure clientType is proper enum
+      return {
+        ...result.data,
+        id: result.data.id.toString(),
+        clientType: result.data.clientType as ClientType
+      };
+    } else {
+      // If no data field, assume the result is the client data itself
+      return {
+        ...result,
+        id: result.id ? result.id.toString() : clientId,
+        clientType: result.clientType as ClientType
+      };
+    }
   } catch (error) {
     console.error('Error updating client:', error);
     throw error;
