@@ -59,6 +59,10 @@ const Equipment = () => {
     setRefreshKey(prevKey => prevKey + 1);
   };
 
+  const handleAddEquipment = () => {
+    setIsAddEquipmentDialogOpen(true);
+  };
+
   return (
     <>
       <Helmet>
@@ -77,7 +81,7 @@ const Equipment = () => {
           {activeTab === 'equipment' && (
             <Button 
               className="bg-primary hover:bg-primary/90 gap-2" 
-              onClick={() => setIsAddEquipmentDialogOpen(true)}
+              onClick={handleAddEquipment}
             >
               <PlusCircle className="h-5 w-5" />
               Add Equipment
@@ -107,6 +111,7 @@ const Equipment = () => {
             <EquipmentList 
               onSelectEquipment={handleSelectEquipment} 
               onRefresh={handleEquipmentRefresh}
+              onAddEquipment={handleAddEquipment}
               key={refreshKey} // This forces a re-render when refreshKey changes
             />
           </TabsContent>

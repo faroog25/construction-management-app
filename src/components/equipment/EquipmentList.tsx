@@ -5,16 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EquipmentItem } from '@/types/equipment';
 import { getEquipment, mapApiEquipmentToEquipmentItem } from '@/services/equipmentService';
-import { Loader2, Info } from 'lucide-react';
+import { Loader2, Info, PlusCircle } from 'lucide-react';
 import EquipmentDetailsDialog from './EquipmentDetailsDialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface EquipmentListProps {
   onSelectEquipment: (equipment: EquipmentItem) => void;
   onRefresh: () => void;
+  onAddEquipment?: () => void;
 }
 
-const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefresh }) => {
+const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefresh, onAddEquipment }) => {
   const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<number | null>(null);
@@ -22,6 +23,7 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
+  const [is404Error, setIs404Error] = useState<boolean>(false);
   const [statusFilter, setStatusFilter] = useState<number | undefined>(undefined);
   const { toast } = useToast();
 
@@ -33,6 +35,7 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
     try {
       setIsLoading(true);
       setError(null);
+      setIs404Error(false);
       
       const response = await getEquipment(currentPage, 10, statusFilter);
       
@@ -44,11 +47,22 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
         setEquipment(mappedEquipment);
         setTotalPages(response.data.totalPages);
       } else {
-        setError('Failed to load equipment list');
+        // Check if it's a 404 error (no equipment found)
+        if (response.message?.includes('404') || equipment.length === 0) {
+          setIs404Error(true);
+        } else {
+          setError('Failed to load equipment list');
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching equipment:', error);
-      setError('An error occurred while loading equipment');
+      
+      // Check if it's a 404 error
+      if (error.message?.includes('404') || error.status === 404) {
+        setIs404Error(true);
+      } else {
+        setError('An error occurred while loading equipment');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -106,6 +120,27 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
     );
   }
 
+  // Handle 404 - No equipment found
+  if (is404Error || (equipment.length === 0 && !isLoading && !error)) {
+    return (
+      <div className="text-center py-16">
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-muted-foreground mb-2">لا يوجد معدات</h3>
+          <p className="text-muted-foreground">لم يتم العثور على أي معدات في النظام</p>
+        </div>
+        {onAddEquipment && (
+          <Button 
+            onClick={onAddEquipment}
+            className="bg-primary hover:bg-primary/90 gap-2"
+          >
+            <PlusCircle className="h-5 w-5" />
+            إضافة معدة جديدة
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="text-center py-16 text-destructive">
@@ -117,14 +152,6 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
         >
           Try Again
         </Button>
-      </div>
-    );
-  }
-
-  if (equipment.length === 0) {
-    return (
-      <div className="text-center py-16">
-        <p className="text-lg text-muted-foreground">No equipment found</p>
       </div>
     );
   }
