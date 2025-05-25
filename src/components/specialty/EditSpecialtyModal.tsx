@@ -53,18 +53,27 @@ export function EditSpecialtyModal({ isOpen, setIsOpen, specialty, onSuccess }: 
 
   const onSubmit = async (data: SpecialtyFormValues) => {
     if (!specialty) {
-      toast.error('لم يتم تحديد التخصص للتعديل');
+      toast({
+        title: 'لم يتم تحديد التخصص للتعديل',
+        variant: "destructive"
+      });
       return;
     }
     
     try {
       await updateSpecialty(specialty.id, data.name);
-      toast.success('تم تعديل التخصص بنجاح');
+      toast({
+        title: 'تم تعديل التخصص بنجاح',
+        variant: "default"
+      });
       form.reset();
       setIsOpen(false);
       onSuccess();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تعديل التخصص');
+      toast({
+        title: error instanceof Error ? error.message : 'حدث خطأ أثناء تعديل التخصص',
+        variant: "destructive"
+      });
     }
   };
 

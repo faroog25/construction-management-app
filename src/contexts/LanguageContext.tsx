@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// Define the available languages
-export type Language = 'en' | 'ar';
+// Define the available languages - Arabic only
+export type Language = 'ar';
 
 // Define the context type
 type LanguageContextType = {
@@ -14,10 +13,10 @@ type LanguageContextType = {
 
 // Create the context with default values
 const LanguageContext = createContext<LanguageContextType>({
-  language: 'en',
+  language: 'ar',
   setLanguage: () => {},
   t: (key) => key,
-  isRtl: false,
+  isRtl: true,
 });
 
 // Create a hook for using the language context
@@ -29,28 +28,19 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  // Get the stored language or use 'en' as default
-  const storedLanguage = localStorage.getItem('appLanguage') as Language;
-  const [language, setLanguage] = useState<Language>(storedLanguage || 'en');
+  // Always use Arabic
+  const [language] = useState<Language>('ar');
   const [translations, setTranslations] = useState<Record<string, string>>({});
-  const isRtl = language === 'ar';
+  const isRtl = true;
 
-  // Effect to load translations when language changes
+  // Effect to load Arabic translations
   useEffect(() => {
     const loadTranslations = async () => {
       try {
-        if (language === 'en') {
-          const { en } = await import('../locales/en.ts');
-          // Flatten the nested object structure for easier access
-          const flattenedTranslations = flattenObject(en);
-          setTranslations(flattenedTranslations);
-        } else if (language === 'ar') {
-          const arTranslations = await import('../locales/ar.ts');
-          // Arabic file has default export
-          setTranslations(arTranslations.default || {});
-        }
+        const arTranslations = await import('../locales/ar.ts');
+        setTranslations(arTranslations.ar || {});
       } catch (error) {
-        console.error(`Failed to load translations for ${language}:`, error);
+        console.error('Failed to load Arabic translations:', error);
         setTranslations({});
       }
     };
@@ -60,48 +50,25 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     // Save language preference to localStorage
     localStorage.setItem('appLanguage', language);
     
-    // Update document direction
-    document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
-    document.documentElement.lang = language;
+    // Update document direction to RTL
+    document.documentElement.dir = 'rtl';
+    document.documentElement.lang = 'ar';
     
-    // Add or remove RTL class for tailwind
-    if (isRtl) {
-      document.documentElement.classList.add('rtl');
-    } else {
-      document.documentElement.classList.remove('rtl');
-    }
+    // Add RTL class for tailwind
+    document.documentElement.classList.add('rtl');
 
     // Force update of UI components that depend on text direction
     window.dispatchEvent(new Event('languagechange'));
-  }, [language, isRtl]);
-
-  // Helper function to flatten nested object
-  const flattenObject = (obj: any, prefix = ''): Record<string, string> => {
-    const flattened: Record<string, string> = {};
-    
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const newKey = prefix ? `${prefix}.${key}` : key;
-        
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-          Object.assign(flattened, flattenObject(obj[key], newKey));
-        } else {
-          flattened[newKey] = obj[key];
-        }
-      }
-    }
-    
-    return flattened;
-  };
+  }, [language]);
 
   // Translation function
   const t = (key: string): string => {
     return translations[key] || key;
   };
 
-  // Handle language change
+  // Handle language change (always Arabic)
   const handleSetLanguage = (newLanguage: Language) => {
-    setLanguage(newLanguage);
+    // Always keep Arabic
   };
 
   return (

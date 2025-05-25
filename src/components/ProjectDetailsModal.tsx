@@ -11,17 +11,15 @@ interface ProjectDetailsModalProps {
 }
 
 const ProjectDetailsModal = ({ project, isOpen, onOpenChange }: ProjectDetailsModalProps) => {
-  // We're no longer adding createdAt and updatedAt as they cause errors
   const enhancedProject: Project = {
     ...project
-    // No need to add default values for createdAt and updatedAt
   };
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Project Details</DialogTitle>
+          <DialogTitle>تفاصيل المشروع</DialogTitle>
         </DialogHeader>
         <ProjectDetails project={enhancedProject} />
       </DialogContent>
