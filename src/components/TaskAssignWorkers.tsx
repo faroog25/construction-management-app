@@ -101,7 +101,7 @@ export function TaskAssignWorkers({ taskId, onWorkersAssigned }: TaskAssignWorke
     }
     
     // Last resort fallback
-    return `عامل رقم ${worker.id}`;
+    return `Worker #${worker.id}`;
   };
 
   return (

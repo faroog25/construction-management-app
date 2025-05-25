@@ -23,7 +23,7 @@ interface EditWorkerModalProps {
 }
 
 export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: EditWorkerModalProps) {
-  const { isRtl } = useLanguage();
+  const { t, isRtl } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [fetchingWorker, setFetchingWorker] = useState(false);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
@@ -64,6 +64,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
         const workerDetails = await getWorkerById(worker.id);
         console.log('Worker details fetched:', workerDetails);
         
+        // تعيين بيانات النموذج من البيانات المجلوبة
         setFormData({
           firstName: workerDetails.firstName || '',
           secondName: workerDetails.secondName || '',
@@ -92,13 +93,14 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
 
     setLoading(true);
     try {
+      // Pass the worker ID and formData directly to updateWorker
       await updateWorker(worker.id, formData);
-      toast.success('تم تحديث العامل بنجاح');
+      toast.success(t('workers.update_success'));
       onWorkerUpdated();
       onClose();
     } catch (error) {
       console.error('Error updating worker:', error);
-      toast.error(error instanceof Error ? error.message : 'فشل في تحديث العامل');
+      toast.error(error instanceof Error ? error.message : t('workers.update_error'));
     } finally {
       setLoading(false);
     }
@@ -114,7 +116,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            تعديل العامل
+            {t('workers.edit')}
           </DialogTitle>
         </DialogHeader>
         {fetchingWorker ? (

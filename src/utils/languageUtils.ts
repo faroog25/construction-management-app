@@ -1,7 +1,8 @@
 
 import { Language } from "@/contexts/LanguageContext";
 
-// Get the stored language from localStorage - always Arabic
+// Get the stored language from localStorage
 export const getLocalStorageLanguage = (): Language => {
-  return 'ar';
+  const storedLanguage = localStorage.getItem('appLanguage') as Language;
+  return storedLanguage || 'en';
 };

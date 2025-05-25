@@ -33,19 +33,8 @@ export function DocumentsFilter({
   filterType, 
   setFilterType 
 }: DocumentsFilterProps) {
-  const documentTypes = [
-    { value: 'pdf', label: 'PDF' },
-    { value: 'doc', label: 'مستندات' },
-    { value: 'image', label: 'صور' },
-    { value: 'archive', label: 'أرشيف' }
-  ];
-  
-  const statusTypes = [
-    { value: 'approved', label: 'مُعتمد' },
-    { value: 'pending', label: 'في الانتظار' },
-    { value: 'rejected', label: 'مرفوض' },
-    { value: 'draft', label: 'مسودة' }
-  ];
+  const documentTypes = ['pdf', 'doc', 'image', 'archive'];
+  const statusTypes = ['approved', 'pending', 'rejected', 'draft'];
   
   const hasActiveFilters = filterStatus !== 'all' || filterType !== 'all';
   
@@ -57,7 +46,7 @@ export function DocumentsFilter({
           hasActiveFilters && "border-primary bg-primary/5"
         )}>
           <Filter className="h-4 w-4" />
-          تصفية
+          Filters
           {hasActiveFilters && (
             <Badge className="h-5 px-1.5 ml-1 rounded-full">
               {(filterStatus !== 'all' ? 1 : 0) + (filterType !== 'all' ? 1 : 0)}
@@ -68,7 +57,7 @@ export function DocumentsFilter({
       <PopoverContent className="w-[220px] p-3" align="end">
         <div className="space-y-4">
           <div>
-            <h4 className="font-medium mb-2">الحالة</h4>
+            <h4 className="font-medium mb-2">Status</h4>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <Checkbox 
@@ -76,23 +65,23 @@ export function DocumentsFilter({
                   checked={filterStatus === 'all'} 
                   onCheckedChange={() => setFilterStatus('all')}
                 />
-                <label htmlFor="all-status" className="text-sm">الكل</label>
+                <label htmlFor="all-status" className="text-sm">All</label>
               </div>
               {statusTypes.map(status => (
-                <div key={status.value} className="flex items-center space-x-2">
+                <div key={status} className="flex items-center space-x-2">
                   <Checkbox 
-                    id={`status-${status.value}`} 
-                    checked={filterStatus === status.value} 
-                    onCheckedChange={() => setFilterStatus(status.value)}
+                    id={`status-${status}`} 
+                    checked={filterStatus === status} 
+                    onCheckedChange={() => setFilterStatus(status)}
                   />
-                  <label htmlFor={`status-${status.value}`} className="text-sm">{status.label}</label>
+                  <label htmlFor={`status-${status}`} className="text-sm capitalize">{status}</label>
                 </div>
               ))}
             </div>
           </div>
           
           <div>
-            <h4 className="font-medium mb-2">نوع المستند</h4>
+            <h4 className="font-medium mb-2">Document Type</h4>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <Checkbox 
@@ -100,16 +89,16 @@ export function DocumentsFilter({
                   checked={filterType === 'all'} 
                   onCheckedChange={() => setFilterType('all')}
                 />
-                <label htmlFor="all-types" className="text-sm">جميع الأنواع</label>
+                <label htmlFor="all-types" className="text-sm">All Types</label>
               </div>
               {documentTypes.map(type => (
-                <div key={type.value} className="flex items-center space-x-2">
+                <div key={type} className="flex items-center space-x-2">
                   <Checkbox 
-                    id={`type-${type.value}`} 
-                    checked={filterType === type.value} 
-                    onCheckedChange={() => setFilterType(type.value)}
+                    id={`type-${type}`} 
+                    checked={filterType === type} 
+                    onCheckedChange={() => setFilterType(type)}
                   />
-                  <label htmlFor={`type-${type.value}`} className="text-sm">{type.label}</label>
+                  <label htmlFor={`type-${type}`} className="text-sm capitalize">{type}</label>
                 </div>
               ))}
             </div>
@@ -129,7 +118,7 @@ export function DocumentsFilter({
               )}
               disabled={!hasActiveFilters}
             >
-              إعادة تعيين
+              Reset Filters
             </Button>
           </div>
         </div>

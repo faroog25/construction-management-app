@@ -34,7 +34,7 @@ interface NewWorkerModalProps {
 }
 
 export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerModalProps) {
-  const { isRtl } = useLanguage();
+  const { t, isRtl } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -136,7 +136,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
 
     try {
       await createWorker(formData);
-      toast.success('تم إضافة العامل بنجاح');
+      toast.success(t('workers.add_success'));
       onWorkerCreated();
       onClose();
       setFormData({
@@ -153,7 +153,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
       setErrors({});
     } catch (error) {
       console.error('Error creating worker:', error);
-      toast.error(error instanceof Error ? error.message : 'فشل في إضافة العامل');
+      toast.error(error instanceof Error ? error.message : t('workers.add_error'));
     } finally {
       setLoading(false);
     }
@@ -173,7 +173,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            إضافة عامل جديد
+            {t('workers.add_new')}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
