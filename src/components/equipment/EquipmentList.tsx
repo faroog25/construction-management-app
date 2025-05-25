@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { getEquipment, mapApiEquipmentToEquipmentItem, deleteEquipment, setEquipmentStatus } from '@/services/equipmentService';
 import { EquipmentItem } from '@/types/equipment';
-import { EquipmentDetailsDialog } from './EquipmentDetailsDialog';
+import EquipmentDetailsDialog from './EquipmentDetailsDialog';
 import { EditEquipmentDialog } from './EditEquipmentDialog';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -409,13 +409,14 @@ const EquipmentList: React.FC<EquipmentListProps> = ({
       {/* Equipment Details Dialog */}
       {selectedEquipment && (
         <EquipmentDetailsDialog
-          equipment={selectedEquipment}
+          equipmentId={parseInt(selectedEquipment.id)}
           isOpen={isDetailsDialogOpen}
           onClose={() => {
             setIsDetailsDialogOpen(false);
             setSelectedEquipment(null);
           }}
-          onBook={handleBookEquipment}
+          onEquipmentDeleted={handleRefresh}
+          onEquipmentUpdated={handleRefresh}
         />
       )}
 
