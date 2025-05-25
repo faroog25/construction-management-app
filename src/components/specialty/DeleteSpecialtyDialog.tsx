@@ -33,6 +33,9 @@ export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess 
       return;
     }
 
+    console.log('Deleting specialty with ID:', specialty.id);
+    console.log('Specialty object:', specialty);
+
     try {
       await deleteSpecialty(specialty.id);
       toast({
@@ -43,6 +46,7 @@ export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess 
       setIsOpen(false);
       onSuccess();
     } catch (error) {
+      console.error('Delete error:', error);
       toast({
         variant: "destructive",
         title: "خطأ",

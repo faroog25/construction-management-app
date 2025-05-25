@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 
 // تعريف نوع البيانات للتخصص
@@ -156,10 +155,16 @@ export async function updateSpecialty(id: number, name: string): Promise<Special
  */
 export async function deleteSpecialty(id: number): Promise<void> {
   try {
-    const response = await fetch(`${API_BASE_URL}/WorkerSpecialties/${id}`, {
+    console.log('Deleting specialty with ID:', id);
+    const deleteUrl = `${API_BASE_URL}/WorkerSpecialties/${id}`;
+    console.log('Delete URL:', deleteUrl);
+
+    const response = await fetch(deleteUrl, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
+
+    console.log('Delete response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -172,6 +177,7 @@ export async function deleteSpecialty(id: number): Promise<void> {
     }
 
     const result = await response.json();
+    console.log('Delete response data:', result);
 
     if (!result.success) {
       throw new Error(result.message || 'فشل في حذف التخصص');
