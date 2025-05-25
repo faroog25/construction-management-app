@@ -21,6 +21,7 @@ const Equipment = () => {
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [isAddEquipmentDialogOpen, setIsAddEquipmentDialogOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [equipmentError, setEquipmentError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleTabChange = (value: string) => {
@@ -46,6 +47,7 @@ const Equipment = () => {
   const handleEquipmentAdded = () => {
     // Refresh equipment list by updating the key
     setRefreshKey(prevKey => prevKey + 1);
+    setEquipmentError(null); // Clear any existing error
     
     toast({
       title: "Equipment Added",
@@ -57,6 +59,16 @@ const Equipment = () => {
   const handleEquipmentRefresh = () => {
     // Refresh equipment list by updating the key
     setRefreshKey(prevKey => prevKey + 1);
+    setEquipmentError(null); // Clear any existing error
+  };
+
+  const handleEquipmentError = (error: string) => {
+    setEquipmentError(error);
+  };
+
+  const handleAddEquipmentFromError = () => {
+    setEquipmentError(null);
+    setIsAddEquipmentDialogOpen(true);
   };
 
   return (
@@ -104,11 +116,29 @@ const Equipment = () => {
           </TabsList>
 
           <TabsContent value="equipment" className="space-y-6">
-            <EquipmentList 
-              onSelectEquipment={handleSelectEquipment} 
-              onRefresh={handleEquipmentRefresh}
-              key={refreshKey} // This forces a re-render when refreshKey changes
-            />
+            {equipmentError && equipmentError.includes('404') ? (
+              <div className="text-center py-16 border border-dashed rounded-lg bg-muted/20">
+                <Box className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">لا يوجد معدات</h3>
+                <p className="text-muted-foreground text-sm mb-6 max-w-md mx-auto">
+                  لم يتم العثور على أي معدات في النظام حتى الآن. يمكنك إضافة معدة جديدة للبدء في إدارة المعدات.
+                </p>
+                <Button 
+                  className="bg-primary hover:bg-primary/90 gap-2" 
+                  onClick={handleAddEquipmentFromError}
+                >
+                  <PlusCircle className="h-5 w-5" />
+                  إضافة معدة جديدة
+                </Button>
+              </div>
+            ) : (
+              <EquipmentList 
+                onSelectEquipment={handleSelectEquipment} 
+                onRefresh={handleEquipmentRefresh}
+                onError={handleEquipmentError}
+                key={refreshKey} // This forces a re-render when refreshKey changes
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="bookings" className="space-y-6">
