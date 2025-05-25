@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteSpecialty, Specialty } from '@/services/specialtyService';
 import { useToast } from '@/hooks/use-toast';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DeleteSpecialtyDialogProps {
   isOpen: boolean;
@@ -23,21 +22,32 @@ interface DeleteSpecialtyDialogProps {
 
 export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess }: DeleteSpecialtyDialogProps) {
   const { toast } = useToast();
-  const { t } = useLanguage();
 
   const handleDelete = async () => {
     if (!specialty) {
-      toast.error(t('No specialty selected for deletion'));
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: "لم يتم تحديد تخصص للحذف"
+      });
       return;
     }
 
     try {
       await deleteSpecialty(specialty.id);
-      toast.success(t('Specialty deleted successfully'));
+      toast({
+        variant: "default",
+        title: "نجح",
+        description: "تم حذف التخصص بنجاح"
+      });
       setIsOpen(false);
       onSuccess();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('Failed to delete specialty'));
+      toast({
+        variant: "destructive",
+        title: "خطأ",
+        description: error instanceof Error ? error.message : "فشل في حذف التخصص"
+      });
     }
   };
 
@@ -45,15 +55,15 @@ export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess 
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t('Are you sure you want to delete this specialty?')}</AlertDialogTitle>
+          <AlertDialogTitle>هل أنت متأكد من حذف هذا التخصص؟</AlertDialogTitle>
           <AlertDialogDescription>
-            {specialty ? t('This will remove the specialty "{name}" permanently.').replace('{name}', specialty.name) : t('This will remove the specialty permanently.')}
+            {specialty ? `سيتم حذف التخصص "${specialty.name}" نهائياً ولا يمكن التراجع عن هذا الإجراء.` : 'سيتم حذف التخصص نهائياً ولا يمكن التراجع عن هذا الإجراء.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-            {t('Confirm')}
+          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            تأكيد الحذف
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
