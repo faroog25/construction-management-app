@@ -222,10 +222,19 @@ export const updateEngineer = async (id: number, engineer: Partial<SiteEngineer>
   try {
     console.log('Updating engineer with data:', engineer);
     
+    // Prepare the request body with only the required fields
+    const requestBody = {
+      id: id,
+      name: engineer.name,
+      phoneNumber: engineer.phoneNumber
+    };
+
+    console.log('Request body for update:', requestBody);
+    
     const response = await fetch(`${API_BASE_URL}/SiteEngineers`, {
       method: 'PUT',
       headers: getAuthHeaders(),
-      body: JSON.stringify(engineer),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
