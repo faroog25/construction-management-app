@@ -10,8 +10,8 @@ export const clientSchema = z.object({
     .min(1, { message: "البريد الإلكتروني مطلوب" })
     .email({ message: "البريد الإلكتروني غير صالح" }),
   phoneNumber: z.string()
-    .min(10, { message: "رقم الهاتف يجب أن يكون 10 أرقام على الأقل" })
-    .max(15, { message: "رقم الهاتف يجب أن لا يتجاوز 15 رقم" })
+    .min(9, { message: "رقم الهاتف يجب أن يكون 9 أرقام على الأقل" })
+    .max(9, { message: "رقم الهاتف يجب أن لا يتجاوز 9 رقم" })
     .regex(/^[0-9+]+$/, { message: "رقم الهاتف يجب أن يحتوي على أرقام فقط" }),
   clientType: z.string()
     .refine((val) => val === ClientType.Individual || val === ClientType.Company, {
