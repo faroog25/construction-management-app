@@ -113,7 +113,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {t('workers.edit')}
@@ -122,102 +122,104 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
         {fetchingWorker ? (
           <div className="text-center py-4">جاري تحميل بيانات العامل...</div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">الاسم الأول</Label>
-              <Input
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">الاسم الأول</Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="secondName">الاسم الثاني</Label>
-              <Input
-                id="secondName"
-                name="secondName"
-                value={formData.secondName}
-                onChange={handleChange}
-                required
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="secondName">الاسم الثاني</Label>
+                <Input
+                  id="secondName"
+                  name="secondName"
+                  value={formData.secondName}
+                  onChange={handleChange}
+                  required
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="thirdName">الاسم الثالث</Label>
-              <Input
-                id="thirdName"
-                name="thirdName"
-                value={formData.thirdName}
-                onChange={handleChange}
-                required
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="thirdName">الاسم الثالث</Label>
+                <Input
+                  id="thirdName"
+                  name="thirdName"
+                  value={formData.thirdName}
+                  onChange={handleChange}
+                  required
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName">الاسم الأخير</Label>
-              <Input
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">الاسم الأخير</Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="nationalNumber">الرقم الوطني</Label>
-              <Input
-                id="nationalNumber"
-                name="nationalNumber"
-                value={formData.nationalNumber}
-                onChange={handleChange}
-                required
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="nationalNumber">الرقم الوطني</Label>
+                <Input
+                  id="nationalNumber"
+                  name="nationalNumber"
+                  value={formData.nationalNumber}
+                  onChange={handleChange}
+                  required
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                required
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+                <Input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  required
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">البريد الإلكتروني</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="address">العنوان</Label>
-              <Input
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="address">العنوان</Label>
+                <Input
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
