@@ -5,11 +5,15 @@ export async function generateProjectReport(project: { id: number }): Promise<vo
   try {
     console.log('بدء تحميل تقرير المشروع من الخادم:', project.id);
     
-    // إرسال طلب لتحميل التقرير من الخادم
+    // الحصول على رمز التوثيق من localStorage
+    const token = localStorage.getItem('authToken');
+    
+    // إرسال طلب لتحميل التقرير من الخادم مع رمز التوثيق
     const response = await fetch(`${API_BASE_URL}/Reports/downloadProjectReprot/${project.id}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/pdf',
+        'Authorization': `Bearer ${token}`,
       },
     });
 
