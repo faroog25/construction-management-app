@@ -37,16 +37,19 @@ PaginationItem.displayName = "PaginationItem"
 
 type PaginationLinkProps = {
   isActive?: boolean
+  onClick?: () => void
 } & Pick<ButtonProps, "size"> &
-  React.ComponentProps<"a">
+  Omit<React.ComponentProps<"button">, "onClick">
 
 const PaginationLink = ({
   className,
   isActive,
   size = "icon",
+  onClick,
   ...props
 }: PaginationLinkProps) => (
-  <a
+  <button
+    type="button"
     aria-current={isActive ? "page" : undefined}
     className={cn(
       buttonVariants({
@@ -55,6 +58,7 @@ const PaginationLink = ({
       }),
       className
     )}
+    onClick={onClick}
     {...props}
   />
 )
@@ -62,12 +66,14 @@ PaginationLink.displayName = "PaginationLink"
 
 const PaginationPrevious = ({
   className,
+  onClick,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
+}: Omit<React.ComponentProps<typeof PaginationLink>, "isActive">) => (
   <PaginationLink
     aria-label="الانتقال إلى الصفحة السابقة"
     size="default"
     className={cn("gap-1 pl-2.5", className)}
+    onClick={onClick}
     {...props}
   >
     <ChevronLeft className="h-4 w-4" />
@@ -78,12 +84,14 @@ PaginationPrevious.displayName = "PaginationPrevious"
 
 const PaginationNext = ({
   className,
+  onClick,
   ...props
-}: React.ComponentProps<typeof PaginationLink>) => (
+}: Omit<React.ComponentProps<typeof PaginationLink>, "isActive">) => (
   <PaginationLink
     aria-label="الانتقال إلى الصفحة التالية"
     size="default"
     className={cn("gap-1 pr-2.5", className)}
+    onClick={onClick}
     {...props}
   >
     <span>التالي</span>

@@ -123,10 +123,32 @@ export function ClientMembers() {
   };
 
   // Generate page numbers for pagination
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
-  }
+  const getVisiblePageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const halfVisible = Math.floor(maxVisiblePages / 2);
+      let start = Math.max(1, currentPage - halfVisible);
+      let end = Math.min(totalPages, start + maxVisiblePages - 1);
+      
+      if (end - start + 1 < maxVisiblePages) {
+        start = Math.max(1, end - maxVisiblePages + 1);
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
+  };
+
+  const pageNumbers = getVisiblePageNumbers();
 
   const handleDelete = async (client: Client) => {
     setClientToDelete(client);
@@ -137,11 +159,11 @@ export function ClientMembers() {
 
     try {
       await deleteClient(clientToDelete.id);
-      toast.success('Client deleted successfully');
+      toast.success('تم حذف العميل بنجاح');
       // Remove the deleted client from the state
       setClients(clients.filter(client => client.id !== clientToDelete.id));
     } catch (error) {
-      toast.error('Failed to delete client');
+      toast.error('فشل في حذف العميل');
       console.error('Error deleting client:', error);
     } finally {
       setClientToDelete(null);
@@ -166,7 +188,7 @@ export function ClientMembers() {
     try {
       // Validate form data
       if (!editFormData.fullName || !editFormData.email || !editFormData.phoneNumber) {
-        toast.error(t('client.validation_error'));
+        toast.error('يرجى ملء جميع الحقول المطلوبة');
         return;
       }
 
@@ -189,11 +211,11 @@ export function ClientMembers() {
         )
       );
       
-      toast.success(t('client.update_success'));
+      toast.success('تم تحديث العميل بنجاح');
       setClientToEdit(null);
     } catch (error) {
       console.error('Error updating client:', error);
-      toast.error(t('client.update_error'));
+      toast.error('فشل في تحديث العميل');
     }
   };
 
@@ -231,13 +253,13 @@ export function ClientMembers() {
         <CardHeader className="flex flex-row items-center justify-between bg-muted/10 pb-2">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Users className="h-5 w-5 text-primary" />
-            {t('team.clients')}
+            العملاء
           </CardTitle>
           <div className="flex items-center gap-2">
             <div className="relative w-64">
               <Search className={`absolute ${isRtl ? 'right-2.5' : 'left-2.5'} top-2.5 h-4 w-4 text-muted-foreground`} />
               <Input 
-                placeholder={t('table.search')}
+                placeholder="البحث..."
                 className={`${isRtl ? 'pr-9' : 'pl-9'} h-9 w-full`}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -378,7 +400,7 @@ export function ClientMembers() {
             </Table>
           )}
           
-          {!loading && clients.length > 0 && (
+          {!loading && clients.length > 0 && totalPages > 1 && (
             <div className="py-4 px-2">
               <Pagination>
                 <PaginationContent>
@@ -386,7 +408,6 @@ export function ClientMembers() {
                     <PaginationPrevious 
                       onClick={() => handlePageChange(currentPage - 1)} 
                       className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      aria-disabled={currentPage === 1} 
                     />
                   </PaginationItem>
                   
@@ -406,7 +427,6 @@ export function ClientMembers() {
                     <PaginationNext 
                       onClick={() => handlePageChange(currentPage + 1)}
                       className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      aria-disabled={currentPage === totalPages}
                     />
                   </PaginationItem>
                 </PaginationContent>
