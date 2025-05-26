@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -33,11 +34,11 @@ import { generateProjectReport } from '@/services/reportService';
 
 // Status configuration same as in ProjectCard for consistency
 const statusConfig = {
-  active: { label: 'Active', className: 'bg-green-100 text-green-800', icon: CheckCircle2 },
-  completed: { label: 'Completed', className: 'bg-blue-100 text-blue-800', icon: CheckCircle2 },
-  pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800', icon: Clock3 },
-  delayed: { label: 'Delayed', className: 'bg-red-100 text-red-800', icon: AlertTriangle },
-  cancelled: { label: 'Cancelled', className: 'bg-gray-100 text-gray-800', icon: XCircle },
+  active: { label: 'نشط', className: 'bg-green-100 text-green-800', icon: CheckCircle2 },
+  completed: { label: 'مكتمل', className: 'bg-blue-100 text-blue-800', icon: CheckCircle2 },
+  pending: { label: 'معلق', className: 'bg-yellow-100 text-yellow-800', icon: Clock3 },
+  delayed: { label: 'متأخر', className: 'bg-red-100 text-red-800', icon: AlertTriangle },
+  cancelled: { label: 'ملغي', className: 'bg-gray-100 text-gray-800', icon: XCircle },
 };
 
 interface ProjectDetailsInfoProps {
@@ -50,9 +51,9 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
   
   // Helper function to format dates
   const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return 'Not set';
+    if (!dateString) return 'غير محدد';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
   // Calculate days remaining or overdue
@@ -73,7 +74,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
   const { days, isOverdue } = calculateDaysRemaining();
 
   // Using the shared utility function to get status type
-  const statusType = getStatusFromCode(typeof project.status === 'number' ? project.status : 1);
+  const statusType = getStatusFromCode(project.status || 1);
   const statusInfo = statusConfig[statusType as keyof typeof statusConfig] || statusConfig.active;
   const StatusIcon = statusInfo.icon;
 
@@ -124,8 +125,8 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
       <div className="space-y-6">
         <Card className="shadow-sm border overflow-hidden">
           <CardHeader className="bg-muted/20 pb-3">
-            <CardTitle className="text-xl font-bold">Edit Project</CardTitle>
-            <CardDescription>Update project information</CardDescription>
+            <CardTitle className="text-xl font-bold">تعديل المشروع</CardTitle>
+            <CardDescription>تحديث معلومات المشروع</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <ProjectEditForm 
@@ -146,21 +147,17 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
           <CardHeader className="bg-muted/20 pb-3">
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="text-xl font-bold">Project Overview</CardTitle>
-                <CardDescription>Key information about this project</CardDescription>
+                <CardTitle className="text-xl font-bold">نظرة عامة على المشروع</CardTitle>
+                <CardDescription>المعلومات الأساسية حول هذا المشروع</CardDescription>
               </div>
-              {/* <Button size="sm" variant="outline" className="gap-1" onClick={handleEdit}>
-                <Edit className="h-3.5 w-3.5" />
-                Edit
-              </Button> */}
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div className="mb-6 pb-6 border-b">
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">الوصف</h3>
               <p className="text-base">
                 {project.description || 
-                  "This construction project involves the development and implementation of a comprehensive building plan. The project includes detailed architectural design, structural engineering, and construction management to ensure high-quality results. Our team is committed to delivering the project on time and within budget while maintaining the highest standards of safety and quality."}
+                  "هذا المشروع الإنشائي يتضمن تطوير وتنفيذ خطة بناء شاملة. يشمل المشروع التصميم المعماري المفصل والهندسة الإنشائية وإدارة البناء لضمان النتائج عالية الجودة. فريقنا ملتزم بتسليم المشروع في الوقت المحدد وضمن الميزانية مع الحفاظ على أعلى معايير السلامة والجودة."}
               </p>
             </div>
             
@@ -168,31 +165,31 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
               <div className="flex items-start gap-3">
                 <Building className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Client</p>
-                  <p className="font-medium">{project.clientName || 'Not assigned'}</p>
+                  <p className="text-sm text-muted-foreground">العميل</p>
+                  <p className="font-medium">{project.clientName || 'غير مُعيَّن'}</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Site Address</p>
-                  <p className="font-medium">{project.siteAddress || 'Not set'}</p>
+                  <p className="text-sm text-muted-foreground">عنوان الموقع</p>
+                  <p className="font-medium">{project.siteAddress || 'غير محدد'}</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
                 <UserCircle className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Site Engineer</p>
+                  <p className="text-sm text-muted-foreground">مهندس الموقع</p>
                   <p className="font-medium">
                     {project.siteEngineerName || (project.siteEngineerId ? 
-                      `Engineer #${project.siteEngineerId}` : 
-                      'Not assigned yet')}
+                      `مهندس #${project.siteEngineerId}` : 
+                      'لم يتم التعيين بعد')}
                   </p>
                   {(project.siteEngineerId || project.siteEngineerName) && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      Responsible for site supervision and quality control
+                      مسؤول عن الإشراف على الموقع ومراقبة الجودة
                     </p>
                   )}
                 </div>
@@ -201,7 +198,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
               <div className="flex items-start gap-3">
                 <Calendar className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Started On</p>
+                  <p className="text-sm text-muted-foreground">تاريخ البدء</p>
                   <p className="font-medium">{formatDate(project.startDate?.toString())}</p>
                 </div>
               </div>
@@ -210,7 +207,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <div className="flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-primary mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Geographical Coordinates</p>
+                    <p className="text-sm text-muted-foreground">الإحداثيات الجغرافية</p>
                     <p className="font-medium">{project.geographicalCoordinates}</p>
                   </div>
                 </div>
@@ -220,7 +217,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Completion Date</p>
+                    <p className="text-sm text-muted-foreground">تاريخ الإنجاز</p>
                     <p className="font-medium">{formatDate(project.completionDate)}</p>
                   </div>
                 </div>
@@ -230,7 +227,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <div className="flex items-start gap-3">
                   <Briefcase className="h-5 w-5 text-primary mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Handover Date</p>
+                    <p className="text-sm text-muted-foreground">تاريخ التسليم</p>
                     <p className="font-medium">{formatDate(project.handoverDate)}</p>
                   </div>
                 </div>
@@ -240,10 +237,10 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <div className="flex items-start gap-3">
                   <AlertOctagon className="h-5 w-5 text-primary mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Cancellation Date</p>
+                    <p className="text-sm text-muted-foreground">تاريخ الإلغاء</p>
                     <p className="font-medium">{formatDate(project.cancellationDate)}</p>
                     {project.cancellationReason && (
-                      <p className="text-sm text-muted-foreground mt-1">Reason: {project.cancellationReason}</p>
+                      <p className="text-sm text-muted-foreground mt-1">السبب: {project.cancellationReason}</p>
                     )}
                   </div>
                 </div>
@@ -254,7 +251,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
 
         <Card className="shadow-sm border overflow-hidden">
           <CardHeader className="bg-muted/20 pb-3">
-            <CardTitle className="text-lg font-bold">Project Status</CardTitle>
+            <CardTitle className="text-lg font-bold">حالة المشروع</CardTitle>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
             <div className="flex items-center justify-between">
@@ -266,7 +263,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
             
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Progress</span>
+                <span className="text-muted-foreground">التقدم</span>
                 <span className="font-medium">{progressValue}%</span>
               </div>
               <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden">
@@ -279,7 +276,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
             
             <div className="space-y-4 pt-2">
               <div className="flex justify-between items-center pb-2 border-b">
-                <span className="text-sm text-muted-foreground">Expected Completion</span>
+                <span className="text-sm text-muted-foreground">الإنجاز المتوقع</span>
                 <span className="font-medium">{formatDate(project.expectedEndDate?.toString())}</span>
               </div>
               
@@ -287,23 +284,23 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 <div className="flex items-center justify-between text-red-600 font-medium">
                   <div className="flex items-center">
                     <AlertTriangle className="h-4 w-4 mr-1.5" />
-                    <span>Overdue</span>
+                    <span>متأخر</span>
                   </div>
-                  <span>{days} days</span>
+                  <span>{days} يوم</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-between text-blue-600 font-medium">
                   <div className="flex items-center">
                     <Timer className="h-4 w-4 mr-1.5" />
-                    <span>Remaining</span>
+                    <span>متبقي</span>
                   </div>
-                  <span>{days} days</span>
+                  <span>{days} يوم</span>
                 </div>
               )}
               
               {project.completionDate && (
                 <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-sm text-muted-foreground">Actual Completion</span>
+                  <span className="text-sm text-muted-foreground">الإنجاز الفعلي</span>
                   <span className="font-medium">{formatDate(project.completionDate?.toString())}</span>
                 </div>
               )}
@@ -324,7 +321,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 ) : (
                   <>
                     <FileText className="h-4 w-4" />
-                    Generate Report
+                    إنشاء التقرير
                   </>
                 )}
               </Button>
