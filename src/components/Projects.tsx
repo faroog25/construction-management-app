@@ -70,7 +70,7 @@ interface PaginatedResponse<T> {
     currentPage: number;
     pageSize: number;
     hasNextPage: boolean;
-    hasPreveiosPage: boolean; // Note: There's a typo in the API response, kept as is
+    hasPreveiosPage: boolean;
   };
 }
 
@@ -85,23 +85,20 @@ const Projects = () => {
   const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(8); // Fixed page size of 8 projects per page
+  const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Update the clients query to handle paginated response
   const { data: clientsResponse, isLoading: isLoadingClients } = useQuery({
     queryKey: ['clients'],
     queryFn: getClients,
   });
 
-  // Get the clients array from the response
   const clients = clientsResponse?.data || [];
 
-  // Fetch projects with pagination
   const fetchPaginatedProjects = async (page: number, size: number) => {
     try {
       setLoading(true);
@@ -138,7 +135,6 @@ const Projects = () => {
     }
   };
 
-  // Load projects when component mounts or when page changes
   useEffect(() => {
     fetchPaginatedProjects(currentPage, pageSize);
   }, [currentPage, pageSize]);
@@ -192,11 +188,9 @@ const Projects = () => {
   };
 
   const handleProjectCreated = () => {
-    // Refresh the projects list after creating a new project
     fetchPaginatedProjects(currentPage, pageSize);
   };
 
-  // Filter projects based on search
   const filteredProjects = projects
     .filter(project => 
       project.projectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -211,19 +205,16 @@ const Projects = () => {
       return 0;
     });
 
-  // Handle page change
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages = [];
     const maxPagesVisible = 5;
     
-    // If we have 5 or fewer pages, show all page numbers
     if (totalPages <= maxPagesVisible) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -231,34 +222,27 @@ const Projects = () => {
       return pages;
     }
     
-    // Always show first page
     pages.push(1);
     
-    // Calculate the middle range of pages to show
     let startPage = Math.max(currentPage - Math.floor(maxPagesVisible / 2), 2);
     let endPage = Math.min(startPage + maxPagesVisible - 3, totalPages - 1);
     
-    // Adjust if we're near the end
     if (endPage - startPage < maxPagesVisible - 3) {
       startPage = Math.max(totalPages - maxPagesVisible + 2, 2);
     }
     
-    // Add ellipsis after page 1 if needed
     if (startPage > 2) {
-      pages.push(-1); // -1 represents ellipsis
+      pages.push(-1);
     }
     
-    // Add the middle pages
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
     
-    // Add ellipsis before the last page if needed
     if (endPage < totalPages - 1) {
-      pages.push(-2); // -2 represents ellipsis
+      pages.push(-2);
     }
     
-    // Always show last page
     pages.push(totalPages);
     
     return pages;
@@ -266,25 +250,24 @@ const Projects = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">المشاريع</h1>
+      <h1 className="text-2xl font-bold mb-4">Projects</h1>
       
       <div className="mb-4 flex flex-col sm:flex-row justify-between gap-2">
         <div className="flex items-center">
           <Input
-            placeholder="البحث عن المشاريع..."
+            placeholder="Search projects..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full sm:w-64"
           />
         </div>
         <Button onClick={handleAddProject}>
-          <Plus className="mr-2 h-4 w-4" /> إضافة مشروع
+          <Plus className="mr-2 h-4 w-4" /> Add Project
         </Button>
       </div>
       
       {loading && <div className="flex justify-center my-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
       {error && <div className="text-red-500 text-center py-4">{error}</div>}
-      
       {!loading && !error && (
         <div>
           {projects.length === 0 ? (
@@ -307,14 +290,14 @@ const Projects = () => {
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  لا يوجد مشاريع
+                  No Projects
                 </h3>
                 <p className="text-gray-500 mb-6">
-                  ابدأ بإنشاء مشروعك الأول لإدارة أعمال البناء بكفاءة
+                  Start by creating your first project to efficiently manage construction work
                 </p>
                 <Button onClick={handleAddProject} size="lg" className="inline-flex items-center">
                   <Plus className="mr-2 h-5 w-5" />
-                  إضافة مشروع جديد
+                  Add New Project
                 </Button>
               </div>
             </div>
@@ -370,19 +353,19 @@ const Projects = () => {
                                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                 >
                                   <Trash2 className="h-3 w-3 ml-1" />
-                                  حذف
+                                  Delete
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    لا يمكن التراجع عن هذا الإجراء. سيتم حذف المشروع نهائياً.
+                                    This action cannot be undone. The project will be permanently deleted.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel onClick={cancelDeleteProject}>إلغاء</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => confirmDeleteProject()} className="bg-red-600">حذف</AlertDialogAction>
+                                  <AlertDialogCancel onClick={cancelDeleteProject}>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => confirmDeleteProject()} className="bg-red-600">Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>

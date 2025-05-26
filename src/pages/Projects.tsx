@@ -255,8 +255,8 @@ const Projects = () => {
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">المشاريع</h1>
-            <p className="text-muted-foreground mt-1">إدارة ومراقبة جميع مشاريع البناء الخاصة بك</p>
+            <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
+            <p className="text-muted-foreground mt-1">Manage and monitor all your construction projects</p>
           </div>
           <div className="mt-4 lg:mt-0">
             <Button 
@@ -264,18 +264,17 @@ const Projects = () => {
               onClick={handleAddProject}
             >
               <Plus className="mr-2 h-4 w-4" />
-              مشروع جديد
+              New Project
             </Button>
           </div>
         </div>
-        
         <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="بحث في المشاريع..."
+                  placeholder="Search projects..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -286,19 +285,19 @@ const Projects = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex items-center gap-2">
                       <SlidersHorizontal className="h-4 w-4" />
-                      <span>ترتيب</span>
+                      <span>Sort</span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setSortOption('newest')}>
-                      الأحدث أولاً
+                      Newest first
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setSortOption('progress')}>
-                      حسب التقدم
+                      By progress
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setSortOption('dueDate')}>
-                      حسب تاريخ الاستحقاق
+                      By due date
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -309,17 +308,17 @@ const Projects = () => {
         
         <Tabs defaultValue="all" className="space-y-4" onValueChange={setActiveTab} value={activeTab}>
           <TabsList>
-            <TabsTrigger value="all">الكل</TabsTrigger>
-            <TabsTrigger value="active">قيد التنفيذ</TabsTrigger>
-            <TabsTrigger value="pending">معلق</TabsTrigger>
-            <TabsTrigger value="completed">مكتمل</TabsTrigger>
-            <TabsTrigger value="canceled">ملغي</TabsTrigger>
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="canceled">Canceled</TabsTrigger>
           </TabsList>
           
           {isLoading && (
             <div className="flex flex-col justify-center items-center py-20">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="mt-4 text-lg text-muted-foreground">جاري تحميل المشاريع...</span>
+              <span className="mt-4 text-lg text-muted-foreground">Loading projects...</span>
             </div>
           )}
           
@@ -327,10 +326,10 @@ const Projects = () => {
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="flex items-center text-destructive">
                 <AlertCircle className="w-5 h-5 mr-2" />
-                <p>فشل في تحميل المشاريع</p>
+                <p>Failed to load projects</p>
               </div>
               <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}>
-                حاول مرة أخرى
+                Try again
               </Button>
             </div>
           )}
@@ -358,7 +357,7 @@ const Projects = () => {
               
               {filteredProjects.length === 0 && !isLoading && (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">لا توجد مشاريع</p>
+                  <p className="text-muted-foreground">No projects found</p>
                 </div>
               )}
 
@@ -385,7 +384,7 @@ const Projects = () => {
                     </PaginationContent>
                   </Pagination>
                   <div className="text-center mt-2 text-sm text-muted-foreground">
-                    عرض الصفحة {currentPage} من {totalPages} ({totalItems} مشروع)
+                    Showing page {currentPage} of {totalPages} ({totalItems} projects)
                   </div>
                 </div>
               )}
