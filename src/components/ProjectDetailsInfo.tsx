@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Project, getStatusFromCode } from '@/services/projectService';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -106,22 +105,14 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
   const handleGenerateReport = async () => {
     try {
       setIsGeneratingReport(true);
-      toast.info("جاري إنشاء التقرير، يرجى الانتظار...");
+      toast.info("جاري تحميل التقرير، يرجى الانتظار...");
       
-      const pdfDataUri = await generateProjectReport(project);
+      await generateProjectReport(project);
       
-      // إنشاء رابط مؤقت للتنزيل
-      const link = document.createElement('a');
-      link.href = pdfDataUri;
-      link.download = `تقرير_${project.projectName.replace(/\s+/g, '_')}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast.success("تم إنشاء التقرير بنجاح");
+      toast.success("تم تحميل التقرير بنجاح");
     } catch (error) {
-      console.error('خطأ أثناء إنشاء التقرير:', error);
-      toast.error("فشل إنشاء التقرير، الرجاء المحاولة مرة أخرى");
+      console.error('خطأ أثناء تحميل التقرير:', error);
+      toast.error("فشل تحميل التقرير، الرجاء المحاولة مرة أخرى");
     } finally {
       setIsGeneratingReport(false);
     }
@@ -328,7 +319,7 @@ const ProjectDetailsInfo = ({ project }: ProjectDetailsInfoProps) => {
                 {isGeneratingReport ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    جاري إنشاء التقرير...
+                    جاري تحميل التقرير...
                   </>
                 ) : (
                   <>
