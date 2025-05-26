@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { getClients, deleteClient, updateClient, Client } from '../services/clientService';
 import { ClientType } from '@/types/client';
@@ -69,29 +68,43 @@ export function ClientMembers() {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [hasPreviousPage, setHasPreviousPage] = useState(false);
 
   const fetchClients = async () => {
     try {
       setLoading(true);
-      setError(null); // Clear any previous errors
+      setError(null);
+      console.log('Fetching clients with pagination:', {
+        pageNumber: currentPage,
+        pageSize: itemsPerPage,
+        searchTerm: searchQuery,
+        sortBy: sortColumn,
+        sortDirection
+      });
+
       const response = await getClients(currentPage, itemsPerPage, searchQuery, sortColumn, sortDirection);
+      console.log('API Response:', response);
+      
       setClients(response.items);
       setTotalPages(response.totalPages);
       setTotalItems(response.totalItems);
+      setHasNextPage(response.hasNextPage || false);
+      setHasPreviousPage(response.hasPreviousPage || false);
     } catch (err) {
       console.error('Error fetching clients:', err);
-      // Only set error for actual unexpected errors, not for "no data" scenarios
       if (err instanceof Error && !err.message.includes('404')) {
         setError(err.message);
         toast.error('حدث خطأ في جلب بيانات العملاء');
       } else {
-        // For 404 or "no data" scenarios, just set empty state
         setClients([]);
         setTotalPages(1);
         setTotalItems(0);
+        setHasNextPage(false);
+        setHasPreviousPage(false);
       }
     } finally {
       setLoading(false);
@@ -109,20 +122,23 @@ export function ClientMembers() {
       setSortColumn(column);
       setSortDirection('asc');
     }
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when search changes
+    setCurrentPage(1);
   };
 
   const handlePageChange = (pageNumber: number) => {
-    if (pageNumber < 1 || pageNumber > totalPages) return;
+    console.log('Page change requested:', pageNumber);
+    if (pageNumber < 1 || pageNumber > totalPages) {
+      console.log('Invalid page number:', pageNumber, 'totalPages:', totalPages);
+      return;
+    }
     setCurrentPage(pageNumber);
   };
 
-  // Generate page numbers for pagination
   const getVisiblePageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
@@ -160,8 +176,10 @@ export function ClientMembers() {
     try {
       await deleteClient(clientToDelete.id);
       toast.success('تم حذف العميل بنجاح');
-      // Remove the deleted client from the state
       setClients(clients.filter(client => client.id !== clientToDelete.id));
+      setTotalItems(totalItems - 1);
+      // Refresh the data to get updated pagination
+      fetchClients();
     } catch (error) {
       toast.error('فشل في حذف العميل');
       console.error('Error deleting client:', error);
@@ -186,13 +204,11 @@ export function ClientMembers() {
     if (!clientToEdit) return;
 
     try {
-      // Validate form data
       if (!editFormData.fullName || !editFormData.email || !editFormData.phoneNumber) {
         toast.error('يرجى ملء جميع الحقول المطلوبة');
         return;
       }
 
-      // Prepare the update data
       const updateData = {
         fullName: editFormData.fullName,
         email: editFormData.email,
@@ -204,7 +220,6 @@ export function ClientMembers() {
 
       const updatedClient = await updateClient(clientToEdit.id, updateData);
       
-      // Update the clients list with the new data
       setClients(prevClients => 
         prevClients.map(client => 
           client.id === clientToEdit.id ? { ...client, ...updatedClient } : client
@@ -380,7 +395,7 @@ export function ClientMembers() {
                     <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
                       <div 
                         className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}
-                        onClick={(e) => e.stopPropagation()} // Prevent row click when clicking buttons
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Button variant="outline" size="xs" onClick={() => handleEdit(client)}>
                           <Edit className="h-4 w-4" />
@@ -402,35 +417,40 @@ export function ClientMembers() {
           
           {!loading && clients.length > 0 && totalPages > 1 && (
             <div className="py-4 px-2">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => handlePageChange(currentPage - 1)} 
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                  
-                  {pageNumbers.map(number => (
-                    <PaginationItem key={number}>
-                      <PaginationLink 
-                        isActive={number === currentPage}
-                        onClick={() => handlePageChange(number)}
-                        className="cursor-pointer"
-                      >
-                        {number}
-                      </PaginationLink>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500">
+                  عرض {((currentPage - 1) * itemsPerPage) + 1} إلى {Math.min(currentPage * itemsPerPage, totalItems)} من {totalItems} عنصر
+                </div>
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => handlePageChange(currentPage - 1)} 
+                        className={!hasPreviousPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
                     </PaginationItem>
-                  ))}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                    
+                    {pageNumbers.map(number => (
+                      <PaginationItem key={number}>
+                        <PaginationLink 
+                          isActive={number === currentPage}
+                          onClick={() => handlePageChange(number)}
+                          className="cursor-pointer"
+                        >
+                          {number}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        className={!hasNextPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             </div>
           )}
         </CardContent>

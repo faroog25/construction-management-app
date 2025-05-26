@@ -1,3 +1,4 @@
+
 import { API_BASE_URL } from '@/config/api';
 import { ClientType } from '@/types/client';
 
@@ -102,7 +103,6 @@ export async function getClientById(clientId: string): Promise<Client> {
       throw new Error(result.message || 'Failed to fetch client');
     }
     
-    // Convert id to string for consistency and ensure clientType is proper enum
     const clientData = {
       ...result.data,
       id: result.data.id.toString(),
@@ -149,21 +149,14 @@ export async function createClient(clientData: Omit<Client, 'id'>): Promise<Clie
       throw new Error(result.message || 'Failed to create client');
     }
     
-    // Check if the response has the expected structure
     if (result.data) {
-      // Convert id to string for consistency and ensure clientType is proper enum
       return {
         ...result.data,
         id: result.data.id.toString(),
         clientType: result.data.clientType as ClientType
       };
     } else {
-      // If no data field, assume the result is the client data itself
-      return {
-        ...result,
-        id: result.id ? result.id.toString() : '',
-        clientType: result.clientType as ClientType
-      };
+      throw new Error('Invalid response format from server');
     }
   } catch (error) {
     console.error('Error creating client:', error);
@@ -171,9 +164,49 @@ export async function createClient(clientData: Omit<Client, 'id'>): Promise<Clie
   }
 }
 
-export async function getClients(page?: number, pageSize?: number, searchTerm?: string, clientType?: string, sortBy?: string): Promise<{ items: Client[]; totalPages: number; totalItems: number; data: Client[] }> {
+export async function getClients(
+  pageNumber?: number, 
+  pageSize?: number, 
+  searchTerm?: string, 
+  sortBy?: string, 
+  sortDirection?: string
+): Promise<{ 
+  items: Client[]; 
+  totalPages: number; 
+  totalItems: number; 
+  hasNextPage: boolean; 
+  hasPreviousPage: boolean;
+}> {
   try {
-    const response = await fetch(`${API_BASE_URL}/Clients`, {
+    // Build query parameters
+    const params = new URLSearchParams();
+    
+    if (pageNumber) {
+      params.append('pageNumber', pageNumber.toString());
+    }
+    
+    if (pageSize) {
+      params.append('pageSize', pageSize.toString());
+    }
+    
+    if (searchTerm && searchTerm.trim()) {
+      params.append('searchTerm', searchTerm.trim());
+    }
+    
+    if (sortBy) {
+      params.append('sortBy', sortBy);
+    }
+    
+    if (sortDirection) {
+      params.append('sortDirection', sortDirection);
+    }
+
+    const queryString = params.toString();
+    const url = queryString ? `${API_BASE_URL}/Clients?${queryString}` : `${API_BASE_URL}/Clients`;
+    
+    console.log('Fetching clients from URL:', url);
+    
+    const response = await fetch(url, {
       headers: getAuthHeaders(),
     });
     
@@ -182,12 +215,12 @@ export async function getClients(page?: number, pageSize?: number, searchTerm?: 
     }
     
     const result: ClientsResponse = await response.json();
+    console.log('API Response:', result);
     
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch clients');
     }
     
-    // Convert ids to strings for consistency and ensure clientType is proper enum
     const clients = (result.data.items || []).map(client => ({
       ...client,
       id: client.id.toString(),
@@ -195,10 +228,11 @@ export async function getClients(page?: number, pageSize?: number, searchTerm?: 
     }));
     
     return { 
-      data: clients,
       items: clients,
       totalPages: result.data.totalPages || 1,
-      totalItems: result.data.totalItems || clients.length
+      totalItems: result.data.totalItems || clients.length,
+      hasNextPage: result.data.hasNextPage || false,
+      hasPreviousPage: result.data.hasPreveiosPage || false, // Note: API has typo "hasPreveiosPage"
     };
   } catch (error) {
     console.error('Error fetching clients:', error);
@@ -224,9 +258,8 @@ export async function deleteClient(clientId: string): Promise<void> {
 
 export async function updateClient(clientId: string, clientData: Partial<Client>): Promise<Client> {
   try {
-    // Prepare the request body with the required format
     const requestBody = {
-      id: parseInt(clientId), // Convert string ID to number
+      id: parseInt(clientId),
       fullName: clientData.fullName,
       email: clientData.email,
       phoneNumber: clientData.phoneNumber,
@@ -257,16 +290,13 @@ export async function updateClient(clientId: string, clientData: Partial<Client>
     const result = await response.json();
     console.log('Update client response data:', result);
     
-    // Check if the response has the expected structure
     if (result.data) {
-      // Convert id to string for consistency and ensure clientType is proper enum
       return {
         ...result.data,
         id: result.data.id.toString(),
         clientType: result.data.clientType as ClientType
       };
     } else {
-      // If no data field, assume the result is the client data itself
       return {
         ...result,
         id: result.id ? result.id.toString() : clientId,
