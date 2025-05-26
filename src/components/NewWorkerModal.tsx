@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
@@ -170,134 +169,132 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {t('workers.add_new')}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">الاسم الأول</Label>
-              <Input
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className={errors.firstName ? "border-red-500" : ""}
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-              {errors.firstName && (
-                <p className="text-sm text-red-500">{errors.firstName}</p>
-              )}
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">الاسم الأول</Label>
+            <Input
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              className={errors.firstName ? "border-red-500" : ""}
+              dir={isRtl ? 'rtl' : 'ltr'}
+            />
+            {errors.firstName && (
+              <p className="text-sm text-red-500">{errors.firstName}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="secondName">الاسم الثاني</Label>
-              <Input
-                id="secondName"
-                name="secondName"
-                value={formData.secondName}
-                onChange={handleChange}
-                className={errors.secondName ? "border-red-500" : ""}
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-              {errors.secondName && (
-                <p className="text-sm text-red-500">{errors.secondName}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="secondName">الاسم الثاني</Label>
+            <Input
+              id="secondName"
+              name="secondName"
+              value={formData.secondName}
+              onChange={handleChange}
+              className={errors.secondName ? "border-red-500" : ""}
+              dir={isRtl ? 'rtl' : 'ltr'}
+            />
+            {errors.secondName && (
+              <p className="text-sm text-red-500">{errors.secondName}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="thirdName">الاسم الثالث</Label>
-              <Input
-                id="thirdName"
-                name="thirdName"
-                value={formData.thirdName}
-                onChange={handleChange}
-                className={errors.thirdName ? "border-red-500" : ""}
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-              {errors.thirdName && (
-                <p className="text-sm text-red-500">{errors.thirdName}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="thirdName">الاسم الثالث</Label>
+            <Input
+              id="thirdName"
+              name="thirdName"
+              value={formData.thirdName}
+              onChange={handleChange}
+              className={errors.thirdName ? "border-red-500" : ""}
+              dir={isRtl ? 'rtl' : 'ltr'}
+            />
+            {errors.thirdName && (
+              <p className="text-sm text-red-500">{errors.thirdName}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName">الاسم الأخير</Label>
-              <Input
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className={errors.lastName ? "border-red-500" : ""}
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-              {errors.lastName && (
-                <p className="text-sm text-red-500">{errors.lastName}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="lastName">الاسم الأخير</Label>
+            <Input
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className={errors.lastName ? "border-red-500" : ""}
+              dir={isRtl ? 'rtl' : 'ltr'}
+            />
+            {errors.lastName && (
+              <p className="text-sm text-red-500">{errors.lastName}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="nationalNumber">الرقم الوطني</Label>
-              <Input
-                id="nationalNumber"
-                name="nationalNumber"
-                value={formData.nationalNumber}
-                onChange={handleChange}
-                className={errors.nationalNumber ? "border-red-500" : ""}
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-              {errors.nationalNumber && (
-                <p className="text-sm text-red-500">{errors.nationalNumber}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="nationalNumber">الرقم الوطني</Label>
+            <Input
+              id="nationalNumber"
+              name="nationalNumber"
+              value={formData.nationalNumber}
+              onChange={handleChange}
+              className={errors.nationalNumber ? "border-red-500" : ""}
+              dir={isRtl ? 'rtl' : 'ltr'}
+            />
+            {errors.nationalNumber && (
+              <p className="text-sm text-red-500">{errors.nationalNumber}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className={errors.phoneNumber ? "border-red-500" : ""}
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-              {errors.phoneNumber && (
-                <p className="text-sm text-red-500">{errors.phoneNumber}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+            <Input
+              id="phoneNumber"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className={errors.phoneNumber ? "border-red-500" : ""}
+              dir={isRtl ? 'rtl' : 'ltr'}
+            />
+            {errors.phoneNumber && (
+              <p className="text-sm text-red-500">{errors.phoneNumber}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={errors.email ? "border-red-500" : ""}
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">البريد الإلكتروني</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={errors.email ? "border-red-500" : ""}
+              dir={isRtl ? 'rtl' : 'ltr'}
+            />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="address">العنوان</Label>
-              <Input
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className={errors.address ? "border-red-500" : ""}
-                dir={isRtl ? 'rtl' : 'ltr'}
-              />
-              {errors.address && (
-                <p className="text-sm text-red-500">{errors.address}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="address">العنوان</Label>
+            <Input
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className={errors.address ? "border-red-500" : ""}
+              dir={isRtl ? 'rtl' : 'ltr'}
+            />
+            {errors.address && (
+              <p className="text-sm text-red-500">{errors.address}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -339,4 +336,4 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
       </DialogContent>
     </Dialog>
   );
-}
+} 
