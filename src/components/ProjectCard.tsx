@@ -94,10 +94,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         </h3>
         
         <div className="space-y-2">
-          {/* معلومات العميل */}
+          {/* Client Information */}
           <div className="flex items-center gap-2 text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg">
             <Building className="h-4 w-4" />
-            <p className="text-sm font-medium">{client_name || 'لم يتم تعيين عميل'}</p>
+            <p className="text-sm font-medium">{client_name || 'No client assigned'}</p>
           </div>
           
 
@@ -108,7 +108,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
                 <BarChart2 className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">التقدم</span>
+                <span className="text-sm font-medium">Progress</span>
               </div>
               <span className="text-sm font-bold">{progress}%</span>
             </div>
@@ -128,7 +128,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           className="w-full hover:bg-primary hover:text-white transition-all duration-300 group border-2" 
           onClick={handleClick}
         >
-          عرض التفاصيل
+          View Details
           <ChevronRight className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Button>
       </CardFooter>

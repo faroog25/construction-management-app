@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -33,14 +32,14 @@ import { getSiteEngineerNames, SiteEngineerName } from '@/services/siteEngineerS
 
 // Schema for the new project form - only required fields
 const projectSchema = z.object({
-  projectName: z.string().min(1, 'اسم المشروع مطلوب'),
+  projectName: z.string().min(1, 'Project name is required'),
   description: z.string().optional(),
-  siteAddress: z.string().min(1, 'عنوان الموقع مطلوب'),
+  siteAddress: z.string().min(1, 'Site address is required'),
   geographicalCoordinates: z.string().optional(),
   siteEngineerId: z.number().optional(),
   clientId: z.number().optional(),
-  startDate: z.string().min(1, 'تاريخ البدء مطلوب'),
-  expectedEndDate: z.string().min(1, 'تاريخ الانتهاء المتوقع مطلوب'),
+  startDate: z.string().min(1, 'Start date is required'),
+  expectedEndDate: z.string().min(1, 'Expected end date is required'),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -95,7 +94,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
       setClients(clientNames);
     } catch (error) {
       console.error('Error loading clients:', error);
-      toast.error('فشل في جلب قائمة العملاء');
+      toast.error('Failed to load client list');
     } finally {
       setIsLoadingClients(false);
     }
@@ -108,7 +107,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
       setSiteEngineers(engineerNames);
     } catch (error) {
       console.error('Error loading site engineers:', error);
-      toast.error('فشل في جلب قائمة مهندسي الموقع');
+      toast.error('Failed to load site engineers list');
     } finally {
       setIsLoadingSiteEngineers(false);
     }
@@ -145,19 +144,19 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
           statusText: response.statusText,
           body: errorText
         });
-        throw new Error(`فشل في إنشاء المشروع. (HTTP ${response.status})`);
+        throw new Error(`Failed to create project. (HTTP ${response.status})`);
       }
 
       const result = await response.json();
       console.log('Project created successfully:', result);
       
-      toast.success('تم إنشاء المشروع بنجاح');
+      toast.success('Project created successfully');
       onOpenChange(false);
       onProjectCreated?.();
       form.reset();
     } catch (error) {
       console.error('Error creating project:', error);
-      toast.error(error instanceof Error ? error.message : 'فشل إنشاء المشروع. الرجاء المحاولة مرة أخرى.');
+      toast.error(error instanceof Error ? error.message : 'Failed to create project. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -175,7 +174,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>إنشاء مشروع جديد</DialogTitle>
+          <DialogTitle>Create New Project</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -184,9 +183,9 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
               name="projectName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم المشروع *</FormLabel>
+                  <FormLabel>Project Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل اسم المشروع" {...field} />
+                    <Input placeholder="Enter project name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -198,9 +197,9 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الوصف</FormLabel>
+                  <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل وصف المشروع" {...field} />
+                    <Input placeholder="Enter project description" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -212,9 +211,9 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
               name="siteAddress"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>عنوان الموقع *</FormLabel>
+                  <FormLabel>Site Address *</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل عنوان الموقع" {...field} />
+                    <Input placeholder="Enter site address" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -226,9 +225,9 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
               name="geographicalCoordinates"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الإحداثيات الجغرافية</FormLabel>
+                  <FormLabel>Geographical Coordinates</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل الإحداثيات الجغرافية" {...field} />
+                    <Input placeholder="Enter geographical coordinates" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -241,7 +240,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 name="clientId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>العميل</FormLabel>
+                    <FormLabel>Client</FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
                       value={field.value?.toString() || ''}
@@ -250,7 +249,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={
-                            isLoadingClients ? "جاري التحميل..." : "اختر العميل"
+                            isLoadingClients ? "Loading..." : "Select client"
                           } />
                         </SelectTrigger>
                       </FormControl>
@@ -265,7 +264,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                         ))}
                         {clients.length === 0 && !isLoadingClients && (
                           <SelectItem value="" disabled>
-                            لا توجد عملاء متاحين
+                            No clients available
                           </SelectItem>
                         )}
                       </SelectContent>
@@ -280,7 +279,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 name="siteEngineerId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>مهندس الموقع</FormLabel>
+                    <FormLabel>Site Engineer</FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} 
                       value={field.value?.toString() || ''}
@@ -304,7 +303,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                         ))}
                         {siteEngineers.length === 0 && !isLoadingSiteEngineers && (
                           <SelectItem value="" disabled>
-                            لا توجد مهندسين متاحين
+                            No engineers available
                           </SelectItem>
                         )}
                       </SelectContent>
@@ -321,7 +320,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 name="startDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>تاريخ البدء *</FormLabel>
+                    <FormLabel>Start Date *</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -335,7 +334,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                             {field.value ? (
                               format(new Date(field.value), "dd/MM/yyyy")
                             ) : (
-                              <span>اختر التاريخ</span>
+                              <span>Select Date</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -362,7 +361,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 name="expectedEndDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>تاريخ الانتهاء المتوقع *</FormLabel>
+                    <FormLabel>Expected End Date *</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -376,7 +375,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                             {field.value ? (
                               format(new Date(field.value), "dd/MM/yyyy")
                             ) : (
-                              <span>اختر التاريخ</span>
+                              <span>Select Date</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -409,7 +408,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 }}
                 disabled={isSubmitting}
               >
-                إلغاء
+                Cancel
               </Button>
               <Button 
                 type="submit" 
@@ -418,10 +417,10 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    جاري الإنشاء...
+                    Creating...
                   </>
                 ) : (
-                  'إنشاء المشروع'
+                  'Create Project'
                 )}
               </Button>
             </div>

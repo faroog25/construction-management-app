@@ -57,14 +57,13 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
       const data = await getTaskById(taskId);
       setTaskData(data);
       
-      // Fetch assigned workers separately using the API endpoint
       await fetchAssignedWorkers(taskId);
       await fetchTaskDocuments(taskId);
     } catch (error) {
       console.error('Error fetching task details:', error);
       toast({
-        title: "خطأ",
-        description: "فشل في تحميل تفاصيل المهمة",
+        title: "Error",
+        description: "Failed to load task details",
         variant: "destructive"
       });
     } finally {
@@ -104,58 +103,49 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
     }
   }, [isOpen, taskId]);
 
-  // Handler when workers are successfully assigned
   const handleWorkersAssigned = () => {
     if (taskId) {
       fetchAssignedWorkers(taskId);
     }
   };
 
-  // Handler when task is successfully edited
   const handleTaskUpdated = () => {
     fetchTaskDetails();
   };
 
-  // Handle document upload success
   const handleDocumentUploaded = () => {
     if (taskId) {
       fetchTaskDocuments(taskId);
     }
   };
 
-  // Handle document update success
   const handleDocumentUpdated = () => {
     if (taskId) {
       fetchTaskDocuments(taskId);
     }
   };
 
-  // Handle task completion or unchecking
   const handleToggleTaskCompletion = async () => {
     if (!taskId || !taskData) return;
     
     setIsCompleting(true);
     
     try {
-      // Determine if we need to complete or uncheck the task
       const isTaskCompleted = taskData.data.isCompleted;
       
       let result;
       if (isTaskCompleted) {
-        // Task is already completed, uncheck it
         result = await uncheckTask(taskId);
       } else {
-        // Task is not completed, complete it
         result = await completeTask(taskId);
       }
       
       if (result.success) {
         toast({
-          title: "تم بنجاح",
-          description: isTaskCompleted ? "تم إلغاء اكتمال المهمة بنجاح" : "تم إكمال المهمة بنجاح"
+          title: "Success",
+          description: isTaskCompleted ? "Task uncompleted successfully" : "Task completed successfully"
         });
         
-        // Update the local state to show the task as completed/uncompleted
         setTaskData(prev => {
           if (!prev) return null;
           return {
@@ -168,16 +158,16 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
         });
       } else {
         toast({
-          title: "خطأ",
-          description: result.message || (isTaskCompleted ? "فشل في إلغاء اكتمال المهمة" : "فشل في إكمال المهمة"),
+          title: "Error",
+          description: result.message || (isTaskCompleted ? "Failed to uncomplete task" : "Failed to complete task"),
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error toggling task completion:', error);
       toast({
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في تغيير حالة المهمة",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to change task status",
         variant: "destructive"
       });
     } finally {
@@ -187,11 +177,8 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
 
   if (!taskId) return null;
 
-  // Get the projectId from taskData for document upload
-  // If projectId is not available, default to 0
   const projectId = taskData?.data?.projectId || 0;
   
-  // Check if projectId is available for debugging
   console.log("Task Details - Project ID:", projectId);
 
   return (
@@ -200,13 +187,13 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-2xl font-bold">تفاصيل المهمة</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">Task Details</DialogTitle>
               <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 rounded-full">
                 <X className="h-4 w-4" />
               </Button>
             </div>
             <DialogDescription className="text-base">
-              عرض تفاصيل المهمة، العمال والمستندات
+              View task details, workers and documents
             </DialogDescription>
           </DialogHeader>
 
@@ -217,9 +204,9 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
           ) : taskData?.data ? (
             <Tabs defaultValue="details" className="w-full mt-6">
               <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="details" className="text-sm">تفاصيل المهمة</TabsTrigger>
-                <TabsTrigger value="workers" className="text-sm">العمال</TabsTrigger>
-                <TabsTrigger value="documents" className="text-sm">المستندات</TabsTrigger>
+                <TabsTrigger value="details" className="text-sm">Task Details</TabsTrigger>
+                <TabsTrigger value="workers" className="text-sm">Workers</TabsTrigger>
+                <TabsTrigger value="documents" className="text-sm">Documents</TabsTrigger>
               </TabsList>
               
               <TabsContent value="details" className="space-y-8">
@@ -230,11 +217,11 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                         <div className="flex items-center gap-3">
                           <h3 className="text-2xl font-semibold">{taskData.data.name}</h3>
                           <Badge variant={taskData.data.isCompleted ? "success" : "warning"} className="text-sm py-1 px-3">
-                            {taskData.data.isCompleted ? "مكتملة" : "جارية"}
+                            {taskData.data.isCompleted ? "Completed" : "In Progress"}
                           </Badge>
                         </div>
                         <p className="text-gray-600">
-                          {taskData.data.description || 'لا يوجد وصف لهذه المهمة'}
+                          {taskData.data.description || 'No description available for this task'}
                         </p>
                       </div>
                       
@@ -246,7 +233,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                           className="h-10 px-4 flex items-center gap-2"
                         >
                           <Pencil className="h-4 w-4" />
-                          تعديل المهمة
+                          Edit Task
                         </Button>
 
                         <div className="flex items-center gap-3 bg-gray-50 p-2 px-4 rounded-lg border">
@@ -265,7 +252,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                             <div className="h-5 w-5 border-2 border-t-transparent border-green-600 rounded-full animate-spin"></div>
                           ) : (
                             <span className="text-sm text-green-700 font-medium">
-                              {taskData.data.isCompleted ? "إلغاء الاكتمال" : "إكمال المهمة"}
+                              {taskData.data.isCompleted ? "Cancel Completion" : "Complete Task"}
                             </span>
                           )}
                         </div>
@@ -276,14 +263,14 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-5">
-                        <h4 className="font-medium text-lg text-gray-700">معلومات المهمة</h4>
+                        <h4 className="font-medium text-lg text-gray-700">Task Information</h4>
                         <div className="space-y-4">
                           <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
                             <div className="bg-blue-100 p-3 rounded-lg">
                               <Calendar className="h-6 w-6 text-blue-600" />
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">تاريخ البدء</p>
+                              <p className="text-sm text-gray-500">Start Date</p>
                               <p className="text-base font-medium">{formatDate(taskData.data.startDate)}</p>
                             </div>
                           </div>
@@ -293,7 +280,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                               <CalendarClock className="h-6 w-6 text-amber-600" />
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">تاريخ الانتهاء المتوقع</p>
+                              <p className="text-sm text-gray-500">Expected End Date</p>
                               <p className="text-base font-medium">{formatDate(taskData.data.endDate || taskData.data.expectedEndDate || '')}</p>
                             </div>
                           </div>
@@ -301,7 +288,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                       </div>
                       
                       <div className="space-y-5">
-                        <h4 className="font-medium text-lg text-gray-700">العمال المعينون</h4>
+                        <h4 className="font-medium text-lg text-gray-700">Assigned Workers</h4>
                         {loadingWorkers ? (
                           <div className="flex justify-center py-6">
                             <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -329,7 +316,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                         ) : (
                           <div className="p-6 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-center">
                             <Users className="h-10 w-10 mx-auto text-gray-400 mb-3" />
-                            <p className="text-gray-500">لم يتم تعيين أي عمال لهذه المهمة</p>
+                            <p className="text-gray-500">No workers assigned to this task</p>
                           </div>
                         )}
                       </div>
@@ -342,9 +329,9 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                 <Card className="border shadow-sm">
                   <CardContent className="p-8">
                     <h4 className="text-xl font-semibold mb-6 flex items-center text-gray-800">
-                      <Users className="mr-3 h-6 w-6 text-primary" /> تعيين العمال للمهمة
+                      <Users className="mr-3 h-6 w-6 text-primary" /> Assign Workers to Task
                     </h4>
-                    <p className="text-gray-600 mb-8">اختر العمال الذين سيعملون على هذه المهمة من القائمة أدناه</p>
+                    <p className="text-gray-600 mb-8">Select workers who will work on this task from the list below</p>
                     <TaskAssignWorkers 
                       taskId={taskId} 
                       onWorkersAssigned={handleWorkersAssigned} 
@@ -359,7 +346,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                     <div className="flex flex-col space-y-6">
                       <div className="flex flex-wrap items-center justify-between gap-4">
                         <h4 className="text-xl font-semibold flex items-center text-gray-800">
-                          <FileText className="mr-3 h-6 w-6 text-primary" /> مستندات المهمة
+                          <FileText className="mr-3 h-6 w-6 text-primary" /> Task Documents
                         </h4>
                         
                         <Button 
@@ -367,7 +354,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
                           className="bg-primary hover:bg-primary/90"
                         >
                           <FileUp className="mr-2 h-4 w-4" />
-                          رفع مستند جديد
+                          Upload New Document
                         </Button>
                       </div>
                       
@@ -385,7 +372,7 @@ export default function TaskDetailsModal({ isOpen, onClose, taskId }: TaskDetail
             </Tabs>
           ) : (
             <div className="py-12 text-center">
-              <p className="text-gray-500">لا توجد بيانات متاحة</p>
+              <p className="text-gray-500">No data available</p>
             </div>
           )}
         </DialogContent>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
@@ -31,11 +30,8 @@ import {
   getEquipmentStatistics,
   getDocumentStatistics 
 } from '@/services/dashboardService';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 const DashboardStatsNew = () => {
-  const { t } = useLanguage();
-
   const { data: teamStats } = useQuery({
     queryKey: ['team-statistics'],
     queryFn: getTeamStatistics,
@@ -63,35 +59,35 @@ const DashboardStatsNew = () => {
 
   const stats = [
     {
-      title: t('statistics.total_workers'),
+      title: 'Total Workers',
       value: teamStats?.totalWorkers || 0,
       icon: Users,
       color: 'text-blue-500',
       bg: 'bg-blue-50',
     },
     {
-      title: t('dashboard.active_projects'),
+      title: 'Active Projects',
       value: projectStats?.activeProjects || 0,
       icon: Building2,
       color: 'text-green-500',
       bg: 'bg-green-50',
     },
     {
-      title: t('statistics.completed_tasks'),
+      title: 'Completed Tasks',
       value: taskStats?.completedTasks || 0,
       icon: CheckSquare,
       color: 'text-purple-500',
       bg: 'bg-purple-50',
     },
     {
-      title: t('statistics.available_equipments'),
+      title: 'Available Equipments',
       value: equipmentStats?.availabeEquipments || 0,
       icon: Truck,
       color: 'text-orange-500',
       bg: 'bg-orange-50',
     },
     {
-      title: t('statistics.total_documents'),
+      title: 'Total Documents',
       value: documentStats?.totalDocuments || 0,
       icon: FileText,
       color: 'text-indigo-500',

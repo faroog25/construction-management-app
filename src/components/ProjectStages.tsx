@@ -257,10 +257,9 @@ const ProjectStages = ({ project }: { project: Project }) => {
           setCompletedTasks(prev => prev.filter(id => id !== taskId));
           
           toast({
-            title: "تم بنجاح",
-            description: "تم إلغاء اكتمال المهمة بنجاح",
+            title: "Success",
+            description: "Task completion has been successfully cancelled",
           });
-          
           // Find and update the task in state
           const updatedStages = [...apiStages];
           for (let i = 0; i < updatedStages.length; i++) {
@@ -285,8 +284,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
           setApiStages(updatedStages);
         } else {
           toast({
-            title: "خطأ",
-            description: result.message || "فشل في إلغاء اكتمال المهمة",
+            title: "Error",
+            description: result.message || "Failed to cancel task completion",
             variant: "destructive"
           });
         }
@@ -299,8 +298,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
           setCompletedTasks(prev => [...prev, taskId]);
           
           toast({
-            title: "تم بنجاح",
-            description: "تم إكمال المهمة بنجاح",
+            title: "Success",
+            description: "Task completion has been successfully completed",
           });
           
           // Find and update the task in state
@@ -327,8 +326,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
           setApiStages(updatedStages);
         } else {
           toast({
-            title: "خطأ",
-            description: result.message || "فشل في إكمال المهمة",
+            title: "Error",
+            description: result.message || "Failed to complete task",
             variant: "destructive"
           });
         }
@@ -336,8 +335,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
     } catch (error) {
       console.error('Error toggling task completion:', error);
       toast({
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في تغيير حالة المهمة",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to change task status",
         variant: "destructive"
       });
     } finally {
@@ -353,8 +352,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
   const handleAddStageSubmit = async (formData: { name: string; description: string; startDate: string; endDate: string }) => {
     if (!project.id) {
       toast({
-        title: "خطأ",
-        description: "رقم المشروع م��قود",
+        title: "Error",
+        description: "Project ID is missing",
         variant: "destructive"
       });
       return;
@@ -372,8 +371,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
       
       if (result.success) {
         toast({
-          title: "تم بنجاح",
-          description: result.message || "تم إنشاء المرحلة بنجاح",
+          title: "Success",
+          description: result.message || "Stage created successfully",
         });
         setIsAddStageModalOpen(false);
         setNoStagesFound(false); // Reset the no stages found state
@@ -390,16 +389,16 @@ const ProjectStages = ({ project }: { project: Project }) => {
         setApiStages(newStages);
       } else {
         toast({
-          title: "خطأ",
-          description: result.message || "فشل في إنشاء المرحلة",
+          title: "Error",
+          description: result.message || "Failed to create stage",
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error creating stage:', error);
       toast({
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في إنشاء المرحلة",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create stage",
         variant: "destructive"
       });
     } finally {
@@ -420,8 +419,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
       
       if (result.success) {
         toast({
-          title: "تم بنجاح",
-          description: result.message || "تم تحديث المرحلة بنجاح",
+          title: "Success",
+          description: result.message || "Stage updated successfully",
         });
         setIsEditStageModalOpen(false);
         
@@ -442,16 +441,16 @@ const ProjectStages = ({ project }: { project: Project }) => {
         }
       } else {
         toast({
-          title: "خطأ",
-          description: result.message || "فشل في تحديث المرحلة",
+          title: "Error",
+          description: result.message || "Failed to update stage",
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error updating stage:', error);
       toast({
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في تحديث المرحلة",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update stage",
         variant: "destructive"
       });
     } finally {
@@ -477,8 +476,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
       
       if (result.success) {
         toast({
-          title: "تم بنجاح",
-          description: result.message || "تم حذف المرحلة بنجاح",
+          title: "Success",
+          description: result.message || "Stage deleted successfully",
         });
         
         // Remove deleted stage from state
@@ -491,16 +490,16 @@ const ProjectStages = ({ project }: { project: Project }) => {
         }
       } else {
         toast({
-          title: "خطأ",
-          description: result.message || "فشل في حذف المرحلة",
+          title: "Error",
+          description: result.message || "Failed to delete stage",
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error deleting stage:', error);
       toast({
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في حذف المرحلة",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete stage",
         variant: "destructive"
       });
     } finally {
@@ -529,8 +528,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
       
       if (result.success) {
         toast({
-          title: "تم بنجاح",
-          description: "تم إضافة المهمة بنجاح",
+          title: "Success",
+          description: "Task added successfully",
         });
         setIsTaskFormModalOpen(false);
         
@@ -587,8 +586,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
             } catch (err) {
               console.error(`Error refreshing tasks for stage ${formData.stageId}:`, err);
               toast({
-                title: "خطأ",
-                description: "تم إضافة المهمة ولكن فشل في تحديث القائمة",
+                title: "Error",
+                description: "Task added but failed to update the list",
                 variant: "destructive"
               });
             }
@@ -596,16 +595,16 @@ const ProjectStages = ({ project }: { project: Project }) => {
         }
       } else {
         toast({
-          title: "خطأ",
-          description: result.message || "فشل في إضافة المهمة",
+          title: "Error",
+          description: result.message || "Failed to add task",
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error creating task:', error);
       toast({
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في إضافة المهمة",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add task",
         variant: "destructive"
       });
     } finally {
@@ -687,8 +686,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
       } catch (err) {
         console.error('Error refreshing stages:', err);
         toast({
-          title: "خطأ",
-          description: "فشل في تحديث البيانات",
+          title: "Error",
+          description: "Failed to update data",
           variant: "destructive"
         });
       }
@@ -713,8 +712,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
       
       if (result.success) {
         toast({
-          title: "تم بنجاح",
-          description: "تم حذف المهمة بنجاح",
+          title: "Success",
+          description: "Task deleted successfully",
         });
         
         // Remove deleted task from state
@@ -738,16 +737,16 @@ const ProjectStages = ({ project }: { project: Project }) => {
         setApiStages(updatedStages);
       } else {
         toast({
-          title: "خطأ",
-          description: result.message || "فشل في حذف المهمة",
+          title: "Error",
+          description: result.message || "Failed to delete task",
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error deleting task:', error);
       toast({
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في حذف المهمة",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete task",
         variant: "destructive"
       });
     } finally {
@@ -773,7 +772,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
       <div className="flex justify-center items-center py-20">
         <div className="flex flex-col items-center">
           <div className="h-8 w-8 border-4 border-t-primary animate-spin rounded-full"></div>
-          <p className="mt-4 text-gray-500">جاري تحميل مراحل المشروع...</p>
+          <p className="mt-4 text-gray-500">Loading project stages...</p>
         </div>
       </div>
     );
@@ -784,14 +783,14 @@ const ProjectStages = ({ project }: { project: Project }) => {
       <div className="flex justify-center items-center py-20">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center max-w-md">
           <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-red-700">فشل في تحميل المراحل</h3>
+          <h3 className="text-lg font-semibold text-red-700">Failed to load stages</h3>
           <p className="text-red-600 mt-2">{error}</p>
           <Button 
             variant="outline" 
             className="mt-4 border-red-300 text-red-700 hover:bg-red-50"
             onClick={() => window.location.reload()}
           >
-            إعادة المحاولة
+            Retry
           </Button>
         </div>
       </div>
@@ -804,8 +803,8 @@ const ProjectStages = ({ project }: { project: Project }) => {
         <div className="flex items-center">
           <SquareKanban className="h-7 w-7 text-indigo-600 mr-3" />
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">مراحل المشروع</h2>
-            <p className="text-gray-500 mt-1">إدارة وتتبع جميع المراحل والمهام</p>
+            <h2 className="text-2xl font-bold text-gray-900">Project Stages</h2>
+            <p className="text-gray-500 mt-1">Manage and track all stages and tasks</p>
           </div>
         </div>
         <Button 
@@ -813,7 +812,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
           className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-md transition-all duration-300"
         >
           <Plus className="mr-2 h-4 w-4" />
-          إضافة مرحلة
+          Add Stage
         </Button>
       </div>
       
@@ -865,13 +864,13 @@ const ProjectStages = ({ project }: { project: Project }) => {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>تأكيد حذف المرحلة</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Stage Deletion</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من أنك تريد حذف هذه المرحلة؟ هذا الإجراء لا يمكن التراجع عنه وسيؤدي إلى حذف جميع المهام المرتبطة بها.
+              Are you sure you want to delete this stage? This action cannot be undone and will delete all associated tasks.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingStage}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingStage}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteStage}
               disabled={isDeletingStage}
@@ -880,10 +879,10 @@ const ProjectStages = ({ project }: { project: Project }) => {
               {isDeletingStage ? (
                 <>
                   <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
-                  جاري الحذف...
+                  Deleting...
                 </>
               ) : (
-                <>حذف</>
+                <>Delete</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -894,13 +893,13 @@ const ProjectStages = ({ project }: { project: Project }) => {
       <AlertDialog open={isDeleteTaskDialogOpen} onOpenChange={setIsDeleteTaskDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>تأكيد حذف المهمة</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Task Deletion</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من أنك تريد حذف هذه المهمة؟ هذا الإجراء لا يمكن التراجع عنه.
+              Are you sure you want to delete this task? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingTask}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingTask}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteTask}
               disabled={isDeletingTask}
@@ -909,10 +908,10 @@ const ProjectStages = ({ project }: { project: Project }) => {
               {isDeletingTask ? (
                 <>
                   <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
-                  جاري الحذف...
+                  Deleting...
                 </>
               ) : (
-                <>حذف</>
+                <>Delete</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -925,13 +924,13 @@ const ProjectStages = ({ project }: { project: Project }) => {
           <div className="p-3 rounded-full bg-slate-100">
             <Clock className="h-6 w-6 text-slate-400" />
           </div>
-          <h3 className="mt-4 text-lg font-medium text-slate-900">لا توجد مراحل</h3>
+          <h3 className="mt-4 text-lg font-medium text-slate-900">No Stages Found</h3>
           <p className="mt-1 text-sm text-slate-500 text-center max-w-sm">
-            هذا المشروع لا يحتوي على أي مراحل بعد. أضف أول مرحلة لبدء تتبع التقدم.
+            This project does not have any stages yet. Add your first stage to start tracking progress.
           </p>
           <Button onClick={handleAddStage} className="mt-6">
             <Plus className="mr-2 h-4 w-4" />
-            إضافة أول مرحلة
+            Add First Stage
           </Button>
         </div>
       ) : (
@@ -989,11 +988,11 @@ const ProjectStages = ({ project }: { project: Project }) => {
                         <DropdownMenuContent align="end" className="w-48">
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditStage(stage); }}>
                             <Edit className="mr-2 h-4 w-4" />
-                            تعديل مرحلة
+                            Edit Stage
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}>
                             <Plus className="mr-2 h-4 w-4" />
-                            إضافة مهمة
+                            Add Task
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
@@ -1001,7 +1000,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                             onClick={(e) => { e.stopPropagation(); handleDeleteStageConfirm(stage.id); }}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            حذف مرحلة
+                            Delete Stage
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -1068,7 +1067,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                           <Button size="sm" onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}
                             className="bg-violet-100 text-violet-700 hover:bg-violet-200 hover:text-violet-800">
                             <Plus className="mr-1 h-3.5 w-3.5" />
-                            إضافة مهمة
+                            Add Task
                           </Button>
                         </div>
                         
@@ -1106,7 +1105,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                                        
                                         {overdueDays > 0 && !isCompleted && (
                                           <Badge variant="destructive" className="h-6 px-2 text-xs">
-                                            متأخر {overdueDays} يوم
+                                            Delayed {overdueDays} days
                                           </Badge>
                                         )}
                                       </div>
@@ -1190,7 +1189,7 @@ const ProjectStages = ({ project }: { project: Project }) => {
                               onClick={(e) => { e.stopPropagation(); handleAddTask(stage.id); }}
                             >
                               <Plus className="mr-1 h-3.5 w-3.5" />
-                              إضافة مهمة
+                              Add Task
                             </Button>
                           </div>
                         )}
