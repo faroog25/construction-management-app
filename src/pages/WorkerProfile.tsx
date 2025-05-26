@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getWorkerById } from '../services/workerService';
@@ -26,7 +25,7 @@ export function WorkerProfilePage() {
   const { data: workerTasks, isLoading: isTasksLoading, error: tasksError } = useQuery({
     queryKey: ['workerTasks', workerId],
     queryFn: () => getTasksForWorker(workerId),
-    enabled: !!workerId, // Only fetch tasks if workerId is valid
+    enabled: !!workerId,
   });
 
   const handleGoBack = () => {
@@ -39,7 +38,7 @@ export function WorkerProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="h-16"></div>
         <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-6">
           <Button
             variant="ghost"
@@ -48,7 +47,7 @@ export function WorkerProfilePage() {
             className="flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
-            العودة إلى الفريق
+            Back to Team
           </Button>
           
           <div className="flex items-center gap-4 mb-8">
@@ -83,13 +82,13 @@ export function WorkerProfilePage() {
 
   if (error) {
     toast({
-      title: "خطأ", 
-      description: "حدث خطأ أثناء تحميل بيانات العامل",
+      title: "Error", 
+      description: "Error loading worker data",
       variant: "destructive"
     });
     return (
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="h-16"></div>
         <div className="w-full max-w-6xl mx-auto px-4 py-8">
           <Button
             variant="ghost"
@@ -98,12 +97,12 @@ export function WorkerProfilePage() {
             className="flex items-center gap-1 mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
-            العودة إلى الفريق
+            Back to Team
           </Button>
           
           <Alert variant="destructive">
             <AlertDescription>
-              {error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل بيانات العامل'}
+              {error instanceof Error ? error.message : 'Error loading worker data'}
             </AlertDescription>
           </Alert>
         </div>
@@ -113,13 +112,13 @@ export function WorkerProfilePage() {
 
   if (!worker) {
     toast({
-      title: "خطأ",
-      description: "لم يتم العثور على العامل",
+      title: "Error",
+      description: "Worker not found",
       variant: "destructive"
     });
     return (
       <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-        <div className="h-16"></div> {/* Spacer for navbar */}
+        <div className="h-16"></div>
         <div className="w-full max-w-6xl mx-auto px-4 py-8">
           <Button
             variant="ghost"
@@ -128,11 +127,11 @@ export function WorkerProfilePage() {
             className="flex items-center gap-1 mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
-            العودة إلى الفريق
+            Back to Team
           </Button>
           
           <Alert>
-            <AlertDescription>لم يتم العثور على العامل</AlertDescription>
+            <AlertDescription>Worker not found</AlertDescription>
           </Alert>
         </div>
       </div>
@@ -142,14 +141,12 @@ export function WorkerProfilePage() {
   const fullName = `${worker.firstName} ${worker.secondName} ${worker.thirdName} ${worker.lastName}`;
   const initials = `${worker.firstName?.charAt(0) || ''}${worker.lastName?.charAt(0) || ''}`.toUpperCase();
 
-  // Use workerTasks from the API instead of worker.tasks
   const tasks = workerTasks || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-      <div className="h-16"></div> {/* Spacer for navbar */}
+      <div className="h-16"></div>
       <div className="w-full max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {/* Header with back button */}
         <Button
           variant="outline"
           size="sm"
@@ -157,7 +154,7 @@ export function WorkerProfilePage() {
           className="flex items-center gap-1 mb-2 shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" />
-          العودة إلى الفريق
+          Back to Team
         </Button>
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between bg-card rounded-lg p-6 shadow-md border mb-6">
@@ -171,7 +168,7 @@ export function WorkerProfilePage() {
               <h1 className="text-2xl font-bold tracking-tight">{fullName}</h1>
               <div className="flex items-center mt-1">
                 <Briefcase className="h-4 w-4 text-muted-foreground mr-1" />
-                <p className="text-muted-foreground">{worker.specialty || 'عامل'}</p>
+                <p className="text-muted-foreground">{worker.specialty || 'Worker'}</p>
               </div>
             </div>
           </div>
@@ -179,24 +176,23 @@ export function WorkerProfilePage() {
             {worker.isAvailable ? (
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4" />
-                <span>متاح</span>
+                <span>Available</span>
               </div>
             ) : (
               <div className="flex items-center gap-1.5">
                 <XCircle className="h-4 w-4" />
-                <span>غير متاح</span>
+                <span>Unavailable</span>
               </div>
             )}
           </Badge>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Personal Information Card */}
           <Card className="shadow-md hover:shadow-lg transition-shadow overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent pb-3">
               <CardTitle className="text-xl flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
-                المعلومات الشخصية
+                Personal Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
@@ -204,7 +200,7 @@ export function WorkerProfilePage() {
                 <div className="space-y-2">
                   <div className="flex items-center text-muted-foreground">
                     <Mail className="h-4 w-4 mr-2" />
-                    <span>البريد الإلكتروني:</span>
+                    <span>Email:</span>
                   </div>
                   <p className="text-sm font-medium">{worker.email || '-'}</p>
                 </div>
@@ -212,7 +208,7 @@ export function WorkerProfilePage() {
                 <div className="space-y-2">
                   <div className="flex items-center text-muted-foreground">
                     <Phone className="h-4 w-4 mr-2" />
-                    <span>رقم الهاتف:</span>
+                    <span>Phone:</span>
                   </div>
                   <p className="text-sm font-medium">{worker.phoneNumber}</p>
                 </div>
@@ -220,7 +216,7 @@ export function WorkerProfilePage() {
                 <div className="space-y-2">
                   <div className="flex items-center text-muted-foreground">
                     <User className="h-4 w-4 mr-2" />
-                    <span>الرقم الوطني:</span>
+                    <span>National ID:</span>
                   </div>
                   <p className="text-sm font-medium">{worker.nationalNumber || '-'}</p>
                 </div>
@@ -240,7 +236,7 @@ export function WorkerProfilePage() {
                 <div className="space-y-2">
                   <div className="flex items-center text-muted-foreground">
                     <Briefcase className="h-4 w-4 mr-2" />
-                    <span>التخصص:</span>
+                    <span>Specialty:</span>
                   </div>
                   <p className="text-sm font-medium">{worker.specialty || '-'}</p>
                 </div>
@@ -253,14 +249,14 @@ export function WorkerProfilePage() {
             <CardHeader className="bg-gradient-to-r from-blue-500/10 to-transparent pb-3">
               <CardTitle className="text-xl flex items-center gap-2">
                 <ListTodo className="h-5 w-5 text-blue-500" />
-                المهام المسندة
+                Assigned Tasks
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               {tasks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground bg-muted/20 rounded-lg">
                   <ListTodo className="mx-auto h-12 w-12 mb-3 text-muted-foreground/50" />
-                  <p>لا توجد مهام مسندة</p>
+                  <p>No assigned tasks</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -271,7 +267,7 @@ export function WorkerProfilePage() {
                     >
                       <div>
                         <h4 className="font-medium">{task.taskName}</h4>
-                        <p className="text-sm text-muted-foreground mt-1">تاريخ التعيين: {new Date(task.assignedDate).toLocaleDateString('ar-SA')}</p>
+                        <p className="text-sm text-muted-foreground mt-1">Assignment Date: {new Date(task.assignedDate).toLocaleDateString()}</p>
                       </div>
                       <Button 
                         variant="ghost" 
@@ -279,7 +275,7 @@ export function WorkerProfilePage() {
                         className="text-primary"
                         onClick={() => navigate(`/projects/tasks/${task.taskId}`)}
                       >
-                        عرض التفاصيل
+                        View Details
                       </Button>
                     </div>
                   ))}

@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 import { NewClientModal } from './NewClientModal';
 import { Input } from './ui/input';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertDialog,
@@ -35,19 +34,18 @@ import {
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const getClientTypeLabel = (type: ClientType, t: (key: string) => string): string => {
+const getClientTypeLabel = (type: ClientType): string => {
   switch (type) {
     case ClientType.Individual:
-      return t('client.individual');
+      return 'Individual';
     case ClientType.Company:
-      return t('client.company');
+      return 'Company';
     default:
-      return t('client.unknown');
+      return 'Unknown';
   }
 };
 
 export function ClientMembers() {
-  const { t, isRtl } = useLanguage();
   const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +96,7 @@ export function ClientMembers() {
       console.error('Error fetching clients:', err);
       if (err instanceof Error && !err.message.includes('404')) {
         setError(err.message);
-        toast.error('حدث خطأ في جلب بيانات العملاء');
+        toast.error('Error fetching clients');
       } else {
         setClients([]);
         setTotalPages(1);
@@ -175,13 +173,13 @@ export function ClientMembers() {
 
     try {
       await deleteClient(clientToDelete.id);
-      toast.success('تم حذف العميل بنجاح');
+      toast.success('Client deleted successfully');
       setClients(clients.filter(client => client.id !== clientToDelete.id));
       setTotalItems(totalItems - 1);
       // Refresh the data to get updated pagination
       fetchClients();
     } catch (error) {
-      toast.error('فشل في حذف العميل');
+      toast.error('Failed to delete client');
       console.error('Error deleting client:', error);
     } finally {
       setClientToDelete(null);
@@ -205,7 +203,7 @@ export function ClientMembers() {
 
     try {
       if (!editFormData.fullName || !editFormData.email || !editFormData.phoneNumber) {
-        toast.error('يرجى ملء جميع الحقول المطلوبة');
+        toast.error('Please fill in all required fields');
         return;
       }
 
@@ -226,11 +224,11 @@ export function ClientMembers() {
         )
       );
       
-      toast.success('تم تحديث العميل بنجاح');
+      toast.success('Client updated successfully');
       setClientToEdit(null);
     } catch (error) {
       console.error('Error updating client:', error);
-      toast.error('فشل في تحديث العميل');
+      toast.error('Failed to update client');
     }
   };
 
@@ -268,21 +266,21 @@ export function ClientMembers() {
         <CardHeader className="flex flex-row items-center justify-between bg-muted/10 pb-2">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Users className="h-5 w-5 text-primary" />
-            العملاء
+            Clients
           </CardTitle>
           <div className="flex items-center gap-2">
             <div className="relative w-64">
-              <Search className={`absolute ${isRtl ? 'right-2.5' : 'left-2.5'} top-2.5 h-4 w-4 text-muted-foreground`} />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="البحث..."
-                className={`${isRtl ? 'pr-9' : 'pl-9'} h-9 w-full`}
+                placeholder="Search..."
+                className="pl-9 h-9 w-full"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
             <Button size="sm" className="gap-1" onClick={() => setIsAddModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              إضافة عميل
+              Add Client
             </Button>
           </div>
         </CardHeader>
@@ -299,66 +297,66 @@ export function ClientMembers() {
                 <Users className="h-16 w-16 text-gray-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                لا يوجد عملاء
+                No Clients
               </h3>
               <p className="text-gray-500 mb-6 max-w-md">
                 {searchQuery 
-                  ? `لم يتم العثور على عملاء مطابقين لـ "${searchQuery}"`
-                  : "ابدأ بإضافة عملائك لإدارة المشاريع بكفاءة أكبر"
+                  ? `No clients found matching "${searchQuery}"`
+                  : "Start by adding your clients to manage projects more efficiently"
                 }
               </p>
               {searchQuery ? (
                 <Button variant="outline" onClick={() => setSearchQuery('')}>
-                  مسح البحث
+                  Clear Search
                 </Button>
               ) : (
                 <Button onClick={() => setIsAddModalOpen(true)} className="gap-2" size="lg">
                   <Plus className="h-5 w-5" />
-                  إضافة أول عميل
+                  Add First Client
                 </Button>
               )}
             </div>
           ) : (
-            <Table dir={isRtl ? "rtl" : "ltr"}>
+            <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30 hover:bg-muted/30">
                   <TableHead 
-                    className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
+                    className="font-medium cursor-pointer text-left"
                     onClick={() => handleSort('name')}
                   >
                     <div className="flex items-center">
-                      الاسم
-                      <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
+                      Name
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                   <TableHead 
-                    className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
+                    className="font-medium cursor-pointer text-left"
                     onClick={() => handleSort('email')}
                   >
                     <div className="flex items-center">
-                      البريد الإلكتروني
-                      <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
+                      Email
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                   <TableHead 
-                    className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
+                    className="font-medium cursor-pointer text-left"
                     onClick={() => handleSort('phone')}
                   >
                     <div className="flex items-center">
-                      رقم الهاتف
-                      <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
+                      Phone
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                   <TableHead 
-                    className={`font-medium cursor-pointer ${isRtl ? 'text-right' : 'text-left'}`}
+                    className="font-medium cursor-pointer text-left"
                     onClick={() => handleSort('type')}
                   >
                     <div className="flex items-center">
-                      النوع
-                      <ArrowUpDown className={`${isRtl ? 'mr-2' : 'ml-2'} h-4 w-4`} />
+                      Type
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
-                  <TableHead className={`font-medium ${isRtl ? 'text-right' : 'text-left'}`}>الإجراءات</TableHead>
+                  <TableHead className="font-medium text-left">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -379,22 +377,22 @@ export function ClientMembers() {
                           <>
                             <User className="h-4 w-4 text-blue-600" />
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              فرد
+                              Individual
                             </span>
                           </>
                         ) : (
                           <>
                             <Building2 className="h-4 w-4 text-purple-600" />
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              شركة
+                              Company
                             </span>
                           </>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                    <TableCell className="text-left">
                       <div 
-                        className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}
+                        className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Button variant="outline" size="xs" onClick={() => handleEdit(client)}>
@@ -419,7 +417,7 @@ export function ClientMembers() {
             <div className="py-4 px-2">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-500">
-                  عرض {((currentPage - 1) * itemsPerPage) + 1} إلى {Math.min(currentPage * itemsPerPage, totalItems)} من {totalItems} عنصر
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} items
                 </div>
                 <Pagination>
                   <PaginationContent>
@@ -464,16 +462,16 @@ export function ClientMembers() {
       <AlertDialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              لا يمكن التراجع عن هذا الإجراء. سيتم حذف العميل
-              {clientToDelete && ` "${clientToDelete.fullName}"`} نهائياً.
+              This action cannot be undone. This will permanently delete the client
+              {clientToDelete && ` "${clientToDelete.fullName}"`}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              حذف
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -482,14 +480,14 @@ export function ClientMembers() {
       <Dialog open={!!clientToEdit} onOpenChange={() => setClientToEdit(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تعديل العميل</DialogTitle>
+            <DialogTitle>Edit Client</DialogTitle>
             <DialogDescription>
-              قم بتعديل معلومات العميل هنا. انقر على حفظ عند الانتهاء.
+              Edit the client information here. Click save when you're done.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">الاسم الكامل</Label>
+              <Label htmlFor="fullName">Full Name</Label>
               <Input
                 id="fullName"
                 name="fullName"
@@ -499,7 +497,7 @@ export function ClientMembers() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 name="email"
@@ -510,7 +508,7 @@ export function ClientMembers() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+              <Label htmlFor="phoneNumber">Phone Number</Label>
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
@@ -520,31 +518,31 @@ export function ClientMembers() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="clientType">نوع العميل</Label>
+              <Label htmlFor="clientType">Client Type</Label>
               <Select
                 value={editFormData.clientType}
                 onValueChange={handleTypeChange}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر نوع العميل">
-                    {editFormData.clientType === ClientType.Individual ? 'فرد' : 'شركة'}
+                  <SelectValue placeholder="Select client type">
+                    {editFormData.clientType === ClientType.Individual ? 'Individual' : 'Company'}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={ClientType.Individual}>
-                    فرد
+                    Individual
                   </SelectItem>
                   <SelectItem value={ClientType.Company}>
-                    شركة
+                    Company
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setClientToEdit(null)}>
-                إلغاء
+                Cancel
               </Button>
-              <Button type="submit">حفظ التغييرات</Button>
+              <Button type="submit">Save Changes</Button>
             </DialogFooter>
           </form>
         </DialogContent>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeamMembers } from '@/components/TeamMembers';
@@ -8,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserCog, HardHat, Briefcase, TrendingUp, TrendingDown, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -16,7 +14,6 @@ import { Workers } from '@/components/Workers';
 
 const Team = () => {
   const [activeTab, setActiveTab] = useState('team');
-  const { t } = useLanguage();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -24,8 +21,8 @@ const Team = () => {
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t('team.title')}</h1>
-            <p className="text-muted-foreground mt-1">{t('team.subtitle')}</p>
+            <h1 className="text-3xl font-bold tracking-tight">Team</h1>
+            <p className="text-muted-foreground mt-1">Team and Projects Management</p>
           </div>
         </div>
 
@@ -34,17 +31,17 @@ const Team = () => {
             <TabsList className="grid grid-cols-3 gap-2">
               <TabsTrigger value="team" className="flex items-center gap-2 data-[state=active]:bg-blue-500">
                 <UserCog className="h-5 w-5" />
-                <span className="hidden sm:inline">{t('team.workers')}</span>
+                <span className="hidden sm:inline">Workers</span>
                 <Badge variant="outline" className="ml-1 bg-blue-50 text-blue-700 border border-blue-200">24</Badge>
               </TabsTrigger>
               <TabsTrigger value="engineers" className="flex items-center gap-2 data-[state=active]:bg-amber-500">
                 <HardHat className="h-5 w-5" />
-                <span className="hidden sm:inline">{t('team.engineers')}</span>
+                <span className="hidden sm:inline">Engineers</span>
                 <Badge variant="outline" className="ml-1 bg-amber-50 text-amber-700 border border-amber-200">18</Badge>
               </TabsTrigger>
               <TabsTrigger value="clients" className="flex items-center gap-2 data-[state=active]:bg-rose-500">
                 <Briefcase className="h-5 w-5" />
-                <span className="hidden sm:inline">{t('team.clients')}</span>
+                <span className="hidden sm:inline">Clients</span>
                 <Badge variant="outline" className="ml-1 bg-rose-50 text-rose-700 border border-rose-200">16</Badge>
               </TabsTrigger>
             </TabsList>
@@ -56,7 +53,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <UserCog className="h-5 w-5 text-blue-600" />
-                    {t('team.active_workers')}
+                    Active Workers
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -65,7 +62,7 @@ const Team = () => {
                       <p className="text-2xl font-bold">24</p>
                       <p className="text-xs text-green-600 flex items-center">
                         <TrendingUp className="h-3 w-3 mr-1" />
-                        8% {t('team.from_last_month')}
+                        8% from last month
                       </p>
                     </div>
                     <div className="p-2 bg-blue-100 rounded-full">
@@ -79,7 +76,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-green-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <UserCog className="h-5 w-5 text-green-600" />
-                    {t('team.attendance_rate')}
+                    Attendance Rate
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -88,7 +85,7 @@ const Team = () => {
                       <p className="text-2xl font-bold">92%</p>
                       <p className="text-xs text-green-600 flex items-center">
                         <TrendingUp className="h-3 w-3 mr-1" />
-                        5% {t('team.from_last_month')}
+                        5% from last month
                       </p>
                     </div>
                     <div className="p-2 bg-green-100 rounded-full">
@@ -102,7 +99,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <UserCog className="h-5 w-5 text-purple-600" />
-                    {t('team.productivity')}
+                    Productivity
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -111,7 +108,7 @@ const Team = () => {
                       <p className="text-2xl font-bold">85%</p>
                       <p className="text-xs text-red-600 flex items-center">
                         <TrendingDown className="h-3 w-3 mr-1" />
-                        3% {t('team.from_last_month')}
+                        3% from last month
                       </p>
                     </div>
                     <div className="p-2 bg-purple-100 rounded-full">
@@ -125,7 +122,7 @@ const Team = () => {
             <div className="bg-white rounded-lg shadow-md p-6 border-t-4 border-t-blue-500">
               <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
                 <UserCog className="h-5 w-5 text-primary" />
-                تفاصيل العمال
+                Worker Details
               </h2>
               <Workers />
             </div>
@@ -137,7 +134,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-amber-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <HardHat className="h-5 w-5 text-amber-600" />
-                    {t('team.available_engineers')}
+                    Available Engineers
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -146,7 +143,7 @@ const Team = () => {
                       <p className="text-2xl font-bold">18</p>
                       <p className="text-xs text-green-600 flex items-center">
                         <TrendingUp className="h-3 w-3 mr-1" />
-                        4% {t('team.from_last_month')}
+                        4% from last month
                       </p>
                     </div>
                     <div className="p-2 bg-amber-100 rounded-full">
@@ -160,7 +157,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-cyan-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <HardHat className="h-5 w-5 text-cyan-600" />
-                    {t('team.completed_projects')}
+                    Completed Projects
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -169,7 +166,7 @@ const Team = () => {
                       <p className="text-2xl font-bold">45</p>
                       <p className="text-xs text-green-600 flex items-center">
                         <TrendingUp className="h-3 w-3 mr-1" />
-                        12% {t('team.from_last_month')}
+                        12% from last month
                       </p>
                     </div>
                     <div className="p-2 bg-cyan-100 rounded-full">
@@ -183,7 +180,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-indigo-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <HardHat className="h-5 w-5 text-indigo-600" />
-                    {t('team.overall_rating')}
+                    Overall Rating
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -208,10 +205,10 @@ const Team = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <HardHat className="h-5 w-5 text-primary" />
-                    تفاصيل المهندسين
+                    Engineer Details
                   </h2>
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/team/engineers">عرض كل المهندسين</Link>
+                    <Link to="/team/engineers">View All Engineers</Link>
                   </Button>
                 </div>
               </div>
@@ -224,7 +221,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-rose-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-rose-600" />
-                    {t('team.active_clients')}
+                    Active Clients
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -233,7 +230,7 @@ const Team = () => {
                       <p className="text-2xl font-bold">16</p>
                       <p className="text-xs text-green-600 flex items-center">
                         <TrendingUp className="h-3 w-3 mr-1" />
-                        2% {t('team.from_last_month')}
+                        2% from last month
                       </p>
                     </div>
                     <div className="p-2 bg-rose-100 rounded-full">
@@ -247,7 +244,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-orange-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-orange-600" />
-                    {t('team.ongoing_projects')}
+                    Ongoing Projects
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -256,7 +253,7 @@ const Team = () => {
                       <p className="text-2xl font-bold">28</p>
                       <p className="text-xs text-green-600 flex items-center">
                         <TrendingUp className="h-3 w-3 mr-1" />
-                        15% {t('team.from_last_month')}
+                        15% from last month
                       </p>
                     </div>
                     <div className="p-2 bg-orange-100 rounded-full">
@@ -270,7 +267,7 @@ const Team = () => {
                 <CardHeader className="pb-2 bg-gradient-to-r from-teal-50 to-transparent">
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-teal-600" />
-                    {t('team.client_satisfaction')}
+                    Client Satisfaction
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4">
@@ -295,10 +292,10 @@ const Team = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-primary" />
-                    تفاصيل العملاء
+                    Client Details
                   </h2>
                   <Button variant="outline" size="sm" asChild>
-                    <Link to="/team/clients">عرض كل العملاء</Link>
+                    <Link to="/team/clients">View All Clients</Link>
                   </Button>
                 </div>
               </div>

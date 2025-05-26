@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Worker, getAllWorkers, deleteWorker } from '../services/workerService';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -10,7 +9,6 @@ import { Button } from './ui/button';
 import { CheckCircle2, XCircle, Search, Plus, UserCog, ArrowUpDown, Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { Input } from './ui/input';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from './ui/pagination';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { NewWorkerModal } from './NewWorkerModal';
 import { EditWorkerModal } from './EditWorkerModal';
@@ -28,7 +26,6 @@ import { useNavigate } from 'react-router-dom';
 
 export function TeamMembers() {
   const navigate = useNavigate();
-  const { t, isRtl } = useLanguage();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,12 +47,10 @@ export function TeamMembers() {
       setError(null);
       const data = await getAllWorkers();
 
-      // التحقق من بنية البيانات
       if (!Array.isArray(data)) {
         throw new Error('Invalid data structure received from API');
       }
 
-      // التأكد من وجود جميع الحقول المطلوبة
       const validWorkers = data.map(worker => ({
         ...worker,
         isAvailable: worker.isAvailable ?? true
@@ -83,13 +78,11 @@ export function TeamMembers() {
     }
   };
 
-  // تصفية العمال بناءً على مصطلح البحث
   const filteredWorkers = workers.filter(worker => {
     return worker.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
            (worker.specialty && worker.specialty.toLowerCase().includes(searchQuery.toLowerCase()));
   });
 
-  // ترتيب العمال المصفاة
   const sortedWorkers = [...filteredWorkers].sort((a, b) => {
     const direction = sortDirection === 'asc' ? 1 : -1;
     
@@ -105,7 +98,6 @@ export function TeamMembers() {
     }
   });
 
-  // منطق الصفحات
   const totalPages = Math.ceil(sortedWorkers.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -115,7 +107,6 @@ export function TeamMembers() {
     setCurrentPage(pageNumber);
   };
 
-  // إنشاء أرقام الصفحات للتنقل
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
@@ -131,11 +122,11 @@ export function TeamMembers() {
     try {
       setLoading(true);
       await deleteWorker(workerToDelete.id);
-      toast.success('تم حذف العامل بنجاح');
-      await fetchWorkers(); // إعادة تحميل القائمة
+      toast.success('Worker deleted successfully');
+      await fetchWorkers();
     } catch (error) {
       console.error('Error deleting worker:', error);
-      toast.error(error instanceof Error ? error.message : 'فشل في حذف العامل');
+      toast.error(error instanceof Error ? error.message : 'Failed to delete worker');
     } finally {
       setLoading(false);
       setWorkerToDelete(null);
@@ -164,14 +155,14 @@ export function TeamMembers() {
         <CardHeader className="flex flex-row items-center justify-between bg-muted/10 pb-2">
           <CardTitle className="flex items-center gap-2 text-xl">
             <UserCog className="h-5 w-5 text-primary" />
-            {t('team.workers')}
+            Team Members
           </CardTitle>
           <div className="flex items-center gap-2">
             <div className="relative w-64">
-              <Search className={`absolute ${isRtl ? 'right-2.5' : 'left-2.5'} top-2.5 h-4 w-4 text-muted-foreground`} />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder={t('table.search')}
-                className={`${isRtl ? 'pr-9' : 'pl-9'} h-9 w-full`}
+                placeholder="Search..."
+                className="pl-9 h-9 w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -182,30 +173,29 @@ export function TeamMembers() {
               onClick={() => setIsNewWorkerModalOpen(true)}
             >
               <Plus className="h-4 w-4" />
-              {t('table.add')}
+              Add
             </Button>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table dir={isRtl ? "rtl" : "ltr"}>
+          <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className={`${isRtl ? 'text-right' : 'text-left'}`}>الاسم</TableHead>
-                <TableHead className={`${isRtl ? 'text-right' : 'text-left'}`}>التخصص</TableHead>
-                <TableHead className={`${isRtl ? 'text-right' : 'text-left'}`}>الحالة</TableHead>
-                <TableHead className={`${isRtl ? 'text-right' : 'text-left'}`}>الإجراءات</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Specialty</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                // صفوف التحميل
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={index}>
                     <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                    <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
-                      <Skeleton className={`h-8 w-[100px] ${isRtl ? 'ml-auto' : 'mr-auto'}`} />
+                    <TableCell>
+                      <Skeleton className="h-8 w-[100px] mr-auto" />
                     </TableCell>
                   </TableRow>
                 ))
@@ -215,16 +205,16 @@ export function TeamMembers() {
                     {searchQuery ? 
                       <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                         <Search className="h-8 w-8 opacity-30" />
-                        <p>{t('search.no_results')} "{searchQuery}"</p>
-                        <Button variant="link" onClick={() => setSearchQuery('')}>{t('search.clear')}</Button>
+                        <p>No results found for "{searchQuery}"</p>
+                        <Button variant="link" onClick={() => setSearchQuery('')}>Clear search</Button>
                       </div>
                       : 
                       <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                         <UserCog className="h-8 w-8 opacity-30" />
-                        <p>{t('search.no_workers')}</p>
+                        <p>No workers found</p>
                         <Button variant="outline" size="sm">
-                          <Plus className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-                          {t('search.add_first_worker')}
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add first worker
                         </Button>
                       </div>
                     }
@@ -246,20 +236,20 @@ export function TeamMembers() {
                         {worker.isAvailable ? (
                           <>
                             <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            <span className="text-green-700 text-sm font-medium">متوفر</span>
+                            <span className="text-green-700 text-sm font-medium">Available</span>
                           </>
                         ) : (
                           <>
                             <XCircle className="h-4 w-4 text-red-600" />
-                            <span className="text-red-700 text-sm font-medium">غير متوفر</span>
+                            <span className="text-red-700 text-sm font-medium">Unavailable</span>
                           </>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className={`${isRtl ? 'text-right' : 'text-left'}`}>
+                    <TableCell className="text-left">
                       <div 
-                        className={`flex items-center ${isRtl ? 'justify-start' : 'justify-end'} gap-2 opacity-0 group-hover:opacity-100 transition-opacity`}
-                        onClick={(e) => e.stopPropagation()} // منع تأثير النقر على الصف عند النقر على الأزرار
+                        className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Button 
                           variant="outline" 
@@ -338,20 +328,20 @@ export function TeamMembers() {
       <AlertDialog open={!!workerToDelete} onOpenChange={() => setWorkerToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف العامل {workerToDelete ? workerToDelete.fullName || 'غير معروف' : ''}؟ 
-              لا يمكن التراجع عن هذا الإجراء.
+              Are you sure you want to delete {workerToDelete ? workerToDelete.fullName || 'Unknown' : ''}? 
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmDelete} 
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={loading}
             >
-              {loading ? 'جاري الحذف...' : 'حذف'}
+              {loading ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

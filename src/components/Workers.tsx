@@ -60,7 +60,6 @@ export function Workers() {
       setLoading(true);
       setError(null);
       
-      // Fetch paginated workers data
       const response: WorkersListResponse = await getPaginatedWorkers(
         currentPage, 
         itemsPerPage, 
@@ -69,7 +68,6 @@ export function Workers() {
         sortDirection
       );
       
-      // Update state with paginated data
       setWorkers(response.data.items);
       setTotalPages(response.data.totalPages);
       setTotalItems(response.data.totalItems);
@@ -83,7 +81,6 @@ export function Workers() {
   };
 
   useEffect(() => {
-    // Fetch workers whenever pagination, sorting, or search parameters change
     fetchWorkers();
   }, [currentPage, searchQuery, sortColumn, sortDirection]);
 
@@ -94,12 +91,12 @@ export function Workers() {
       setSortColumn(column);
       setSortDirection('asc');
     }
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when search changes
+    setCurrentPage(1);
   };
 
   const handlePageChange = (pageNumber: number) => {
@@ -108,7 +105,7 @@ export function Workers() {
   };
 
   const handleDeleteClick = (worker: Worker, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click event
+    e.stopPropagation();
     setWorkerToDelete(worker);
   };
 
@@ -118,19 +115,19 @@ export function Workers() {
     setIsDeleting(true);
     try {
       await deleteWorker(workerToDelete.id);
-      toast.success('تم حذف العامل بنجاح');
-      fetchWorkers(); // Refresh data after deletion
+      toast.success('Worker deleted successfully');
+      fetchWorkers();
     } catch (error) {
       console.error('Error deleting worker:', error);
-      toast.error(error instanceof Error ? error.message : 'فشل في حذف العامل');
+      toast.error(error instanceof Error ? error.message : 'Failed to delete worker');
     } finally {
       setIsDeleting(false);
-      setWorkerToDelete(null); // Close the dialog
+      setWorkerToDelete(null);
     }
   };
 
   const handleEditWorker = (worker: Worker, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click event
+    e.stopPropagation();
     setSelectedWorker(worker);
     setIsEditWorkerModalOpen(true);
   };
@@ -143,21 +140,17 @@ export function Workers() {
     navigate('/worker-specialties');
   };
 
-  // Create page numbers array for pagination
   const pageNumbers = [];
   const maxPageButtons = 5;
   
   if (totalPages <= maxPageButtons) {
-    // If total pages is less than or equal to max buttons, show all pages
     for (let i = 1; i <= totalPages; i++) {
       pageNumbers.push(i);
     }
   } else {
-    // Show a range of pages around current page
     let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
     let endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
     
-    // If we're near the end, adjust start page
     if (endPage === totalPages) {
       startPage = Math.max(totalPages - maxPageButtons + 1, 1);
     }
@@ -181,14 +174,14 @@ export function Workers() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
-            العمال
+            Workers
           </CardTitle>
           
           <div className="flex gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="بحث عن عامل..." 
+                placeholder="Search workers..." 
                 className="pl-9 h-9 w-full"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -197,12 +190,12 @@ export function Workers() {
             
             <Button variant="outline" size="sm" onClick={handleGoToSpecialties} className="flex items-center gap-1">
               <Briefcase className="h-4 w-4" />
-              التخصصات
+              Specialties
             </Button>
             
             <Button size="sm" onClick={() => setIsNewWorkerModalOpen(true)}>
               <Plus className="h-4 w-4 mr-1" />
-              إضافة
+              Add
             </Button>
           </div>
         </CardHeader>
@@ -213,29 +206,29 @@ export function Workers() {
               <TableRow>
                 <TableHead onClick={() => handleSort('fullName')} className="cursor-pointer">
                   <div className="flex items-center">
-                    الاسم الكامل
+                    Full Name
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
                 <TableHead onClick={() => handleSort('email')} className="cursor-pointer">
                   <div className="flex items-center">
-                    البريد الإلكتروني
+                    Email
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
                 <TableHead onClick={() => handleSort('phoneNumber')} className="cursor-pointer">
                   <div className="flex items-center">
-                    رقم الهاتف
+                    Phone Number
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
                 <TableHead onClick={() => handleSort('specialty')} className="cursor-pointer">
                   <div className="flex items-center">
-                    التخصص
+                    Specialty
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead>الإجراءات</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             
@@ -262,19 +255,19 @@ export function Workers() {
                       <div className="flex flex-col items-center justify-center p-4">
                         <Search className="h-8 w-8 opacity-30 mb-2" />
                         <p className="text-sm text-muted-foreground mb-2">
-                          لم يتم العثور على عمال مطابقين لـ "{searchQuery}"
+                          No workers found matching "{searchQuery}"
                         </p>
-                        <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>مسح البحث</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>Clear Search</Button>
                       </div>
                       : 
                       <div className="flex flex-col items-center justify-center p-4">
                         <User className="h-8 w-8 opacity-30 mb-2" />
                         <p className="text-sm text-muted-foreground mb-3">
-                          لا يوجد عمال
+                          No workers
                         </p>
                         <Button size="sm" onClick={() => setIsNewWorkerModalOpen(true)}>
                           <Plus className="mr-2 h-4 w-4" />
-                          إضافة أول عامل
+                          Add First Worker
                         </Button>
                       </div>
                     }
@@ -303,7 +296,7 @@ export function Workers() {
                           className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         >
                           <Pencil className="h-3 w-3 mr-1" />
-                          تعديل
+                          Edit
                         </Button>
                         <Button
                           variant="outline"
@@ -312,7 +305,7 @@ export function Workers() {
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
-                          حذف
+                          Delete
                         </Button>
                       </div>
                     </TableCell>
@@ -356,7 +349,7 @@ export function Workers() {
                 </PaginationContent>
               </Pagination>
               <div className="text-sm text-muted-foreground mt-2 text-center">
-                إجمالي العمال: {totalItems}
+                Total Workers: {totalItems}
               </div>
             </div>
           )}
@@ -384,19 +377,19 @@ export function Workers() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>هل أنت متأكد من حذف هذا العامل؟</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to delete this worker?</AlertDialogTitle>
             <AlertDialogDescription>
-              هذا الإجراء لا يمكن التراجع عنه. سيؤدي هذا إلى حذف جميع بيانات العامل بشكل دائم.
+              This action cannot be undone. This will permanently delete all worker data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700 text-white"
               disabled={isDeleting}
             >
-              {isDeleting ? 'جاري الحذف...' : 'حذف'}
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

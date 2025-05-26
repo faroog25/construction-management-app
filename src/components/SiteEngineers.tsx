@@ -58,12 +58,10 @@ export function SiteEngineers() {
       setCurrentPage(response.pageNumber);
     } catch (err) {
       console.error('Error fetching engineers:', err);
-      // Only set error for actual unexpected errors, not for "no data" scenarios
       if (err instanceof Error && !err.message.includes('404')) {
         setError(err.message);
-        toast.error('حدث خطأ في جلب بيانات المهندسين');
+        toast.error('Error fetching engineers');
       } else {
-        // For 404 or "no data" scenarios, just set empty state
         setEngineers([]);
         setTotalPages(1);
         setTotalItems(0);
@@ -106,7 +104,7 @@ export function SiteEngineers() {
     }
   } else {
     let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
-    let endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
+    const endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
     
     if (endPage === totalPages) {
       startPage = Math.max(totalPages - maxPageButtons + 1, 1);
@@ -128,13 +126,13 @@ export function SiteEngineers() {
       try {
         setIsDeleting(true);
         await deleteEngineer(engineerToDelete);
-        toast.success('تم حذف المهندس بنجاح');
+        toast.success('Engineer deleted successfully');
         setIsDeleteDialogOpen(false);
         setEngineerToDelete(null);
         await fetchEngineers();
       } catch (error) {
         console.error('Error deleting engineer:', error);
-        toast.error(error instanceof Error ? error.message : 'فشل في حذف المهندس');
+        toast.error(error instanceof Error ? error.message : 'Failed to delete engineer');
       } finally {
         setIsDeleting(false);
       }
@@ -165,14 +163,14 @@ export function SiteEngineers() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
             <HardHat className="h-5 w-5 text-primary" />
-            المهندسين
+            Engineers
           </CardTitle>
           
           <div className="flex gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="بحث عن مهندس..." 
+                placeholder="Search engineers..." 
                 className="pl-9 h-9 w-full"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -181,7 +179,7 @@ export function SiteEngineers() {
             
             <Button size="sm" onClick={() => setIsNewEngineerModalOpen(true)}>
               <Plus className="h-4 w-4 mr-1" />
-              إضافة
+              Add
             </Button>
           </div>
         </CardHeader>
@@ -192,29 +190,29 @@ export function SiteEngineers() {
               <TableRow>
                 <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
                   <div className="flex items-center">
-                    الاسم
+                    Name
                     <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
                 <TableHead onClick={() => handleSort('userName')} className="cursor-pointer">
                   <div className="flex items-center">
-                    اسم المستخدم
+                    Username
                     <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
                 <TableHead onClick={() => handleSort('phoneNumber')} className="cursor-pointer">
                   <div className="flex items-center">
-                    رقم الهاتف
+                    Phone Number
                     <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
                 <TableHead onClick={() => handleSort('email')} className="cursor-pointer">
                   <div className="flex items-center">
-                    البريد الإلكتروني
+                    Email
                     <ArrowUpDown className="mr-2 h-4 w-4" />
                   </div>
                 </TableHead>
-                <TableHead>الإجراءات</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             
@@ -249,19 +247,19 @@ export function SiteEngineers() {
                       <div className="flex flex-col items-center justify-center p-4">
                         <Search className="h-8 w-8 opacity-30 mb-2" />
                         <p className="text-sm text-muted-foreground mb-2">
-                          لم يتم العثور على مهندسين مطابقين لـ "{searchQuery}"
+                          No engineers found matching "{searchQuery}"
                         </p>
-                        <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>مسح البحث</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>Clear Search</Button>
                       </div>
                       : 
                       <div className="flex flex-col items-center justify-center p-4">
                         <HardHat className="h-8 w-8 opacity-30 mb-2" />
                         <p className="text-sm text-muted-foreground mb-3">
-                          لا يوجد مهندسين
+                          No engineers found
                         </p>
                         <Button size="sm" onClick={() => setIsNewEngineerModalOpen(true)}>
                           <Plus className="mr-2 h-4 w-4" />
-                          إضافة أول مهندس
+                          Add First Engineer
                         </Button>
                       </div>
                     }
@@ -289,7 +287,7 @@ export function SiteEngineers() {
                           className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         >
                           <Pencil className="h-3 w-3 mr-1" />
-                          تعديل
+                          Edit
                         </Button>
                         <Button
                           variant="outline"
@@ -298,7 +296,7 @@ export function SiteEngineers() {
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
-                          حذف
+                          Delete
                         </Button>
                       </div>
                     </TableCell>
@@ -342,7 +340,7 @@ export function SiteEngineers() {
                 </PaginationContent>
               </Pagination>
               <div className="text-sm text-muted-foreground mt-2 text-center">
-                إجمالي المهندسين: {totalItems}
+                Total Engineers: {totalItems}
               </div>
             </div>
           )}
@@ -370,19 +368,19 @@ export function SiteEngineers() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>هل أنت متأكد من حذف هذا المهندس؟</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to delete this engineer?</AlertDialogTitle>
             <AlertDialogDescription>
-              هذا الإجراء لا يمكن التراجع عنه. سيؤدي هذا إلى حذف جميع بيانات المهندس بشكل دائم.
+              This action cannot be undone. This will permanently delete all engineer data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700 text-white"
               disabled={isDeleting}
             >
-              {isDeleting ? 'جاري الحذف...' : 'حذف'}
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
