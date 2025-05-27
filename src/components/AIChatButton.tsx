@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2, Bot, Send, MessageCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -83,6 +84,55 @@ const AIChatButton = () => {
     }
   };
 
+  const isArray = (data: any): data is any[] => {
+    return Array.isArray(data);
+  };
+
+  const isObjectWithKeys = (data: any): data is Record<string, any> => {
+    return typeof data === 'object' && data !== null && !Array.isArray(data);
+  };
+
+  const renderTable = (data: any[], title?: string) => {
+    if (!data || data.length === 0) {
+      return <p className="text-sm text-muted-foreground">لا توجد بيانات للعرض</p>;
+    }
+
+    const firstItem = data[0];
+    const columns = Object.keys(firstItem);
+
+    return (
+      <div className="space-y-3">
+        {title && <h4 className="font-medium text-sm">{title}</h4>}
+        <div className="border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableHead key={column} className="font-medium">
+                    {column}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((row, index) => (
+                <TableRow key={index}>
+                  {columns.map((column) => (
+                    <TableCell key={column} className="text-sm">
+                      {typeof row[column] === 'object' && row[column] !== null
+                        ? JSON.stringify(row[column])
+                        : String(row[column] || '')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  };
+
   const formatResponse = (answer: string | object) => {
     if (typeof answer === 'string') {
       return (
@@ -92,7 +142,60 @@ const AIChatButton = () => {
       );
     }
 
-    if (typeof answer === 'object' && answer !== null) {
+    if (isArray(answer)) {
+      return renderTable(answer, "البيانات");
+    }
+
+    if (isObjectWithKeys(answer)) {
+      // Check if it's a response with data property that contains an array
+      if (answer.data && isArray(answer.data)) {
+        return renderTable(answer.data, "النتائج");
+      }
+      
+      // Check if it's a response with items property that contains an array
+      if (answer.items && isArray(answer.items)) {
+        return renderTable(answer.items, "العناصر");
+      }
+
+      // Check for other common array properties
+      const arrayKeys = Object.keys(answer).filter(key => isArray(answer[key]));
+      if (arrayKeys.length > 0) {
+        return (
+          <div className="space-y-4">
+            {arrayKeys.map((key) => (
+              <div key={key}>
+                {renderTable(answer[key], key)}
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      // If it's an object with key-value pairs, show as a simple table
+      const entries = Object.entries(answer).filter(([_, value]) => 
+        typeof value !== 'object' || value === null
+      );
+      
+      if (entries.length > 0) {
+        return (
+          <div className="space-y-2">
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableBody>
+                  {entries.map(([key, value]) => (
+                    <TableRow key={key}>
+                      <TableCell className="font-medium">{key}</TableCell>
+                      <TableCell>{String(value || '')}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        );
+      }
+
+      // Fallback to JSON view for complex objects
       return (
         <div className="space-y-2">
           <pre className="bg-gray-50 p-3 rounded-lg text-xs overflow-x-auto border">
@@ -119,7 +222,7 @@ const AIChatButton = () => {
             </Button>
           </DialogTrigger>
           
-          <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
+          <DialogContent className="sm:max-w-[800px] max-h-[80vh] flex flex-col">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-xl">
                 <MessageCircle className="h-5 w-5 text-primary" />
@@ -151,7 +254,7 @@ const AIChatButton = () => {
                         
                         {/* AI Response */}
                         <div className="flex justify-start">
-                          <Card className="max-w-[80%] border-l-4 border-l-blue-500">
+                          <Card className="max-w-[90%] border-l-4 border-l-blue-500">
                             <CardContent className="p-4">
                               <div className="flex items-center gap-2 mb-2">
                                 <Bot className="h-4 w-4 text-blue-500" />
