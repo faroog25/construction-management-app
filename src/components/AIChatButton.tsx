@@ -61,13 +61,23 @@ const AIChatButton = () => {
 
       const data = await response.json();
       
-      const newResponse: AIResponse = {
-        question: question,
-        answer: data,
-        timestamp: new Date()
-      };
-
-      setResponses(prev => [...prev, newResponse]);
+      // Check if the response contains an error message
+      if (data.message && data.message.includes("Sorry, I couldn't understand")) {
+        const newResponse: AIResponse = {
+          question: question,
+          answer: data.message,
+          timestamp: new Date()
+        };
+        setResponses(prev => [...prev, newResponse]);
+      } else {
+        const newResponse: AIResponse = {
+          question: question,
+          answer: data,
+          timestamp: new Date()
+        };
+        setResponses(prev => [...prev, newResponse]);
+      }
+      
       setQuestion('');
       
       toast({
