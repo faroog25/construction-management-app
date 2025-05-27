@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
@@ -57,7 +56,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
         setSpecialties(data);
       } catch (error) {
         console.error('Error fetching specialties:', error);
-        toast.error(error instanceof Error ? error.message : 'فشل في جلب التخصصات');
+        toast.error(error instanceof Error ? error.message : 'Failed to fetch specialties');
       }
     };
 
@@ -71,53 +70,53 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
 
     // Validate first name
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'الاسم الأول مطلوب';
+      newErrors.firstName = 'First name is required';
     }
 
     // Validate second name
     if (!formData.secondName.trim()) {
-      newErrors.secondName = 'الاسم الثاني مطلوب';
+      newErrors.secondName = 'Second name is required';
     }
 
     // Validate third name
     if (!formData.thirdName.trim()) {
-      newErrors.thirdName = 'الاسم الثالث مطلوب';
+      newErrors.thirdName = 'Third name is required';
     }
 
     // Validate last name
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'الاسم الأخير مطلوب';
+      newErrors.lastName = 'Last name is required';
     }
 
     // Validate national number
     if (!formData.nationalNumber.trim()) {
-      newErrors.nationalNumber = 'الرقم الوطني مطلوب';
+      newErrors.nationalNumber = 'National number is required';
     } else if (!/^\d{10}$/.test(formData.nationalNumber)) {
-      newErrors.nationalNumber = 'الرقم الوطني يجب أن يتكون من 10 أرقام';
+      newErrors.nationalNumber = 'National number must be 10 digits';
     }
 
     // Validate phone number
     if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = 'رقم الهاتف مطلوب';
+      newErrors.phoneNumber = 'Phone number is required';
     } else if (!/^07\d{8}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = 'رقم الهاتف يجب أن يبدأ بـ 07 ويتكون من 10 أرقام';
+      newErrors.phoneNumber = 'Phone number must start with 07 and be 10 digits';
     }
 
     // Validate email
     if (!formData.email.trim()) {
-      newErrors.email = 'البريد الإلكتروني مطلوب';
+      newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'البريد الإلكتروني غير صالح';
+      newErrors.email = 'Invalid email format';
     }
 
     // Validate address
     if (!formData.address.trim()) {
-      newErrors.address = 'العنوان مطلوب';
+      newErrors.address = 'Address is required';
     }
 
     // Validate specialty
     if (!formData.specialtyId) {
-      newErrors.specialtyId = 'التخصص مطلوب';
+      newErrors.specialtyId = 'Specialty is required';
     }
 
     setErrors(newErrors);
@@ -128,7 +127,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
     e.preventDefault();
     
     if (!validateForm()) {
-      toast.error('يرجى تصحيح الأخطاء في النموذج');
+      toast.error('Please correct the form errors');
       return;
     }
 
@@ -179,7 +178,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">الاسم الأول</Label>
+              <Label htmlFor="firstName">First Name</Label>
               <Input
                 id="firstName"
                 name="firstName"
@@ -194,7 +193,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="secondName">الاسم الثاني</Label>
+              <Label htmlFor="secondName">Second Name</Label>
               <Input
                 id="secondName"
                 name="secondName"
@@ -209,7 +208,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="thirdName">الاسم الثالث</Label>
+              <Label htmlFor="thirdName">Third Name</Label>
               <Input
                 id="thirdName"
                 name="thirdName"
@@ -224,7 +223,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastName">الاسم الأخير</Label>
+              <Label htmlFor="lastName">Last Name</Label>
               <Input
                 id="lastName"
                 name="lastName"
@@ -239,7 +238,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="nationalNumber">الرقم الوطني</Label>
+              <Label htmlFor="nationalNumber">National Number</Label>
               <Input
                 id="nationalNumber"
                 name="nationalNumber"
@@ -254,7 +253,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+              <Label htmlFor="phoneNumber">Phone Number</Label>
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
@@ -269,7 +268,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 name="email"
@@ -285,7 +284,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">العنوان</Label>
+              <Label htmlFor="address">Address</Label>
               <Input
                 id="address"
                 name="address"
@@ -301,7 +300,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="specialtyId">التخصص</Label>
+            <Label htmlFor="specialtyId">Specialty</Label>
             <Select
               value={formData.specialtyId.toString()}
               onValueChange={(value) => {
@@ -312,7 +311,7 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
               }}
             >
               <SelectTrigger className={errors.specialtyId ? "border-red-500" : ""}>
-                <SelectValue placeholder="اختر التخصص" />
+                <SelectValue placeholder="Select Specialty" />
               </SelectTrigger>
               <SelectContent>
                 {specialties.map((specialty) => (
@@ -329,10 +328,10 @@ export function NewWorkerModal({ isOpen, onClose, onWorkerCreated }: NewWorkerMo
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              إلغاء
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'جاري الحفظ...' : 'حفظ'}
+              {loading ? 'Saving...' : 'Save'}
             </Button>
           </DialogFooter>
         </form>

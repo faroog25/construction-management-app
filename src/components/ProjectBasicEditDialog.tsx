@@ -26,7 +26,7 @@ const ProjectBasicEditDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>تعديل بيانات المشروع الأساسية</DialogTitle>
+          <DialogTitle>Edit Project Basic Information</DialogTitle>
         </DialogHeader>
         <ProjectBasicEditForm 
           project={project} 

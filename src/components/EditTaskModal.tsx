@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { editTask, EditTaskRequest } from '@/services/taskService';
 import { toast } from '@/hooks/use-toast';
@@ -53,7 +52,7 @@ export function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: EditTask
     try {
       // Validate form data
       if (!formData.name.trim()) {
-        setError('اسم المهمة مطلوب');
+        setError('Task name is required');
         setIsSubmitting(false);
         return;
       }
@@ -62,25 +61,25 @@ export function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: EditTask
       
       if (result.success) {
         toast({
-          title: "تم بنجاح",
-          description: "تم تحديث المهمة بنجاح",
+          title: "Success",
+          description: "Task updated successfully",
         });
         onTaskUpdated();
         onClose();
       } else {
-        setError(result.message || 'فشل في تحديث المهمة');
+        setError(result.message || 'Failed to update task');
         toast({
-          title: "خطأ",
-          description: result.message || 'فشل في تحديث المهمة',
+          title: "Error",
+          description: result.message || 'Failed to update task',
           variant: "destructive",
         });
       }
     } catch (err) {
       console.error('Error updating task:', err);
-      const errorMessage = err instanceof Error ? err.message : 'حدث خطأ أثناء تحديث المهمة';
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred while updating the task';
       setError(errorMessage);
       toast({
-        title: "خطأ",
+        title: "Error",
         description: errorMessage,
         variant: "destructive",
       });
@@ -93,9 +92,9 @@ export function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: EditTask
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>تعديل المهمة</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
-            قم بتعديل تفاصيل المهمة هنا
+            Edit task details here
           </DialogDescription>
         </DialogHeader>
 
@@ -107,7 +106,7 @@ export function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: EditTask
           )}
           
           <div className="grid w-full items-center gap-2">
-            <Label htmlFor="name" className="required">اسم المهمة</Label>
+            <Label htmlFor="name" className="required">Task Name</Label>
             <Input
               id="name"
               name="name"
@@ -118,7 +117,7 @@ export function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: EditTask
           </div>
           
           <div className="grid w-full items-center gap-2">
-            <Label htmlFor="description">وصف المهمة</Label>
+            <Label htmlFor="description">Task Description</Label>
             <Textarea
               id="description"
               name="description"
@@ -135,16 +134,16 @@ export function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: EditTask
               onClick={onClose}
               disabled={isSubmitting}
             >
-              إلغاء
+              Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  جاري الحفظ...
+                  Saving...
                 </>
               ) : (
-                'حفظ التغييرات'
+                'Save Changes'
               )}
             </Button>
           </DialogFooter>

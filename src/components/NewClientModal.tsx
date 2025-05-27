@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -52,13 +51,13 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
         phoneNumber: values.phoneNumber,
         clientType: values.clientType,
       });
-      toast.success('تمت الإضافة بنجاح');
+      toast.success('Added successfully');
       onClientCreated();
       onOpenChange(false);
       form.reset();
     } catch (error: unknown) {
       console.error('Error creating client:', error);
-      const errorMessage = error instanceof Error ? error.message : 'فشلت الإضافة';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add';
       toast.error(errorMessage);
     }
   };
@@ -67,7 +66,7 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>إضافة عميل جديد</DialogTitle>
+          <DialogTitle>Add New Client</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -76,10 +75,10 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الاسم الكامل</FormLabel>
+                  <FormLabel>Full Name</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="أدخل الاسم الكامل" 
+                      placeholder="Enter full name" 
                       {...field} 
                     />
                   </FormControl>
@@ -93,11 +92,11 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>البريد الإلكتروني</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input 
                       type="email" 
-                      placeholder="أدخل البريد الإلكتروني" 
+                      placeholder="Enter email" 
                       {...field} 
                     />
                   </FormControl>
@@ -111,10 +110,10 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
               name="phoneNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>رقم الهاتف</FormLabel>
+                  <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="أدخل رقم الهاتف" 
+                      placeholder="Enter phone number" 
                       {...field} 
                     />
                   </FormControl>
@@ -128,19 +127,19 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
               name="clientType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>نوع العميل</FormLabel>
+                  <FormLabel>Client Type</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر نوع العميل" />
+                        <SelectValue placeholder="Select client type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value={ClientType.Individual}>فرد</SelectItem>
-                      <SelectItem value={ClientType.Company}>شركة</SelectItem>
+                      <SelectItem value={ClientType.Individual}>Individual</SelectItem>
+                      <SelectItem value={ClientType.Company}>Company</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -150,13 +149,13 @@ export function NewClientModal({ isOpen, onOpenChange, onClientCreated }: NewCli
 
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                إلغاء
+                Cancel
               </Button>
               <Button 
                 type="submit" 
                 disabled={form.formState.isSubmitting || !form.formState.isValid}
               >
-                {form.formState.isSubmitting ? 'جاري الإضافة...' : 'إضافة'}
+                {form.formState.isSubmitting ? 'Adding...' : 'Add'}
               </Button>
             </div>
           </form>

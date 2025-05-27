@@ -89,9 +89,9 @@ const UserProfileDropdown = () => {
               <Mail className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">البريد الإلكتروني</p>
+              <p className="text-xs text-muted-foreground">Email</p>
               <p className="text-sm font-medium truncate">
-                {userProfile?.email || 'لا يوجد بريد إلكتروني'}
+                {userProfile?.email || 'No email'}
               </p>
             </div>
           </div>
@@ -102,7 +102,7 @@ const UserProfileDropdown = () => {
                 <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">رقم الهاتف</p>
+                <p className="text-xs text-muted-foreground">Phone Number</p>
                 <p className="text-sm font-medium">
                   {userProfile.phoneNumber}
                 </p>
@@ -122,8 +122,8 @@ const UserProfileDropdown = () => {
               <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </div>
             <div className="mr-3">
-              <span className="font-medium">إعدادات الحساب</span>
-              <p className="text-xs text-muted-foreground">إدارة معلومات حسابك</p>
+              <span className="font-medium">Account Settings</span>
+              <p className="text-xs text-muted-foreground">Manage your account information</p>
             </div>
           </DropdownMenuItem>
 
@@ -136,7 +136,7 @@ const UserProfileDropdown = () => {
             </div>
             <div className="mr-3">
               <span className="font-medium">{t('nav.logout')}</span>
-              <p className="text-xs text-muted-foreground">تسجيل الخروج من الحساب</p>
+              <p className="text-xs text-muted-foreground">Sign out of your account</p>
             </div>
           </DropdownMenuItem>
         </div>

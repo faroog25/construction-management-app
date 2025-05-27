@@ -12,8 +12,8 @@ import { updateEngineer } from '@/services/engineerService';
 import { SiteEngineer } from '@/services/engineerService';
 
 const editSiteEngineerSchema = z.object({
-  name: z.string().min(2, 'الاسم يجب أن يكون أكثر من حرفين'),
-  phoneNumber: z.string().min(10, 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل'),
+  name: z.string().min(2, 'Name must be more than 2 characters'),
+  phoneNumber: z.string().min(9, 'Phone number must be at least 9 digits'),
 });
 
 type EditSiteEngineerFormValues = z.infer<typeof editSiteEngineerSchema>;
@@ -56,13 +56,13 @@ export function EditSiteEngineerModal({
   const onSubmit = async (data: EditSiteEngineerFormValues) => {
     try {
       await updateEngineer(engineer.id, data);
-      toast.success('تم تحديث بيانات المهندس بنجاح');
+      toast.success('Engineer information updated successfully');
       onEngineerUpdated();
       onOpenChange(false);
       reset();
     } catch (error) {
       console.error('Error updating engineer:', error);
-      toast.error(error instanceof Error ? error.message : 'حدث خطأ في تحديث بيانات المهندس');
+      toast.error(error instanceof Error ? error.message : 'Error updating engineer information');
     }
   };
 
@@ -70,13 +70,13 @@ export function EditSiteEngineerModal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>تعديل بيانات المهندس</DialogTitle>
+          <DialogTitle>Edit Engineer Information</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">الاسم الكامل</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
                 type="text"
@@ -89,7 +89,7 @@ export function EditSiteEngineerModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+              <Label htmlFor="phoneNumber">Phone Number</Label>
               <Input
                 id="phoneNumber"
                 type="tel"
@@ -102,32 +102,32 @@ export function EditSiteEngineerModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={engineer.email}
                 disabled
                 className="bg-gray-100 cursor-not-allowed"
-                placeholder="البريد الإلكتروني غير قابل للتعديل"
+                placeholder="Email cannot be modified"
               />
               <p className="text-xs text-muted-foreground">
-                البريد الإلكتروني غير قابل للتعديل
+                Email cannot be modified
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="userName">اسم المستخدم</Label>
+              <Label htmlFor="userName">Username</Label>
               <Input
                 id="userName"
                 type="text"
                 value={engineer.userName}
                 disabled
                 className="bg-gray-100 cursor-not-allowed"
-                placeholder="اسم المستخدم غير قابل للتعديل"
+                placeholder="Username cannot be modified"
               />
               <p className="text-xs text-muted-foreground">
-                اسم المستخدم غير قابل للتعديل
+                Username cannot be modified
               </p>
             </div>
           </div>
@@ -139,10 +139,10 @@ export function EditSiteEngineerModal({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              إلغاء
+              Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </form>

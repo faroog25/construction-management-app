@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,9 +12,9 @@ import { Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 const projectBasicFormSchema = z.object({
-  projectName: z.string().min(1, { message: 'اسم المشروع مطلوب' }),
+  projectName: z.string().min(1, { message: 'Project name is required' }),
   description: z.string().optional(),
-  siteAddress: z.string().min(1, { message: 'عنوان الموقع مطلوب' }),
+  siteAddress: z.string().min(1, { message: 'Site address is required' }),
   geographicalCoordinates: z.string().optional(),
 });
 
@@ -60,11 +59,11 @@ const ProjectBasicEditForm = ({ project, onSuccess, onCancel }: ProjectBasicEdit
       // Invalidate project query to fetch updated data
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
       
-      toast.success('تم تحديث بيانات المشروع بنجاح');
+      toast.success('Project information updated successfully');
       onSuccess();
     } catch (error) {
       console.error('Error updating project:', error);
-      toast.error('فشل تحديث بيانات المشروع');
+      toast.error('Failed to update project information');
     } finally {
       setIsSubmitting(false);
     }
@@ -78,7 +77,7 @@ const ProjectBasicEditForm = ({ project, onSuccess, onCancel }: ProjectBasicEdit
           name="projectName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>اسم المشروع</FormLabel>
+              <FormLabel>Project Name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -92,7 +91,7 @@ const ProjectBasicEditForm = ({ project, onSuccess, onCancel }: ProjectBasicEdit
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>الوصف</FormLabel>
+              <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea {...field} rows={3} />
               </FormControl>
@@ -106,7 +105,7 @@ const ProjectBasicEditForm = ({ project, onSuccess, onCancel }: ProjectBasicEdit
           name="siteAddress"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>عنوان الموقع</FormLabel>
+              <FormLabel>Site Address</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -120,9 +119,9 @@ const ProjectBasicEditForm = ({ project, onSuccess, onCancel }: ProjectBasicEdit
           name="geographicalCoordinates"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>الإحداثيات الجغرافية</FormLabel>
+              <FormLabel>Geographical Coordinates</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="مثال: 24.7136, 46.6753" />
+                <Input {...field} placeholder="Example: 24.7136, 46.6753" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -131,11 +130,11 @@ const ProjectBasicEditForm = ({ project, onSuccess, onCancel }: ProjectBasicEdit
         
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onCancel}>
-            إلغاء
+            Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-            حفظ التغييرات
+            Save Changes
           </Button>
         </div>
       </form>

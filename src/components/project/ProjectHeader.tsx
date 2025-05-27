@@ -38,7 +38,7 @@ const ProjectHeader = ({
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success('تم نسخ رابط المشروع إلى الحافظة');
+    toast.success('Project link copied to clipboard');
   };
 
   const handlePrint = () => {
@@ -46,7 +46,7 @@ const ProjectHeader = ({
   };
 
   const handleExport = () => {
-    toast.success('تم تصدير بيانات المشروع');
+    toast.success('Project data exported successfully');
   };
 
   const handleGoBack = () => {
@@ -64,25 +64,25 @@ const ProjectHeader = ({
             onClick={handleGoBack}
           >
             <ChevronLeft className="h-4 w-4 ml-1" />
-            المشاريع
+            Projects
           </Button>
         </div>
         <h1 className="text-3xl font-bold tracking-tight mt-2">{project?.projectName}</h1>
         <div className="flex flex-wrap gap-4 mt-2">
           <p className="text-muted-foreground flex items-center">
             <span className="w-4 h-4 ml-1" /> 
-            معرف المشروع: {project?.id}
+            Project ID: {project?.id}
           </p>
           {project?.startDate && (
             <p className="text-muted-foreground flex items-center">
               <span className="w-4 h-4 ml-1" /> 
-              تاريخ البدء: {new Date(project?.startDate).toLocaleDateString('ar-SA')}
+              Start Date: {new Date(project?.startDate).toLocaleDateString('en-US')}
             </p>
           )}
           {project?.clientName && (
             <p className="text-muted-foreground flex items-center">
               <span className="w-4 h-4 ml-1" /> 
-              العميل: {project?.clientName}
+              Client: {project?.clientName}
             </p>
           )}
         </div>
@@ -91,11 +91,11 @@ const ProjectHeader = ({
       <div className="flex gap-2 print:hidden sm:mt-0 mt-4 w-full sm:w-auto">
         <Button variant="outline" size="sm" onClick={handleShare} className="flex-1 sm:flex-none">
           <Share2 className="h-4 w-4 ml-1.5" />
-          مشاركة
+          Share
         </Button>
         <Button variant="outline" size="sm" onClick={onEdit} className="flex-1 sm:flex-none">
           <Edit className="h-4 w-4 ml-1.5" />
-          تعديل
+          Edit
         </Button>
         
         {showPendButton && onPend && (
@@ -106,7 +106,7 @@ const ProjectHeader = ({
             className="flex-1 sm:flex-none"
           >
             <PauseCircle className="h-4 w-4 ml-1.5" />
-            تعليق المشروع
+            Suspend Project
           </Button>
         )}
         
@@ -118,7 +118,7 @@ const ProjectHeader = ({
             className="flex-1 sm:flex-none"
           >
             <PlayCircle className="h-4 w-4 ml-1.5" />
-            تفعيل المشروع
+            Activate Project
           </Button>
         )}
         
@@ -130,7 +130,7 @@ const ProjectHeader = ({
             className="flex-1 sm:flex-none"
           >
             <Ban className="h-4 w-4 ml-1.5" />
-            إلغاء المشروع
+            Cancel Project
           </Button>
         )}
         
@@ -143,15 +143,15 @@ const ProjectHeader = ({
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleExport}>
               <Download className="h-4 w-4 ml-2" />
-              تصدير
+              Export
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handlePrint}>
               <Printer className="h-4 w-4 ml-2" />
-              طباعة
+              Print
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => toast.info("سيتم توفير ميزة الأرشفة قريبًا")}>
-              أرشفة المشروع
+            <DropdownMenuItem onClick={() => toast.info("Archive feature coming soon")}>
+              Archive Project
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

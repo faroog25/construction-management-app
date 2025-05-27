@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +52,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
       };
 
       await createEngineer(engineer);
-      toast.success('تمت الإضافة بنجاح');
+      toast.success('Added successfully');
       onOpenChange(false);
       onEngineerCreated?.();
       form.reset();
@@ -64,7 +63,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
       } else if (typeof error === 'string') {
         toast.error(error);
       } else {
-        toast.error('فشلت الإضافة. الرجاء المحاولة مرة أخرى');
+        toast.error('Failed to add. Please try again');
       }
     }
   };
@@ -73,7 +72,7 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>إضافة مهندس موقع جديد</DialogTitle>
+          <DialogTitle>Add New Site Engineer</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -83,11 +82,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-1">
-                    الاسم
+                    Name
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل الاسم الكامل" {...field} />
+                    <Input placeholder="Enter full name" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs text-destructive" />
                 </FormItem>
@@ -100,11 +99,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-1">
-                    البريد الإلكتروني
+                    Email
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="أدخل البريد الإلكتروني" {...field} />
+                    <Input type="email" placeholder="Enter email" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs text-destructive" />
                 </FormItem>
@@ -117,11 +116,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-1">
-                    رقم الهاتف
+                    Phone Number
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل رقم الهاتف" {...field} />
+                    <Input placeholder="Enter phone number" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs text-destructive" />
                 </FormItem>
@@ -134,11 +133,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-1">
-                    كلمة المرور
+                    Password
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="أدخل كلمة المرور" {...field} />
+                    <Input type="password" placeholder="Enter password" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs text-destructive" />
                 </FormItem>
@@ -151,11 +150,11 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-1">
-                    تأكيد كلمة المرور
+                    Confirm Password
                     <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="أعد إدخال كلمة المرور" {...field} />
+                    <Input type="password" placeholder="Re-enter password" {...field} />
                   </FormControl>
                   <FormMessage className="text-xs text-destructive" />
                 </FormItem>
@@ -164,13 +163,13 @@ export function NewSiteEngineerModal({ isOpen, onOpenChange, onEngineerCreated }
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                إلغاء
+                Cancel
               </Button>
               <Button 
                 type="submit" 
                 disabled={form.formState.isSubmitting}
               >
-                {form.formState.isSubmitting ? 'جاري الإضافة...' : 'إضافة المهندس'}
+                {form.formState.isSubmitting ? 'Adding...' : 'Add Engineer'}
               </Button>
             </DialogFooter>
           </form>

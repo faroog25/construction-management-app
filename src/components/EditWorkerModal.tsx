@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
@@ -46,7 +45,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
         setSpecialties(data);
       } catch (error) {
         console.error('Error fetching specialties:', error);
-        toast.error(error instanceof Error ? error.message : 'فشل في جلب التخصصات');
+        toast.error(error instanceof Error ? error.message : 'Failed to fetch specialties');
       }
     };
 
@@ -64,7 +63,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
         const workerDetails = await getWorkerById(worker.id);
         console.log('Worker details fetched:', workerDetails);
         
-        // تعيين بيانات النموذج من البيانات المجلوبة
+        // Set form data from fetched data
         setFormData({
           firstName: workerDetails.firstName || '',
           secondName: workerDetails.secondName || '',
@@ -78,7 +77,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
         });
       } catch (error) {
         console.error('Error fetching worker details:', error);
-        toast.error('فشل في جلب بيانات العامل');
+        toast.error('Failed to fetch worker data');
       } finally {
         setFetchingWorker(false);
       }
@@ -93,7 +92,6 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
 
     setLoading(true);
     try {
-      // Pass the worker ID and formData directly to updateWorker
       await updateWorker(worker.id, formData);
       toast.success(t('workers.update_success'));
       onWorkerUpdated();
@@ -120,12 +118,12 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
           </DialogTitle>
         </DialogHeader>
         {fetchingWorker ? (
-          <div className="text-center py-4">جاري تحميل بيانات العامل...</div>
+          <div className="text-center py-4">Loading worker data...</div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">الاسم الأول</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
                   name="firstName"
@@ -137,7 +135,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="secondName">الاسم الثاني</Label>
+                <Label htmlFor="secondName">Second Name</Label>
                 <Input
                   id="secondName"
                   name="secondName"
@@ -149,7 +147,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="thirdName">الاسم الثالث</Label>
+                <Label htmlFor="thirdName">Third Name</Label>
                 <Input
                   id="thirdName"
                   name="thirdName"
@@ -161,7 +159,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lastName">الاسم الأخير</Label>
+                <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
                   name="lastName"
@@ -173,7 +171,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nationalNumber">الرقم الوطني</Label>
+                <Label htmlFor="nationalNumber">National Number</Label>
                 <Input
                   id="nationalNumber"
                   name="nationalNumber"
@@ -185,7 +183,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber">رقم الهاتف</Label>
+                <Label htmlFor="phoneNumber">Phone Number</Label>
                 <Input
                   id="phoneNumber"
                   name="phoneNumber"
@@ -197,7 +195,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -210,7 +208,7 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">العنوان</Label>
+                <Label htmlFor="address">Address</Label>
                 <Input
                   id="address"
                   name="address"
@@ -223,13 +221,13 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="specialtyId">التخصص</Label>
+              <Label htmlFor="specialtyId">Specialty</Label>
               <Select
                 value={formData.specialtyId ? formData.specialtyId.toString() : ""}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, specialtyId: parseInt(value) }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر التخصص" />
+                  <SelectValue placeholder="Select Specialty" />
                 </SelectTrigger>
                 <SelectContent>
                   {specialties.map((specialty) => (
@@ -243,10 +241,10 @@ export function EditWorkerModal({ isOpen, onClose, onWorkerUpdated, worker }: Ed
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
-                إلغاء
+                Cancel
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                {loading ? 'Saving...' : 'Save Changes'}
               </Button>
             </DialogFooter>
           </form>

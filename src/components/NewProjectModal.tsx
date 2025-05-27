@@ -288,7 +288,7 @@ export function NewProjectModal({ isOpen, onOpenChange, onProjectCreated }: NewP
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={
-                            isLoadingSiteEngineers ? "جاري التحميل..." : "اختر مهندس الموقع"
+                            isLoadingSiteEngineers ? "Loading..." : "Select Site Engineer"
                           } />
                         </SelectTrigger>
                       </FormControl>

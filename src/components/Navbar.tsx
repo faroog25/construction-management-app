@@ -89,7 +89,7 @@ const Navbar = () => {
           </Button>
           
           <ThemeSwitcher />
-          <LanguageSwitcher />
+          {/* <LanguageSwitcher /> */}
           
           {/* User Profile Dropdown */}
           <UserProfileDropdown />
