@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -125,8 +124,8 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
     return (
       <div className="text-center py-16">
         <div className="mb-6">
-          <h3 className="text-xl font-semibold text-muted-foreground mb-2">لا يوجد معدات</h3>
-          <p className="text-muted-foreground">لم يتم العثور على أي معدات في النظام</p>
+          <h3 className="text-xl font-semibold text-muted-foreground mb-2">No Equipment</h3>
+          <p className="text-muted-foreground">No equipment found in the system</p>
         </div>
         {onAddEquipment && (
           <Button 
@@ -134,7 +133,7 @@ const EquipmentList: React.FC<EquipmentListProps> = ({ onSelectEquipment, onRefr
             className="bg-primary hover:bg-primary/90 gap-2"
           >
             <PlusCircle className="h-5 w-5" />
-            إضافة معدة جديدة
+            Add New Equipment
           </Button>
         )}
       </div>

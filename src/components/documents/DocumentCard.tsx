@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,11 +79,11 @@ const DocumentCard = ({ document, onView, onDownload, onShare, onEdit, onDelete 
 
   const getStatusName = (status: Document['status']) => {
     switch (status) {
-      case 'approved': return 'معتمد';
-      case 'pending': return 'قيد المراجعة';
-      case 'rejected': return 'مرفوض';
-      case 'draft': return 'مسودة';
-      default: return 'معتمد';
+      case 'approved': return 'Approved';
+      case 'pending': return 'Under Review';
+      case 'rejected': return 'Rejected';
+      case 'draft': return 'Draft';
+      default: return 'Approved';
     }
   };
 
@@ -107,11 +106,11 @@ const DocumentCard = ({ document, onView, onDownload, onShare, onEdit, onDelete 
       case 'jpeg':
       case 'png':
       case 'gif':
-      case 'image': return 'صورة';
+      case 'image': return 'Image';
       case 'zip':
       case 'rar':
       case '7z':
-      case 'archive': return 'ملف مضغوط';
+      case 'archive': return 'Compressed File';
       default: return type.toUpperCase();
     }
   };
@@ -139,24 +138,24 @@ const DocumentCard = ({ document, onView, onDownload, onShare, onEdit, onDelete 
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={onView} className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
-                  عرض
+                  View
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onDownload} className="flex items-center gap-2">
                   <Download className="h-4 w-4" />
-                  تحميل
+                  Download
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onShare} className="flex items-center gap-2">
                   <Share className="h-4 w-4" />
-                  مشاركة
+                  Share
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onEdit} className="flex items-center gap-2">
                   <Edit className="h-4 w-4" />
-                  تعديل
+                  Edit
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-red-600 flex items-center gap-2" onClick={onDelete}>
                   <Trash className="h-4 w-4" />
-                  حذف
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -177,11 +176,11 @@ const DocumentCard = ({ document, onView, onDownload, onShare, onEdit, onDelete 
           <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
             <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={onView}>
               <Eye className="h-3 w-3 mr-1" />
-              عرض
+              View
             </Button>
             <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={onDownload}>
               <Download className="h-3 w-3 mr-1" />
-              تحميل
+              Download
             </Button>
           </div>
         </div>

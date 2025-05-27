@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -24,7 +23,7 @@ import { updateSpecialty, Specialty } from '@/services/specialtyService';
 import { useToast } from '@/hooks/use-toast';
 
 const specialtySchema = z.object({
-  name: z.string().min(1, { message: 'اسم التخصص مطلوب' }),
+  name: z.string().min(1, { message: 'Specialty name is required' }),
 });
 
 type SpecialtyFormValues = z.infer<typeof specialtySchema>;
@@ -53,18 +52,18 @@ export function EditSpecialtyModal({ isOpen, setIsOpen, specialty, onSuccess }: 
 
   const onSubmit = async (data: SpecialtyFormValues) => {
     if (!specialty) {
-      toast.error('لم يتم تحديد التخصص للتعديل');
+      toast.error('No specialty selected for editing');
       return;
     }
     
     try {
       await updateSpecialty(specialty.id, data.name);
-      toast.success('تم تعديل التخصص بنجاح');
+      toast.success('Specialty updated successfully');
       form.reset();
       setIsOpen(false);
       onSuccess();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'حدث خطأ أثناء تعديل التخصص');
+      toast.error(error instanceof Error ? error.message : 'An error occurred while updating the specialty');
     }
   };
 
@@ -72,7 +71,7 @@ export function EditSpecialtyModal({ isOpen, setIsOpen, specialty, onSuccess }: 
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>تعديل التخصص</DialogTitle>
+          <DialogTitle>Edit Specialty</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -81,9 +80,9 @@ export function EditSpecialtyModal({ isOpen, setIsOpen, specialty, onSuccess }: 
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>اسم التخصص</FormLabel>
+                  <FormLabel>Specialty Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="أدخل اسم التخصص" {...field} />
+                    <Input placeholder="Enter specialty name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -91,9 +90,9 @@ export function EditSpecialtyModal({ isOpen, setIsOpen, specialty, onSuccess }: 
             />
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                إلغاء
+                Cancel
               </Button>
-              <Button type="submit">حفظ التعديل</Button>
+              <Button type="submit">Save Changes</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -33,8 +33,8 @@ const AIChatButton = () => {
   const askQuestion = async () => {
     if (!question.trim()) {
       toast({
-        title: "خطأ",
-        description: "الرجاء كتابة سؤال",
+        title: "Error",
+        description: "Please write a question",
         variant: "destructive"
       });
       return;
@@ -55,7 +55,6 @@ const AIChatButton = () => {
       );
 
       if (!response.ok) {
-        // Handle HTTP errors by showing a user-friendly message in chat
         const errorResponse: AIResponse = {
           question: question,
           answer: "Sorry, I couldn't understand your question. Please be more specific and try again.",
@@ -68,7 +67,6 @@ const AIChatButton = () => {
 
       const data = await response.json();
       
-      // Check if the response contains an error message
       if (data.message && data.message.includes("Sorry, I couldn't understand")) {
         const newResponse: AIResponse = {
           question: question,
@@ -88,14 +86,13 @@ const AIChatButton = () => {
       setQuestion('');
       
       toast({
-        title: "تم",
-        description: "تم الحصول على الإجابة بنجاح",
+        title: "Success",
+        description: "Answer received successfully",
         variant: "default"
       });
     } catch (error) {
       console.error('Error asking question:', error);
       
-      // Instead of showing a toast error, add the error message to chat
       const errorResponse: AIResponse = {
         question: question,
         answer: "Sorry, I couldn't understand your question. Please be more specific and try again.",
@@ -124,7 +121,7 @@ const AIChatButton = () => {
 
   const renderTable = (data: any[], title?: string) => {
     if (!data || data.length === 0) {
-      return <p className="text-sm text-muted-foreground">لا توجد بيانات للعرض</p>;
+      return <p className="text-sm text-muted-foreground">No data to display</p>;
     }
 
     const firstItem = data[0];
@@ -173,21 +170,18 @@ const AIChatButton = () => {
     }
 
     if (isArray(answer)) {
-      return renderTable(answer, "البيانات");
+      return renderTable(answer, "Data");
     }
 
     if (isObjectWithKeys(answer)) {
-      // Check if it's a response with data property that contains an array
       if (answer.data && isArray(answer.data)) {
-        return renderTable(answer.data, "النتائج");
+        return renderTable(answer.data, "Results");
       }
       
-      // Check if it's a response with items property that contains an array
       if (answer.items && isArray(answer.items)) {
-        return renderTable(answer.items, "العناصر");
+        return renderTable(answer.items, "Items");
       }
 
-      // Check for other common array properties
       const arrayKeys = Object.keys(answer).filter(key => isArray(answer[key]));
       if (arrayKeys.length > 0) {
         return (
@@ -201,7 +195,6 @@ const AIChatButton = () => {
         );
       }
 
-      // If it's an object with key-value pairs, show as a simple table
       const entries = Object.entries(answer).filter(([_, value]) => 
         typeof value !== 'object' || value === null
       );
@@ -225,7 +218,6 @@ const AIChatButton = () => {
         );
       }
 
-      // Fallback to JSON view for complex objects
       return (
         <div className="space-y-2">
           <pre className="bg-gray-50 p-3 rounded-lg text-xs overflow-x-auto border">
@@ -235,12 +227,11 @@ const AIChatButton = () => {
       );
     }
 
-    return <p className="text-sm text-muted-foreground">لا توجد بيانات للعرض</p>;
+    return <p className="text-sm text-muted-foreground">No data to display</p>;
   };
 
   return (
     <>
-      {/* Floating Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
@@ -256,28 +247,26 @@ const AIChatButton = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-xl">
                 <MessageCircle className="h-5 w-5 text-primary" />
-                مساعد الذكاء الاصطناعي
+                AI Assistant
               </DialogTitle>
             </DialogHeader>
             
             <div className="flex-1 flex flex-col min-h-0">
-              {/* Messages Area */}
               <ScrollArea className="flex-1 px-1">
                 <div className="space-y-4 pb-4">
                   {responses.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Bot className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-                      <p>اسأل أي سؤال عن المشاريع أو البيانات</p>
+                      <p>Ask any question about projects or data</p>
                     </div>
                   ) : (
                     responses.map((response, index) => (
                       <div key={index} className="space-y-3">
-                        {/* User Question */}
                         <div className="flex justify-end">
                           <div className="bg-primary text-primary-foreground rounded-lg px-4 py-2 max-w-[80%]">
                             <p className="text-sm">{response.question}</p>
                             <p className="text-xs opacity-70 mt-1">
-                              {response.timestamp.toLocaleTimeString('ar-SA')}
+                              {response.timestamp.toLocaleTimeString('en-US')}
                             </p>
                           </div>
                         </div>
@@ -289,7 +278,7 @@ const AIChatButton = () => {
                               <div className="flex items-center gap-2 mb-2">
                                 <Bot className="h-4 w-4 text-blue-500" />
                                 <Badge variant="secondary" className="text-xs">
-                                  مساعد الذكاء الاصطناعي
+                                  AI Assistant
                                 </Badge>
                               </div>
                               {formatResponse(response.answer)}
@@ -306,7 +295,7 @@ const AIChatButton = () => {
                         <CardContent className="p-4">
                           <div className="flex items-center gap-2">
                             <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                            <span className="text-sm text-muted-foreground">جاري التفكير...</span>
+                            <span className="text-sm text-muted-foreground">Thinking...</span>
                           </div>
                         </CardContent>
                       </Card>
@@ -319,7 +308,7 @@ const AIChatButton = () => {
               {/* Input Area */}
               <div className="flex gap-2 pt-4 border-t bg-background">
                 <Input
-                  placeholder="اكتب سؤالك هنا..."
+                  placeholder="Type your question here..."
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   onKeyPress={handleKeyPress}

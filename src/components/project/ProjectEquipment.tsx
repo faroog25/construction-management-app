@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Calendar, Package, AlertCircle, X, Check, Clock } from 'lucide-react';
@@ -46,8 +45,8 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
     mutationFn: cancelReservation,
     onSuccess: () => {
       toast({
-        title: "تم الإلغاء",
-        description: "تم إلغاء حجز المعدة بنجاح",
+        title: "Cancelled",
+        description: "Equipment reservation cancelled successfully",
       });
       setCancelDialogOpen(false);
       setEquipmentToCancel(null);
@@ -55,8 +54,8 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
     },
     onError: (error) => {
       toast({
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "حدث خطأ أثناء إلغاء الحجز",
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred while cancelling the reservation",
         variant: "destructive",
       });
     },
@@ -132,7 +131,7 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
     return (
       <div className="flex flex-col justify-center items-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">جاري تحميل بيانات المعدات...</p>
+        <p className="text-muted-foreground">Loading equipment data...</p>
       </div>
     );
   }
@@ -142,10 +141,10 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
       <div className="flex flex-col justify-center items-center py-12 space-y-4">
         <div className="flex items-center text-destructive">
           <AlertCircle className="w-5 h-5 mr-2" />
-          <p>فشل في تحميل بيانات المعدات</p>
+          <p>Failed to load equipment data</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()}>
-          إعادة المحاولة
+          Try Again
         </Button>
       </div>
     );
@@ -154,7 +153,7 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">المعدات المحجوزة للمشروع</h3>
+        <h3 className="text-lg font-semibold">Project Reserved Equipment</h3>
       </div>
       
       {equipments && equipments.length > 0 ? (
@@ -163,11 +162,11 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-muted/50">
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">المعدة</th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">تاريخ البدء</th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">تاريخ الانتهاء</th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">الحالة</th>
-                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">الإجراءات</th>
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Equipment</th>
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Start Date</th>
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">End Date</th>
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 text-start text-sm font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -202,7 +201,7 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
                           size="sm"
                           onClick={() => openCancelDialog(equipment)}
                         >
-                          إلغاء الحجز
+                          Cancel Reservation
                         </Button>
                       )}
                     </td>
@@ -215,9 +214,9 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
       ) : (
         <div className="text-center py-10 border border-dashed rounded-lg bg-muted/20">
           <Package className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <h3 className="text-lg font-medium mb-1">لا توجد معدات محجوزة</h3>
+          <h3 className="text-lg font-medium mb-1">No Reserved Equipment</h3>
           <p className="text-muted-foreground text-sm">
-            لم يتم حجز أي معدات لهذا المشروع حتى الآن
+            No equipment has been reserved for this project yet
           </p>
         </div>
       )}
@@ -226,20 +225,20 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>إلغاء الحجز</AlertDialogTitle>
+            <AlertDialogTitle>Cancel Reservation</AlertDialogTitle>
             <AlertDialogDescription>
               {equipmentToCancel ? (
                 <>
-                  هل أنت متأكد من رغبتك بإلغاء حجز <span className="font-medium">{equipmentToCancel.equipmentName}</span>؟
-                  هذا الإجراء لا يمكن التراجع عنه.
+                  Are you sure you want to cancel the reservation for <span className="font-medium">{equipmentToCancel.equipmentName}</span>?
+                  This action cannot be undone.
                 </>
               ) : (
-                'هل أنت متأكد من رغبتك بإلغاء هذا الحجز؟ هذا الإجراء لا يمكن التراجع عنه.'
+                'Are you sure you want to cancel this reservation? This action cannot be undone.'
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isCancelling}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel disabled={isCancelling}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={(e) => {
                 e.preventDefault();
@@ -251,10 +250,10 @@ const ProjectEquipment: React.FC<ProjectEquipmentProps> = ({ project }) => {
               {isCancelling ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  جاري الإلغاء...
+                  Cancelling...
                 </>
               ) : (
-                'نعم، إلغاء الحجز'
+                'Yes, Cancel Reservation'
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

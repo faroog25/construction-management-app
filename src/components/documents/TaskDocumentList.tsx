@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Document } from '@/types/document';
 import { FileText, Download, Info, Calendar, File, ExternalLink, Pencil, Trash } from 'lucide-react';
@@ -35,70 +34,58 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
     try {
       toast.promise(
         downloadDocument(document.id).then(blob => {
-          // Create a blob URL for the file
           const url = window.URL.createObjectURL(blob);
-          
-          // Create a temporary link element
           const link = window.document.createElement('a');
           link.href = url;
           link.download = document.name || 'document';
-          
-          // Trigger download
           window.document.body.appendChild(link);
           link.click();
-          
-          // Clean up
           window.document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
         }),
         {
-          loading: 'جاري تحميل المستند...',
-          success: 'تم تحميل المستند بنجاح',
-          error: 'فشل في تحميل المستند'
+          loading: 'Loading document...',
+          success: 'Document downloaded successfully',
+          error: 'Failed to download document'
         }
       );
     } catch (error) {
       console.error('Error downloading document:', error);
-      toast.error('فشل في تحميل المستند');
+      toast.error('Failed to download document');
     }
   };
 
-  // Function to open the document in a new tab
   const handleOpenDocument = async (document: Document) => {
     try {
-      toast.loading('جاري تحميل المستند...');
+      toast.loading('Loading document...');
       
       const result = await getDocument(document.id);
       
       if (result.success && result.data && result.data.fileUrl) {
-        // Open the file URL in a new tab
         window.open(result.data.fileUrl, '_blank');
         toast.dismiss();
-        toast.success('تم فتح المستند بنجاح');
+        toast.success('Document opened successfully');
       } else {
         toast.dismiss();
-        toast.error('فشل في فتح المستند');
+        toast.error('Failed to open document');
       }
     } catch (error) {
       console.error('Error opening document:', error);
       toast.dismiss();
-      toast.error('فشل في فتح المستند');
+      toast.error('Failed to open document');
     }
   };
 
-  // Function to handle document editing
   const handleEditDocument = (document: Document) => {
     setSelectedDocument(document);
     setEditDialogOpen(true);
   };
 
-  // Function to handle document deletion confirmation
   const handleDeleteConfirm = (document: Document) => {
     setSelectedDocument(document);
     setDeleteDialogOpen(true);
   };
 
-  // Function to handle document deletion
   const handleDeleteDocument = async () => {
     if (!selectedDocument) return;
     
@@ -108,25 +95,23 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
       const result = await deleteDocument(selectedDocument.id);
       
       if (result.success) {
-        toast.success('تم حذف المستند بنجاح');
+        toast.success('Document deleted successfully');
         setDeleteDialogOpen(false);
         
-        // Refresh documents list
         if (onDocumentUpdated) {
           onDocumentUpdated();
         }
       } else {
-        toast.error(result.message || 'فشل في حذف المستند');
+        toast.error(result.message || 'Failed to delete document');
       }
     } catch (error) {
       console.error('Error deleting document:', error);
-      toast.error('فشل في حذف المستند');
+      toast.error('Failed to delete document');
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Handle edit success
   const handleDocumentEdited = () => {
     if (onDocumentUpdated) {
       onDocumentUpdated();
@@ -156,7 +141,7 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('ar-SA', {
+      return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
@@ -170,7 +155,7 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
     return (
       <div className="flex flex-col items-center justify-center h-40">
         <div className="h-10 w-10 border-4 border-t-primary animate-spin rounded-full"></div>
-        <p className="mt-4 text-muted-foreground">جاري تحميل المستندات...</p>
+        <p className="mt-4 text-muted-foreground">Loading documents...</p>
       </div>
     );
   }
@@ -179,9 +164,9 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
         <FileText className="h-16 w-16 text-muted-foreground/30 mb-4" />
-        <h3 className="text-lg font-medium mb-1">لا توجد مستندات</h3>
+        <h3 className="text-lg font-medium mb-1">No documents</h3>
         <p className="text-muted-foreground max-w-md">
-          لم يتم إضافة أي مستندات لهذه المهمة بعد. استخدم زر "رفع مستند جديد" لإضافة مستندات.
+          No documents have been added to this task yet. Use the "Upload new document" button to add documents.
         </p>
       </div>
     );
@@ -207,8 +192,8 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
                   <Badge variant="outline" className="shrink-0 sm:ml-2">
                     {doc.fileType === 'pdf' ? 'PDF' : 
                      doc.fileType === 'doc' || doc.fileType === 'docx' ? 'Word' :
-                     ['jpg', 'jpeg', 'png', 'gif'].includes(doc.fileType || '') ? 'صورة' :
-                     ['zip', 'rar', '7z'].includes(doc.fileType || '') ? 'ملف مضغوط' : 'مستند'}
+                     ['jpg', 'jpeg', 'png', 'gif'].includes(doc.fileType || '') ? 'Image' :
+                     ['zip', 'rar', '7z'].includes(doc.fileType || '') ? 'Compressed' : 'Document'}
                   </Badge>
                 </div>
                 
@@ -231,48 +216,48 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
                 variant="outline"
                 className="text-xs h-8"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  e.stopPropagation();
                   handleOpenDocument(doc);
                 }}
               >
                 <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                فتح
+                Open
               </Button>
               <Button 
                 size="sm" 
                 variant="outline"
                 className="text-xs h-8"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  e.stopPropagation();
                   handleEditDocument(doc);
                 }}
               >
                 <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                تعديل
+                Edit
               </Button>
               <Button 
                 size="sm" 
                 variant="outline"
                 className="text-xs h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  e.stopPropagation();
                   handleDeleteConfirm(doc);
                 }}
               >
                 <Trash className="h-3.5 w-3.5 mr-1.5" />
-                حذف
+                Delete
               </Button>
               <Button 
                 size="sm" 
                 variant="secondary"
                 className="text-xs h-8"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  e.stopPropagation();
                   handleDownload(doc);
                 }}
               >
                 <Download className="h-3.5 w-3.5 mr-1.5" />
-                تحميل
+                Download
               </Button>
             </div>
           </div>
@@ -291,9 +276,9 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-right">تأكيد حذف المستند</AlertDialogTitle>
+            <AlertDialogTitle className="text-right">Confirm Document Deletion</AlertDialogTitle>
             <AlertDialogDescription className="text-right">
-              هل أنت متأكد من رغبتك في حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.
+              Are you sure you want to delete this document? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row-reverse gap-2 sm:justify-start">
@@ -305,16 +290,16 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
               {isDeleting ? (
                 <>
                   <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2" />
-                  جاري الحذف...
+                  Deleting...
                 </>
               ) : (
                 <>
                   <Trash className="h-4 w-4 mr-2" />
-                  نعم، حذف المستند
+                  Yes, Delete Document
                 </>
               )}
             </AlertDialogAction>
-            <AlertDialogCancel className="sm:mr-2">إلغاء</AlertDialogCancel>
+            <AlertDialogCancel className="sm:mr-2">Cancel</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

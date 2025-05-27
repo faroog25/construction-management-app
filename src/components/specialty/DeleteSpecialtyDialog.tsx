@@ -27,8 +27,8 @@ export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess 
     if (!specialty) {
       toast({
         variant: "destructive",
-        title: "خطأ",
-        description: "لم يتم تحديد تخصص للحذف"
+        title: "Error",
+        description: "No specialty selected for deletion"
       });
       return;
     }
@@ -40,8 +40,8 @@ export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess 
       await deleteSpecialty(specialty.id);
       toast({
         variant: "default",
-        title: "نجح",
-        description: "تم حذف التخصص بنجاح"
+        title: "Success",
+        description: "Specialty deleted successfully"
       });
       setIsOpen(false);
       onSuccess();
@@ -49,8 +49,8 @@ export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess 
       console.error('Delete error:', error);
       toast({
         variant: "destructive",
-        title: "خطأ",
-        description: error instanceof Error ? error.message : "فشل في حذف التخصص"
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete specialty"
       });
     }
   };
@@ -59,15 +59,15 @@ export function DeleteSpecialtyDialog({ isOpen, setIsOpen, specialty, onSuccess 
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>هل أنت متأكد من حذف هذا التخصص؟</AlertDialogTitle>
+          <AlertDialogTitle>Are you sure you want to delete this specialty?</AlertDialogTitle>
           <AlertDialogDescription>
-            {specialty ? `سيتم حذف التخصص "${specialty.name}" نهائياً ولا يمكن التراجع عن هذا الإجراء.` : 'سيتم حذف التخصص نهائياً ولا يمكن التراجع عن هذا الإجراء.'}
+            {specialty ? `The specialty "${specialty.name}" will be permanently deleted and this action cannot be undone.` : 'The specialty will be permanently deleted and this action cannot be undone.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            تأكيد الحذف
+            Confirm Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
