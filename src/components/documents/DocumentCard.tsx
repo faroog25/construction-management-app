@@ -23,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 
 interface Document {
   id: number;
@@ -48,11 +47,24 @@ interface DocumentCardProps {
 const DocumentCard = ({ document, onView, onDownload, onShare, onEdit, onDelete }: DocumentCardProps) => {
   const getDocumentIcon = (type: string) => {
     switch (type) {
-      case 'pdf': return <FileText className="h-16 w-16 text-red-500" />;
-      case 'doc': return <FileText className="h-16 w-16 text-blue-500" />;
-      case 'image': return <FileImage className="h-16 w-16 text-green-500" />;
-      case 'archive': return <FileArchive className="h-16 w-16 text-amber-500" />;
-      default: return <File className="h-16 w-16 text-gray-500" />;
+      case 'pdf': 
+        return <FileText className="h-16 w-16 text-red-500" />;
+      case 'doc': 
+      case 'docx': 
+        return <FileText className="h-16 w-16 text-blue-500" />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'image': 
+        return <FileImage className="h-16 w-16 text-green-500" />;
+      case 'zip':
+      case 'rar':
+      case '7z':
+      case 'archive': 
+        return <FileArchive className="h-16 w-16 text-amber-500" />;
+      default: 
+        return <File className="h-16 w-16 text-gray-500" />;
     }
   };
 
@@ -83,6 +95,24 @@ const DocumentCard = ({ document, onView, onDownload, onShare, onEdit, onDelete 
       case 'rejected': return 'border-l-4 border-l-red-500';
       case 'draft': return 'border-l-4 border-l-gray-500';
       default: return '';
+    }
+  };
+
+  const getTypeDisplayName = (type: string) => {
+    switch (type) {
+      case 'pdf': return 'PDF';
+      case 'doc': 
+      case 'docx': return 'Word';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'image': return 'صورة';
+      case 'zip':
+      case 'rar':
+      case '7z':
+      case 'archive': return 'ملف مضغوط';
+      default: return type.toUpperCase();
     }
   };
 
@@ -133,12 +163,12 @@ const DocumentCard = ({ document, onView, onDownload, onShare, onEdit, onDelete 
           </div>
           <div className="flex justify-between items-center mt-3">
             <Badge variant="outline" className={cn("text-xs font-normal", 
-              document.type === 'pdf' && "bg-red-50 text-red-700 border-red-200", 
-              document.type === 'doc' && "bg-blue-50 text-blue-700 border-blue-200",
-              document.type === 'image' && "bg-green-50 text-green-700 border-green-200",
-              document.type === 'archive' && "bg-amber-50 text-amber-700 border-amber-200"
+              (document.type === 'pdf') && "bg-red-50 text-red-700 border-red-200", 
+              (document.type === 'doc' || document.type === 'docx') && "bg-blue-50 text-blue-700 border-blue-200",
+              (['jpg', 'jpeg', 'png', 'gif', 'image'].includes(document.type)) && "bg-green-50 text-green-700 border-green-200",
+              (['zip', 'rar', '7z', 'archive'].includes(document.type)) && "bg-amber-50 text-amber-700 border-amber-200"
             )}>
-              {document.type.toUpperCase()}
+              {getTypeDisplayName(document.type)}
             </Badge>
             <Badge variant="outline" className={cn("text-xs font-normal", getStatusColor(document.status))}>
               {getStatusName(document.status)}

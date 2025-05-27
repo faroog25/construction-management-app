@@ -10,11 +10,11 @@ export interface Document {
   classificationId?: number;
   classificationName?: string;
   createdDate: string;
-  type?: string; // Added for UI display
+  type?: string; // Added for UI display (deprecated, use fileType instead)
   size?: string; // Added for UI display
   status?: 'approved' | 'pending' | 'rejected' | 'draft'; // Fixed typing
   fileUrl?: string; // Added for document viewing
-  fileType?: string; // Added for file type information
+  fileType?: string; // File type from API response (e.g., 'pdf', 'doc', 'docx', etc.)
 }
 
 export interface DocumentsParams {

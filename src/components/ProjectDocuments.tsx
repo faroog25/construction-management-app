@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,14 +52,12 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch documents using React Query with retry disabled for 404 responses
-  // Remove ClassificationId filter to get all document types
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['project-documents', project.id],
     queryFn: () => getDocuments({ 
       projectId: project.id,
       pageNumber: 1,
       pageSize: 50
-      // Removed ClassificationId to get all document types
     }),
     retry: false // Don't retry on failure
   });
@@ -195,15 +194,6 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
     refetch();
   };
 
-  const getDocumentType = (name: string): string => {
-    const extension = name.split('.').pop()?.toLowerCase();
-    if (extension === 'pdf') return 'pdf';
-    if (['doc', 'docx'].includes(extension || '')) return 'doc';
-    if (['jpg', 'jpeg', 'png', 'gif'].includes(extension || '')) return 'image';
-    if (['zip', 'rar', '7z'].includes(extension || '')) return 'archive';
-    return 'pdf'; // Default to PDF
-  };
-
   // Format the date
   const formatDate = (dateString: string) => {
     try {
@@ -222,7 +212,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
     return 'approved'; // Default
   };
 
-  // Filter documents based on search term and document type
+  // Filter documents based on search term and document type using fileType from API
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = searchTerm ? 
       doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -231,7 +221,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
     
     const matchesType = documentType === 'all' ? 
       true : 
-      (doc.type || getDocumentType(doc.name)) === documentType;
+      doc.fileType === documentType;
     
     return matchesSearch && matchesType;
   });
@@ -276,6 +266,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
                   <SelectItem value="all">جميع الملفات</SelectItem>
                   <SelectItem value="pdf">PDF</SelectItem>
                   <SelectItem value="doc">Word</SelectItem>
+                  <SelectItem value="docx">Word</SelectItem>
                   <SelectItem value="image">صور</SelectItem>
                   <SelectItem value="archive">ملفات مضغوطة</SelectItem>
                 </SelectGroup>
@@ -305,7 +296,7 @@ const ProjectDocuments = ({ project }: ProjectDocumentsProps) => {
                   document={{
                     id: Number(doc.id) || 0,
                     name: doc.name,
-                    type: doc.type || getDocumentType(doc.name),
+                    type: doc.fileType || 'pdf', // Use fileType from API response
                     size: doc.size || '2.5 MB',
                     dateModified: formatDate(doc.createdDate),
                     project: doc.projectName,

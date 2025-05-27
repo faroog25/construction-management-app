@@ -133,15 +133,21 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
     }
   };
 
-  const getDocumentIcon = (docType: string | undefined) => {
-    switch (docType) {
+  const getDocumentIcon = (fileType: string | undefined) => {
+    switch (fileType) {
       case 'pdf':
         return <File className="h-8 w-8 text-red-500" />;
       case 'doc':
+      case 'docx':
         return <File className="h-8 w-8 text-blue-500" />;
-      case 'image':
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
         return <File className="h-8 w-8 text-green-500" />;
-      case 'archive':
+      case 'zip':
+      case 'rar':
+      case '7z':
         return <File className="h-8 w-8 text-yellow-500" />;
       default:
         return <FileText className="h-8 w-8 text-primary/80" />;
@@ -192,17 +198,17 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
           >
             <div className="flex items-start gap-4">
               <div className="h-14 w-14 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                {getDocumentIcon(doc.type)}
+                {getDocumentIcon(doc.fileType)}
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                   <h4 className="font-semibold text-lg truncate">{doc.name}</h4>
                   <Badge variant="outline" className="shrink-0 sm:ml-2">
-                    {doc.type === 'pdf' ? 'PDF' : 
-                     doc.type === 'doc' ? 'Word' :
-                     doc.type === 'image' ? 'صورة' :
-                     doc.type === 'archive' ? 'ملف مضغوط' : 'مستند'}
+                    {doc.fileType === 'pdf' ? 'PDF' : 
+                     doc.fileType === 'doc' || doc.fileType === 'docx' ? 'Word' :
+                     ['jpg', 'jpeg', 'png', 'gif'].includes(doc.fileType || '') ? 'صورة' :
+                     ['zip', 'rar', '7z'].includes(doc.fileType || '') ? 'ملف مضغوط' : 'مستند'}
                   </Badge>
                 </div>
                 
