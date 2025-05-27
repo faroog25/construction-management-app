@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Container } from '@/components/ui/container';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Bot } from 'lucide-react';
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -18,6 +18,12 @@ const Welcome = () => {
             <div className="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
               <span className="flex h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
               Construction Management System
+            </div>
+
+            {/* AI Powered Badge */}
+            <div className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium mb-4">
+              <Bot className="h-4 w-4 mr-2" />
+              Powered by Artificial Intelligence
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -90,12 +96,10 @@ const Welcome = () => {
           
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm transition-all hover:shadow-md">
             <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              <Bot className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('welcome.document_management')}</h3>
-            <p className="text-gray-600 dark:text-gray-300">{t('welcome.document_management_description')}</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">AI-Powered Insights</h3>
+            <p className="text-gray-600 dark:text-gray-300">Smart analytics and automated reporting powered by artificial intelligence to help you make better decisions.</p>
           </div>
         </div>
       </Container>
