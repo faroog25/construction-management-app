@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -56,7 +55,15 @@ const AIChatButton = () => {
       );
 
       if (!response.ok) {
-        throw new Error('فشل في الحصول على الإجابة');
+        // Handle HTTP errors by showing a user-friendly message in chat
+        const errorResponse: AIResponse = {
+          question: question,
+          answer: "Sorry, I couldn't understand your question. Please be more specific and try again.",
+          timestamp: new Date()
+        };
+        setResponses(prev => [...prev, errorResponse]);
+        setQuestion('');
+        return;
       }
 
       const data = await response.json();
@@ -87,11 +94,15 @@ const AIChatButton = () => {
       });
     } catch (error) {
       console.error('Error asking question:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في الحصول على الإجابة",
-        variant: "destructive"
-      });
+      
+      // Instead of showing a toast error, add the error message to chat
+      const errorResponse: AIResponse = {
+        question: question,
+        answer: "Sorry, I couldn't understand your question. Please be more specific and try again.",
+        timestamp: new Date()
+      };
+      setResponses(prev => [...prev, errorResponse]);
+      setQuestion('');
     } finally {
       setIsLoading(false);
     }
