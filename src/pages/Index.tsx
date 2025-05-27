@@ -1,9 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import DashboardStatsNew from '@/components/DashboardStatsNew';
 import DetailedStatistics from '@/components/DetailedStatistics';
 import ProjectCard from '@/components/ProjectCard';
 import ProjectTimeline from '@/components/ProjectTimeline';
 import UpcomingTasks from '@/components/UpcomingTasks';
+import AIChatButton from '@/components/AIChatButton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -163,6 +165,9 @@ const Index = () => {
         onOpenChange={setIsNewProjectModalOpen}
         onProjectCreated={handleProjectCreated}
       />
+
+      {/* AI Chat Button */}
+      <AIChatButton />
     </div>
   );
 };
