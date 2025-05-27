@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,15 @@ const AIChatButton = () => {
   const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [responses, setResponses] = useState<AIResponse[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [responses, isLoading]);
 
   const askQuestion = async () => {
     if (!question.trim()) {
@@ -222,7 +231,7 @@ const AIChatButton = () => {
             </Button>
           </DialogTrigger>
           
-          <DialogContent className="sm:max-w-[800px] max-h-[80vh] flex flex-col">
+          <DialogContent className="sm:max-w-[900px] h-[80vh] flex flex-col">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-xl">
                 <MessageCircle className="h-5 w-5 text-primary" />
@@ -232,8 +241,8 @@ const AIChatButton = () => {
             
             <div className="flex-1 flex flex-col min-h-0">
               {/* Messages Area */}
-              <ScrollArea className="flex-1 h-[400px] pr-4">
-                <div className="space-y-4">
+              <ScrollArea className="flex-1 px-1">
+                <div className="space-y-4 pb-4">
                   {responses.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Bot className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
@@ -282,11 +291,12 @@ const AIChatButton = () => {
                       </Card>
                     </div>
                   )}
+                  <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
               
               {/* Input Area */}
-              <div className="flex gap-2 pt-4 border-t">
+              <div className="flex gap-2 pt-4 border-t bg-background">
                 <Input
                   placeholder="اكتب سؤالك هنا..."
                   value={question}
