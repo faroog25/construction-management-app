@@ -98,7 +98,7 @@ const ProjectHeader = ({
           Edit
         </Button>
         
-        {showPendButton && onPend && (
+        {/* {showPendButton && onPend && (
           <Button 
             variant="warning"
             size="sm" 
@@ -109,8 +109,8 @@ const ProjectHeader = ({
             Suspend Project
           </Button>
         )}
-        
-        {showActivateButton && onActivate && (
+         */}
+        {/* {showActivateButton && onActivate && (
           <Button 
             variant="success"
             size="sm" 
@@ -120,7 +120,7 @@ const ProjectHeader = ({
             <PlayCircle className="h-4 w-4 ml-1.5" />
             Activate Project
           </Button>
-        )}
+        )} */}
         
         {showCancelButton && onCancel && (
           <Button 

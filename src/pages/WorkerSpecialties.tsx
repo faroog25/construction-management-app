@@ -22,42 +22,42 @@ export default function WorkerSpecialties() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   
-  // حالات فتح وغلق النوافذ المنبثقة
+  // Modal open/close states
   const [isNewModalOpen, setIsNewModalOpen] = React.useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = React.useState<Specialty | null>(null);
 
-  // استعلام لجلب بيانات التخصصات
+  // Query to fetch specialties data
   const { data: specialties = [], isLoading, isError, error } = useQuery({
     queryKey: ['specialties'],
     queryFn: getSpecialties,
   });
 
-  // عرض رسالة خطأ عند فشل تحميل البيانات - في useEffect لتجنب infinite loop
+  // Show error message when data loading fails - in useEffect to avoid infinite loop
   useEffect(() => {
     if (isError) {
       toast({
         variant: "destructive",
-        title: "خطأ",
-        description: error instanceof Error ? error.message : 'حدث خطأ أثناء تحميل التخصصات'
+        title: "Error",
+        description: error instanceof Error ? error.message : 'An error occurred while loading specialties'
       });
     }
   }, [isError, error, toast]);
 
-  // فتح مودال التعديل مع تحديد التخصص
+  // Open edit modal with selected specialty
   const handleEditClick = (specialty: Specialty) => {
     setSelectedSpecialty(specialty);
     setIsEditModalOpen(true);
   };
 
-  // فتح حوار الحذف مع تحديد التخصص
+  // Open delete dialog with selected specialty
   const handleDeleteClick = (specialty: Specialty) => {
     setSelectedSpecialty(specialty);
     setIsDeleteDialogOpen(true);
   };
 
-  // تحديث البيانات بعد إضافة أو تعديل أو حذف
+  // Refresh data after add, edit, or delete
   const refreshData = () => {
     queryClient.invalidateQueries({ queryKey: ['specialties'] });
   };
@@ -73,18 +73,18 @@ export default function WorkerSpecialties() {
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            رجوع
+            Back
           </Button>
-          <h1 className="text-2xl font-bold">تخصصات العمال</h1>
+          <h1 className="text-2xl font-bold">Worker Specialties</h1>
         </div>
         <Button onClick={() => setIsNewModalOpen(true)}>
-          <Plus className="mr-2" /> إضافة تخصص
+          <Plus className="mr-2" /> Add Specialty
         </Button>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center items-center h-32">
-          <div className="loader">جاري التحميل...</div>
+          <div className="loader">Loading...</div>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -92,8 +92,8 @@ export default function WorkerSpecialties() {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>اسم التخصص</TableHead>
-                <TableHead className="text-left">الإجراءات</TableHead>
+                <TableHead>Specialty Name</TableHead>
+                <TableHead className="text-left">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -111,7 +111,7 @@ export default function WorkerSpecialties() {
                           className="ml-2"
                         >
                           <Pencil className="h-4 w-4" />
-                          <span className="mr-1">تعديل</span>
+                          <span className="mr-1">Edit</span>
                         </Button>
                         <Button 
                           variant="destructive" 
@@ -119,7 +119,7 @@ export default function WorkerSpecialties() {
                           onClick={() => handleDeleteClick(specialty)}
                         >
                           <Trash2 className="h-4 w-4" />
-                          <span className="mr-1">حذف</span>
+                          <span className="mr-1">Delete</span>
                         </Button>
                       </div>
                     </TableCell>
@@ -128,7 +128,7 @@ export default function WorkerSpecialties() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center py-4">
-                    لا توجد تخصصات مسجلة
+                    No specialties registered
                   </TableCell>
                 </TableRow>
               )}
@@ -137,14 +137,14 @@ export default function WorkerSpecialties() {
         </div>
       )}
 
-      {/* مودال إضافة تخصص جديد */}
+      {/* New specialty modal */}
       <NewSpecialtyModal 
         isOpen={isNewModalOpen}
         setIsOpen={setIsNewModalOpen}
         onSuccess={refreshData}
       />
 
-      {/* مودال تعديل تخصص */}
+      {/* Edit specialty modal */}
       <EditSpecialtyModal 
         isOpen={isEditModalOpen}
         setIsOpen={setIsEditModalOpen}
@@ -152,7 +152,7 @@ export default function WorkerSpecialties() {
         onSuccess={refreshData}
       />
 
-      {/* حوار تأكيد حذف تخصص */}
+      {/* Delete specialty confirmation dialog */}
       <DeleteSpecialtyDialog 
         isOpen={isDeleteDialogOpen}
         setIsOpen={setIsDeleteDialogOpen}

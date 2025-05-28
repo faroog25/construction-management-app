@@ -73,35 +73,35 @@ const TaskFormModal = ({ isOpen, onClose, onSubmit, isLoading, stageId }: TaskFo
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>إضافة مهمة جديدة</DialogTitle>
+          <DialogTitle>Add New Task</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid w-full gap-2">
-            <Label htmlFor="name">اسم المهمة</Label>
+            <Label htmlFor="name">Task Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="أدخل اسم المهمة"
+              placeholder="Enter task name"
               required
             />
           </div>
           
           <div className="grid w-full gap-2">
-            <Label htmlFor="description">الوصف</Label>
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="أدخل وصف المهمة"
+              placeholder="Enter task description"
               className="min-h-20"
             />
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col space-y-2">
-              <Label htmlFor="startDate">تاريخ البداية</Label>
+              <Label htmlFor="startDate">Start Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -113,7 +113,7 @@ const TaskFormModal = ({ isOpen, onClose, onSubmit, isLoading, stageId }: TaskFo
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, 'yyyy-MM-dd') : "اختر تاريخ"}
+                    {startDate ? format(startDate, 'yyyy-MM-dd') : "Select date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -128,7 +128,7 @@ const TaskFormModal = ({ isOpen, onClose, onSubmit, isLoading, stageId }: TaskFo
             </div>
             
             <div className="flex flex-col space-y-2">
-              <Label htmlFor="endDate">تاريخ الانتهاء</Label>
+              <Label htmlFor="endDate">End Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -140,7 +140,7 @@ const TaskFormModal = ({ isOpen, onClose, onSubmit, isLoading, stageId }: TaskFo
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, 'yyyy-MM-dd') : "اختر تاريخ"}
+                    {endDate ? format(endDate, 'yyyy-MM-dd') : "Select date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -157,16 +157,16 @@ const TaskFormModal = ({ isOpen, onClose, onSubmit, isLoading, stageId }: TaskFo
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
-              إلغاء
+              Cancel
             </Button>
             <Button type="submit" disabled={isLoading || !name || !startDate || !endDate}>
               {isLoading ? (
                 <>
                   <span className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></span>
-                  جاري الإضافة...
+                  Adding...
                 </>
               ) : (
-                "إضافة المهمة"
+                "Add Task"
               )}
             </Button>
           </DialogFooter>

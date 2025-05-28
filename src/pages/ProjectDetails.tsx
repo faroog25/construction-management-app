@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -53,20 +52,20 @@ const ProjectDetails = () => {
 
   const handleCancelProject = async () => {
     if (!cancellationReason.trim()) {
-      toast.error("يرجى إدخال سبب الإلغاء");
+      toast.error("Please enter cancellation reason");
       return;
     }
 
     try {
       setIsCancelling(true);
       await cancelProject(projectId, cancellationReason);
-      toast.success("تم إلغاء المشروع بنجاح");
+      toast.success("Project cancelled successfully");
       setCancelDialogOpen(false);
       setCancellationReason('');
       refetch();
     } catch (error) {
-      console.error("فشل في إلغاء المشروع:", error);
-      toast.error("حدث خطأ أثناء محاولة إلغاء المشروع");
+      console.error("Failed to cancel project:", error);
+      toast.error("An error occurred while trying to cancel the project");
     } finally {
       setIsCancelling(false);
     }
@@ -76,11 +75,11 @@ const ProjectDetails = () => {
     try {
       setIsPending(true);
       await pendProject(projectId);
-      toast.success("تم تعليق المشروع بنجاح");
+      toast.success("Project suspended successfully");
       refetch();
     } catch (error) {
-      console.error("فشل في تعليق المشروع:", error);
-      toast.error("حدث خطأ أثناء محاولة تعليق المشروع");
+      console.error("Failed to suspend project:", error);
+      toast.error("An error occurred while trying to suspend the project");
     } finally {
       setIsPending(false);
     }
@@ -90,11 +89,11 @@ const ProjectDetails = () => {
     try {
       setIsActivating(true);
       await activateProject(projectId);
-      toast.success("تم تفعيل المشروع بنجاح");
+      toast.success("Project activated successfully");
       refetch();
     } catch (error) {
-      console.error("فشل في تفعيل المشروع:", error);
-      toast.error("حدث خطأ أثناء محاولة تفعيل المشروع");
+      console.error("Failed to activate project:", error);
+      toast.error("An error occurred while trying to activate the project");
     } finally {
       setIsActivating(false);
     }
@@ -104,7 +103,7 @@ const ProjectDetails = () => {
     return (
       <div className="flex flex-col justify-center items-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="mt-4 text-lg text-muted-foreground">جارٍ تحميل تفاصيل المشروع...</span>
+        <span className="mt-4 text-lg text-muted-foreground">Loading project details...</span>
       </div>
     );
   }
@@ -114,16 +113,16 @@ const ProjectDetails = () => {
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <div className="flex items-center text-destructive">
           <AlertCircle className="w-5 h-5 ml-2" />
-          <p>فشل تحميل تفاصيل المشروع</p>
+          <p>Failed to load project details</p>
         </div>
         <Button variant="outline" onClick={() => window.history.back()}>
-          العودة إلى المشاريع
+          Back to Projects
         </Button>
       </div>
     );
   }
 
-  // بيانات المشروع للتعديل
+  // Project data for editing
   const projectForEdit: UpdateProjectBasicInfo = {
     id: project.id,
     projectName: project.projectName,
@@ -132,24 +131,20 @@ const ProjectDetails = () => {
     geographicalCoordinates: project.geographicalCoordinates
   };
 
-  // تحديد حالة المشروع باستخدام status codes و string values
-  const isProjectCancelled = project.projectStatus?.toLowerCase() === 'ملغي' || 
-                            project.projectStatus?.toLowerCase() === 'cancelled' || 
+  // Determine project status using status codes and string values
+  const isProjectCancelled = project.projectStatus?.toLowerCase() === 'cancelled' || 
                             project.status === 3;
   
-  const isProjectCompleted = project.projectStatus?.toLowerCase() === 'مكتمل' || 
-                           project.projectStatus?.toLowerCase() === 'completed' || 
+  const isProjectCompleted = project.projectStatus?.toLowerCase() === 'completed' || 
                            project.status === 2;
   
-  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ' || 
-                         project.projectStatus?.toLowerCase() === 'active' || 
+  const isProjectActive = project.projectStatus?.toLowerCase() === 'active' || 
                          project.status === 0;
   
-  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق' || 
-                          project.projectStatus?.toLowerCase() === 'pending' || 
+  const isProjectPending = project.projectStatus?.toLowerCase() === 'pending' || 
                           project.status === 1;
   
-  // تحديد أي الأزرار التي يجب عرضها
+  // Determine which buttons to show
   const showCancelButton = !isProjectCancelled && !isProjectCompleted;
   const showPendButton = isProjectActive;
   const showActivateButton = isProjectPending;
@@ -201,19 +196,19 @@ const ProjectDetails = () => {
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>إلغاء المشروع</DialogTitle>
+            <DialogTitle>Cancel Project</DialogTitle>
             <DialogDescription>
-              هذا الإجراء سيؤدي إلى إلغاء المشروع ولن يمكن التراجع عنه. يرجى إدخال سبب الإلغاء أدناه.
+              This action will cancel the project and cannot be undone. Please enter the cancellation reason below.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="reason" className="text-right">سبب الإلغاء</Label>
+              <Label htmlFor="reason" className="text-right">Cancellation Reason</Label>
               <Textarea
                 id="reason"
                 value={cancellationReason}
                 onChange={(e) => setCancellationReason(e.target.value)}
-                placeholder="يرجى ذكر سبب إلغاء المشروع..."
+                placeholder="Please enter the reason for cancellation..."
                 className="resize-none"
                 rows={4}
               />
@@ -226,7 +221,7 @@ const ProjectDetails = () => {
               onClick={() => setCancelDialogOpen(false)}
               disabled={isCancelling}
             >
-              إلغاء
+              Cancel
             </Button>
             <Button
               type="button"
@@ -237,10 +232,10 @@ const ProjectDetails = () => {
               {isCancelling ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  جارٍ الإلغاء...
+                  Cancelling...
                 </>
               ) : (
-                'تأكيد الإلغاء'
+                'Confirm Cancellation'
               )}
             </Button>
           </DialogFooter>
