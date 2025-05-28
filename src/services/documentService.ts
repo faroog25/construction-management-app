@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from '@/config/api';
 import { Document, DocumentsParams, DocumentsResponse } from '@/types/document';
 import { toast } from 'sonner';
@@ -297,7 +296,7 @@ export const editDocument = async (
 // Delete a document
 export const deleteDocument = async (documentId: string): Promise<{ success: boolean; message: string }> => {
   try {
-    console.log('Deleting document with ID:', documentId);
+    console.log('Attempting to delete document with ID:', documentId);
     
     const response = await fetch(`${API_BASE_URL}/Documents/${documentId}`, {
       method: 'DELETE',
@@ -305,22 +304,47 @@ export const deleteDocument = async (documentId: string): Promise<{ success: boo
     });
 
     console.log('Document Delete API Response Status:', response.status);
+    console.log('Document Delete API Response Headers:', response.headers);
     
+    // Check if response is successful
     if (!response.ok) {
+      console.error('Delete request failed with status:', response.status);
+      
       // Try to parse the error response
       let errorData = null;
       try {
-        errorData = await response.json();
-        console.error('Document delete error:', errorData);
+        const responseText = await response.text();
+        console.log('Raw error response:', responseText);
+        
+        if (responseText) {
+          errorData = JSON.parse(responseText);
+          console.error('Parsed document delete error:', errorData);
+        }
       } catch (e) {
-        console.error('Failed to parse error response');
+        console.error('Failed to parse error response:', e);
       }
       
-      throw new Error(errorData?.message || `Failed to delete document: ${response.status}`);
+      throw new Error(errorData?.message || `Failed to delete document: ${response.status} ${response.statusText}`);
     }
 
-    const result = await response.json();
-    console.log('Document Delete API Response:', result);
+    // Try to parse successful response
+    let result;
+    try {
+      const responseText = await response.text();
+      console.log('Raw success response:', responseText);
+      
+      if (responseText) {
+        result = JSON.parse(responseText);
+      } else {
+        // Some APIs return empty response on successful delete
+        result = { success: true, message: 'Document deleted successfully' };
+      }
+    } catch (e) {
+      console.log('Response is not JSON, assuming successful delete');
+      result = { success: true, message: 'Document deleted successfully' };
+    }
+    
+    console.log('Document Delete API Final Result:', result);
     
     return result;
   } catch (error) {

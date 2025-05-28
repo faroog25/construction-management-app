@@ -82,32 +82,47 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
   };
 
   const handleDeleteConfirm = (document: Document) => {
+    console.log('Delete confirmation dialog opened for document:', document);
     setSelectedDocument(document);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteDocument = async () => {
-    if (!selectedDocument) return;
+    if (!selectedDocument) {
+      console.error('No document selected for deletion');
+      return;
+    }
     
+    console.log('Starting deletion process for document:', selectedDocument);
     setIsDeleting(true);
     
     try {
+      console.log('Calling deleteDocument API for ID:', selectedDocument.id);
       const result = await deleteDocument(selectedDocument.id);
+      console.log('Delete API response:', result);
       
       if (result.success) {
+        console.log('Document deleted successfully, showing success toast');
         toast.success('Document deleted successfully');
         setDeleteDialogOpen(false);
+        setSelectedDocument(null);
         
+        console.log('Checking if onDocumentUpdated callback exists:', !!onDocumentUpdated);
         if (onDocumentUpdated) {
+          console.log('Calling onDocumentUpdated callback');
           onDocumentUpdated();
+        } else {
+          console.warn('onDocumentUpdated callback is not available');
         }
       } else {
+        console.error('Delete failed with message:', result.message);
         toast.error(result.message || 'Failed to delete document');
       }
     } catch (error) {
       console.error('Error deleting document:', error);
       toast.error('Failed to delete document');
     } finally {
+      console.log('Deletion process completed, setting isDeleting to false');
       setIsDeleting(false);
     }
   };
@@ -241,6 +256,7 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
                 className="text-xs h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                 onClick={(e) => {
                   e.stopPropagation();
+                  console.log('Delete button clicked for document:', doc);
                   handleDeleteConfirm(doc);
                 }}
               >
@@ -279,6 +295,11 @@ export function TaskDocumentList({ documents, isLoading, onDocumentUpdated }: Ta
             <AlertDialogTitle className="text-right">Confirm Document Deletion</AlertDialogTitle>
             <AlertDialogDescription className="text-right">
               Are you sure you want to delete this document? This action cannot be undone.
+              {selectedDocument && (
+                <div className="mt-2 p-2 bg-muted rounded text-sm">
+                  Document: {selectedDocument.name}
+                </div>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row-reverse gap-2 sm:justify-start">
