@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -62,7 +63,7 @@ const ProjectDetails = () => {
       toast.success("تم إلغاء المشروع بنجاح");
       setCancelDialogOpen(false);
       setCancellationReason('');
-      refetch(); // إعادة تحميل بيانات المشروع بعد الإلغاء
+      refetch();
     } catch (error) {
       console.error("فشل في إلغاء المشروع:", error);
       toast.error("حدث خطأ أثناء محاولة إلغاء المشروع");
@@ -76,7 +77,7 @@ const ProjectDetails = () => {
       setIsPending(true);
       await pendProject(projectId);
       toast.success("تم تعليق المشروع بنجاح");
-      refetch(); // إعادة تحميل بيانات المشروع بعد التعليق
+      refetch();
     } catch (error) {
       console.error("فشل في تعليق المشروع:", error);
       toast.error("حدث خطأ أثناء محاولة تعليق المشروع");
@@ -90,7 +91,7 @@ const ProjectDetails = () => {
       setIsActivating(true);
       await activateProject(projectId);
       toast.success("تم تفعيل المشروع بنجاح");
-      refetch(); // إعادة تحميل بيانات المشروع بعد التفعيل
+      refetch();
     } catch (error) {
       console.error("فشل في تفعيل المشروع:", error);
       toast.error("حدث خطأ أثناء محاولة تفعيل المشروع");
@@ -132,12 +133,13 @@ const ProjectDetails = () => {
   };
 
   // تحديد حالة المشروع
-  const isProjectCancelled = project.projectStatus?.toLowerCase() === 'ملغي';
-  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ';
-  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق';
+  const isProjectCancelled = project.projectStatus?.toLowerCase() === 'ملغي' || project.status === 3;
+  const isProjectCompleted = project.projectStatus?.toLowerCase() === 'مكتمل' || project.status === 2;
+  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ' || project.status === 0;
+  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق' || project.status === 1;
   
   // تحديد أي الأزرار التي يجب عرضها
-  const showCancelButton = !isProjectCancelled && !isProjectPending;
+  const showCancelButton = !isProjectCancelled && !isProjectCompleted && !isProjectPending;
   const showPendButton = isProjectActive;
   const showActivateButton = isProjectPending;
 
@@ -174,7 +176,6 @@ const ProjectDetails = () => {
         onSuccess={handleEditSuccess}
       />
 
-      {/* حوار إلغاء المشروع */}
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

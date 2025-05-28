@@ -154,8 +154,10 @@ const ProjectDetailsInfo = ({
   };
 
   // Determine project status for button visibility
-  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ' || project.projectStatus?.toLowerCase() === 'active';
-  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق' || project.projectStatus?.toLowerCase() === 'pending';
+  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ' || project.projectStatus?.toLowerCase() === 'active' || project.status === 0;
+  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق' || project.projectStatus?.toLowerCase() === 'pending' || project.status === 1;
+  const isProjectCompleted = project.projectStatus?.toLowerCase() === 'مكتمل' || project.projectStatus?.toLowerCase() === 'completed' || project.status === 2;
+  const isProjectCancelled = project.projectStatus?.toLowerCase() === 'ملغي' || project.projectStatus?.toLowerCase() === 'cancelled' || project.status === 3;
 
   // If in edit mode, show the edit form
   if (isEditing) {
@@ -327,7 +329,7 @@ const ProjectDetailsInfo = ({
                   </>}
               </Button>
 
-              {/* Project Status Control Buttons */}
+              {/* عرض أزرار التحكم فقط للمشاريع التي ليست مكتملة أو ملغية */}
               {isProjectActive && (
                 <Button 
                   variant="outline" 
