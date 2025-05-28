@@ -19,6 +19,7 @@ export interface Project {
   cancellationDate?: string;
   completionDate?: string;
   handoverDate?: string;
+  status?: number;
 }
 
 // إضافة واجهة لتحديث المشروع المبسط
@@ -240,14 +241,14 @@ export async function getProjectById(id: number): Promise<Project> {
       startDate: result.data.startDate,
       expectedEndDate: result.data.expectedEndDate,
       projectStatus: result.data.projectStatus,
-      progress: result.data.progress,
+      progress: result.data.progress || 0,
       cancellationReason: result.data.cancellationReason,
       cancellationDate: result.data.cancellationDate,
       completionDate: result.data.completionDate,
       handoverDate: result.data.handoverDate,
-      // Add other fields as needed
-      siteEngineerId: 0, // Default value
-      clientId: 0, // Default value
+      status: result.data.status,
+      siteEngineerId: 0,
+      clientId: 0,
     };
     
     return projectDetails;

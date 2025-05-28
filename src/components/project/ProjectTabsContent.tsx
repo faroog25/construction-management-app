@@ -12,13 +12,14 @@ import { Project } from '@/services/projectService';
 interface ProjectTabsContentProps {
   project: Project;
   projectId: number;
+  onProjectUpdated?: () => void;
 }
 
-const ProjectTabsContent = ({ project, projectId }: ProjectTabsContentProps) => {
+const ProjectTabsContent = ({ project, projectId, onProjectUpdated }: ProjectTabsContentProps) => {
   return (
     <>
       <TabsContent value="details" className="space-y-6 animate-in fade-in-50">
-        <ProjectDetailsInfo project={project} />
+        <ProjectDetailsInfo project={project} onProjectUpdated={onProjectUpdated} />
         <ProjectTimeline />
       </TabsContent>
       

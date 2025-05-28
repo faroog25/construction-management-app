@@ -24,7 +24,10 @@ export interface Project {
   createdAt: string;
   updated_at: string;
   status: 0 | 1 | 2 | 3 | 4;
-  projectStatus: 0 | 1 | 2 | 3 | 4;
+  projectStatus: string;
+  progress: number;
+  cancellationReason?: string;
+  cancellationDate?: string;
 }
 
 export interface Task {

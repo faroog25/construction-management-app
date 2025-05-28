@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -44,6 +43,10 @@ const ProjectDetails = () => {
   };
 
   const handleEditSuccess = () => {
+    refetch();
+  };
+
+  const handleProjectUpdated = () => {
     refetch();
   };
 
@@ -140,7 +143,7 @@ const ProjectDetails = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="h-16"></div> {/* Navbar spacer */}
+      <div className="h-16"></div>
       <main className="flex-1 container mx-auto px-4 py-8 animate-in">
         <ProjectHeader 
           project={project} 
@@ -155,7 +158,11 @@ const ProjectDetails = () => {
 
         <Tabs defaultValue="details" className="space-y-6">
           <ProjectTabsNav />
-          <ProjectTabsContent project={project} projectId={projectId} />
+          <ProjectTabsContent 
+            project={project} 
+            projectId={projectId} 
+            onProjectUpdated={handleProjectUpdated}
+          />
         </Tabs>
       </main>
 

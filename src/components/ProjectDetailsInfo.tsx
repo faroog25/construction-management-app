@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Users, UserCircle, Building, MapPin, Edit, AlertTriangle, CheckCircle2, Clock3, Timer, DollarSign, Briefcase, FileText, Calendar as CalendarIcon, XCircle, CheckCircle, AlertOctagon, Loader2, Download } from 'lucide-react';
+import { Calendar, Clock, Users, UserCircle, Building, MapPin, Edit, AlertTriangle, CheckCircle2, Clock3, Timer, DollarSign, Briefcase, FileText, Calendar as CalendarIcon, XCircle, CheckCircle, AlertOctagon, Loader2, Download, Pause, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import ProjectEditForm from './ProjectEditForm';
 import { generateProjectReport } from '@/services/reportService';
+import { pendProject, activateProject } from '@/services/projectService';
 
 // Status configuration same as in ProjectCard for consistency
 const statusConfig = {
@@ -40,12 +41,16 @@ const statusConfig = {
 };
 interface ProjectDetailsInfoProps {
   project: Project;
+  onProjectUpdated?: () => void;
 }
 const ProjectDetailsInfo = ({
-  project
+  project,
+  onProjectUpdated
 }: ProjectDetailsInfoProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [isPendingProject, setIsPendingProject] = useState(false);
+  const [isActivatingProject, setIsActivatingProject] = useState(false);
 
   // Helper function to format dates
   const formatDate = (dateString: string | undefined) => {
@@ -94,6 +99,35 @@ const ProjectDetailsInfo = ({
   // Fix: Directly use the progress value from the API response
   const progressValue = typeof project.progress === 'number' ? project.progress : 0;
   const progressColor = getProgressColor(progressValue);
+
+  const handlePendProject = async () => {
+    try {
+      setIsPendingProject(true);
+      await pendProject(project.id);
+      toast.success("تم تعليق المشروع بنجاح");
+      onProjectUpdated?.();
+    } catch (error) {
+      console.error('Error pending project:', error);
+      toast.error("فشل في تعليق المشروع");
+    } finally {
+      setIsPendingProject(false);
+    }
+  };
+
+  const handleActivateProject = async () => {
+    try {
+      setIsActivatingProject(true);
+      await activateProject(project.id);
+      toast.success("تم تفعيل المشروع بنجاح");
+      onProjectUpdated?.();
+    } catch (error) {
+      console.error('Error activating project:', error);
+      toast.error("فشل في تفعيل المشروع");
+    } finally {
+      setIsActivatingProject(false);
+    }
+  };
+
   const handleEdit = () => {
     setIsEditing(true);
   };
@@ -118,6 +152,10 @@ const ProjectDetailsInfo = ({
       setIsGeneratingReport(false);
     }
   };
+
+  // Determine project status for button visibility
+  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ' || project.projectStatus?.toLowerCase() === 'active';
+  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق' || project.projectStatus?.toLowerCase() === 'pending';
 
   // If in edit mode, show the edit form
   if (isEditing) {
@@ -278,7 +316,7 @@ const ProjectDetailsInfo = ({
                 </div>}
             </div>
 
-            <div className="mt-4 pt-4 border-t">
+            <div className="mt-4 pt-4 border-t space-y-3">
               <Button variant="outline" onClick={handleGenerateReport} disabled={isGeneratingReport} className="w-full gap-2 bg-blue-700 hover:bg-blue-600 text-zinc-50">
                 {isGeneratingReport ? <>
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -288,6 +326,49 @@ const ProjectDetailsInfo = ({
                     Generate Report by AI
                   </>}
               </Button>
+
+              {/* Project Status Control Buttons */}
+              {isProjectActive && (
+                <Button 
+                  variant="outline" 
+                  onClick={handlePendProject} 
+                  disabled={isPendingProject} 
+                  className="w-full gap-2 bg-amber-600 hover:bg-amber-700 text-white border-amber-600"
+                >
+                  {isPendingProject ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Pending Project...
+                    </>
+                  ) : (
+                    <>
+                      <Pause className="h-4 w-4" />
+                      Suspend Project
+                    </>
+                  )}
+                </Button>
+              )}
+
+              {isProjectPending && (
+                <Button 
+                  variant="outline" 
+                  onClick={handleActivateProject} 
+                  disabled={isActivatingProject} 
+                  className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white border-green-600"
+                >
+                  {isActivatingProject ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Activating Project...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4" />
+                      Activate Project
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
