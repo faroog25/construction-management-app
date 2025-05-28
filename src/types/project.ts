@@ -76,6 +76,9 @@ export interface ProjectCardProps {
   onEdit: (project: Project) => void;
   onDelete: (id: number) => void;
   onView: (id: number) => void;
+  onViewDetails?: (id: number) => void;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 export interface ProjectApiResponse {

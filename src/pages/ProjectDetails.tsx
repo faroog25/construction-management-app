@@ -132,16 +132,39 @@ const ProjectDetails = () => {
     geographicalCoordinates: project.geographicalCoordinates
   };
 
-  // تحديد حالة المشروع
-  const isProjectCancelled = project.projectStatus?.toLowerCase() === 'ملغي' || project.status === 3;
-  const isProjectCompleted = project.projectStatus?.toLowerCase() === 'مكتمل' || project.status === 2;
-  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ' || project.status === 0;
-  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق' || project.status === 1;
+  // تحديد حالة المشروع باستخدام status codes و string values
+  const isProjectCancelled = project.projectStatus?.toLowerCase() === 'ملغي' || 
+                            project.projectStatus?.toLowerCase() === 'cancelled' || 
+                            project.status === 3;
+  
+  const isProjectCompleted = project.projectStatus?.toLowerCase() === 'مكتمل' || 
+                           project.projectStatus?.toLowerCase() === 'completed' || 
+                           project.status === 2;
+  
+  const isProjectActive = project.projectStatus?.toLowerCase() === 'قيد التنفيذ' || 
+                         project.projectStatus?.toLowerCase() === 'active' || 
+                         project.status === 0;
+  
+  const isProjectPending = project.projectStatus?.toLowerCase() === 'معلق' || 
+                          project.projectStatus?.toLowerCase() === 'pending' || 
+                          project.status === 1;
   
   // تحديد أي الأزرار التي يجب عرضها
-  const showCancelButton = !isProjectCancelled && !isProjectCompleted && !isProjectPending;
+  const showCancelButton = !isProjectCancelled && !isProjectCompleted;
   const showPendButton = isProjectActive;
   const showActivateButton = isProjectPending;
+
+  console.log('Project status debug:', {
+    projectStatus: project.projectStatus,
+    status: project.status,
+    isProjectCancelled,
+    isProjectCompleted,
+    isProjectActive,
+    isProjectPending,
+    showCancelButton,
+    showPendButton,
+    showActivateButton
+  });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -168,7 +191,6 @@ const ProjectDetails = () => {
         </Tabs>
       </main>
 
-      {/* حوار تعديل بيانات المشروع الأساسية */}
       <ProjectBasicEditDialog 
         project={projectForEdit}
         isOpen={editDialogOpen}
